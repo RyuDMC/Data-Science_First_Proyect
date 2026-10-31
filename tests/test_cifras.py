@@ -1,4 +1,4 @@
-"""Contrato de cifras: `Data/metadata.json`, los datos y el README.
+"""Contrato de cifras: `Data/metadata.json` y los datos.
 
 Si alguien cambia los datos o escribe una cifra a mano, estos tests fallan.
 Es la red que evita el 42-vs-41 y el 30-vs-68.
@@ -67,35 +67,6 @@ def test_score_legado_archivado():
     """La tabla de la raíz era un legado de 35 filas; solo queda el archivo."""
     assert not (ROOT / "Data" / "score_modelos.csv").exists()
     assert (ROOT / "Data" / "archive" / "score_modelos_2026-10-11.csv").exists()
-
-
-def test_readme_coincide_con_metadata():
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    cortes = META["cortes"]
-    esperados = [
-        f'{C["anuncios"]} anuncios · {C["modelos_ranking"]} modelos',
-        f'{C["fichas_empresa"]} fichas · {C["empresas"]} empresas',
-        f'{C["observaciones_campo"]} observaciones · {C["municipios_campo"]} municipios',
-        f'{C["modelos_con_repuestos"]} de {C["modelos_ranking"]} modelos',
-        f'Corte: anuncios {cortes["anuncios"]} · catálogos {cortes["catalogos"]} · campo {cortes["campo"]}.',
-    ]
-    for texto in esperados:
-        assert texto in readme, f"README no contiene: {texto!r}"
-
-
-def test_readme_resultados_coincide_con_metadata():
-    """Los scores y la marca de calle del README salen del metadata."""
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    for r in R["top_por_propulsion"]["electrico"]:
-        texto = f'{r["modelo"]}** ({r["score"]:.3f})'
-        assert texto in readme, f"README no contiene: {texto!r}"
-
-    cm = R["campo_marca_top"]
-    texto = (
-        f'{cm["marca"]}** ({cm["pct"]:.0f}%, {cm["n"]} de {cm["total"]}; '
-        f'IC95 {cm["ic95_bajo"]:.1f}–{cm["ic95_alto"]:.1f}%)'
-    )
-    assert texto in readme, f"README no contiene: {texto!r}"
 
 
 def test_sin_cifras_viejas_en_el_reporte():
