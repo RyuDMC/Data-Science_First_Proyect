@@ -149,13 +149,13 @@ OVERRIDES = {
     "https://francismotors.org/triciclos/fenix-hibrido/":
         ("FENIX HIBRIDO", None),
     "https://francismotors.org/triciclos/hercules-pro/":
-        ("HERCULES PRO HIBRIDO 72V 85AH", None),
+        ("HERCULES PRO HIBRIDO 72V 85AH", "HERCULES"),
     "https://francismotors.org/triciclos/phantom-200cc/":
         ("PHANTOM 200CC", None),
     "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/":
-        ("TIGER 1800W HIBRIDO 72V 65AH", None),
+        ("TIGER 1800W HIBRIDO 72V 65AH", "TIGER"),
     "https://francismotors.org/triciclos/tiger-hibrido/":
-        ("TIGER HIBRIDO", None),
+        ("TIGER HIBRIDO", "TIGER"),
     "https://francismotors.org/triciclos/topmaq-2000w/":
         ("TOPMAQ 2000W", "TOPMAQ"),
     "https://francismotors.org/triciclos/trion-fm-151/":
@@ -163,17 +163,11 @@ OVERRIDES = {
     "https://francismotors.org/triciclos/white-trek-250cc-4t/":
         ("WHITE TREK 250CC 4T", None),
     # Bluewave Logistics: el catálogo no declara marca ni modelo propio; se
-    # conserva el nombre tal como lo publica la tienda.
+    # conserva el nombre tal como lo publica la tienda. Los títulos que solo
+    # dicen "TRICICLO ..." y no declaran marca no identifican un modelo y se
+    # excluyen (ver EXCLUIDOS).
     "https://bluewavecuba.com/triciclos/tiger":
-        ("TIGER", None),
-    "https://bluewavecuba.com/triciclos/triciclo-hibrido-solar":
-        ("TRICICLO HIBRIDO SOLAR", None),
-    "https://bluewavecuba.com/triciclos/triciclo-hibrido-litio":
-        ("TRICICLO HIBRIDO LITIO", None),
-    "https://bluewavecuba.com/triciclos/triciclo-jmd-hibrido":
-        ("TRICICLO JMD HIBRIDO", None),
-    "https://bluewavecuba.com/triciclos/triciclo-electrico":
-        ("TRICICLO ELECTRICO", None),
+        ("TIGER", "TIGER"),
     # Zona Libre Online
     "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/":
         ("ABL PANEL SOLAR", "ABL MOTORS"),
@@ -200,6 +194,20 @@ EXCLUIDOS = {
     # MundoEnvío: el 'Mini triciclo eléctrico 4 ruedas' es un cuatriciclo.
     "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/":
         "Cuatriciclo ('4 ruedas'), fuera del alcance de triciclos.",
+    # Bluewave Logistics: títulos genéricos ("TRICICLO ...") sin marca. No
+    # identifican un modelo; el usuario los declaró inválidos (2026-10-31).
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-solar":
+        "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. "
+        "Excluido por decisión del usuario (2026-10-31).",
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-litio":
+        "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. "
+        "Excluido por decisión del usuario (2026-10-31).",
+    "https://bluewavecuba.com/triciclos/triciclo-jmd-hibrido":
+        "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. "
+        "Excluido por decisión del usuario (2026-10-31).",
+    "https://bluewavecuba.com/triciclos/triciclo-electrico":
+        "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. "
+        "Excluido por decisión del usuario (2026-10-31).",
 }
 
 # ---- Ficheros que el usuario NO curó: se conservan tal cual y se avisa ----

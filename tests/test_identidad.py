@@ -6,6 +6,7 @@ errata, esto falla.
 """
 
 import json
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -64,3 +65,50 @@ def test_jinpen_y_jinpeng_estan_documentados():
 def test_canonicos_no_reintroducen_erratas():
     modelos = _modelos_canonicos()
     assert not any("JINPEING" in m for m in modelos)
+
+
+def test_triciclo_generico_sin_marca_no_es_valido():
+    """Decisión 2026-10-31: 'TRICICLO ...' sin marca no identifica un modelo."""
+    invalidos = [
+        (v.get("modelo"), v.get("marca"), u)
+        for u, v in CANON["por_url"].items()
+        if "TRICICLO" in str(v.get("modelo") or "").upper()
+        and not str(v.get("marca") or "").strip()
+    ]
+    assert not invalidos, invalidos
+
+    for path in sorted((ROOT / "Data").rglob("*.jsonl")):
+        df = pd.read_json(path, lines=True)
+        if "modelo" not in df.columns or "marca" not in df.columns:
+            continue
+        malos = df[
+            df["modelo"].astype(str).str.contains("TRICICLO", case=False, na=False)
+            & (df["marca"].isna() | (df["marca"].astype(str).str.strip() == ""))
+        ]
+        assert malos.empty, (
+            f"{path}: {malos[['modelo', 'marca', 'url']].to_dict('records')}"
+        )
+
+
+def test_marca_presente_si_el_modelo_la_nombra():
+    """Si el modelo contiene una marca conocida, `marca` no puede quedar vacía."""
+    marcas = {
+        str(v["marca"]).strip().upper()
+        for v in CANON["por_url"].values() if v.get("marca")
+    }
+    for path in sorted((ROOT / "Data").rglob("*.jsonl")):
+        df = pd.read_json(path, lines=True)
+        if "modelo" not in df.columns or "marca" not in df.columns:
+            continue
+        faltan = df[
+            df["marca"].isna() | (df["marca"].astype(str).str.strip() == "")
+        ]
+        for r in faltan.itertuples():
+            modelo = str(r.modelo or "").upper()
+            hits = [
+                m for m in marcas
+                if re.search(rf"(?<![A-Z0-9]){re.escape(m)}(?![A-Z0-9])", modelo)
+            ]
+            assert not hits, (
+                f"{path}: modelo={r.modelo!r} sin marca; contiene {hits}"
+            )

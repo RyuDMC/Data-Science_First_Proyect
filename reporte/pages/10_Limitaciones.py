@@ -163,7 +163,7 @@ st.markdown(f"""
 |---------|--------|---------------------|-----------|-------|
 | `anuncios_triciclos.jsonl` | 5 scrapers | {_cortes.get('anuncios', '—')} | {_n('anuncios_scraper')} | vedca.cu caído; 1 excluido por el usuario |
 | `anuncios_facebook.jsonl` | parse_fb.py | {_cortes.get('anuncios', '—')} | {_n('anuncios_facebook')} | 1 excluido (Artemisa) |
-| `empresas_*.jsonl` ({_n('empresas')}) | scrape_empresas.py | {_cortes.get('catalogos', '—')} | {_n('fichas_empresa')} | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
+| `empresas_*.jsonl` ({_n('empresas')}) | scrape_empresas.py | {_cortes.get('catalogos', '—')} | {_n('fichas_empresa')} | 5 catálogos previos + 5 nuevos; excluidos genéricos sin marca, cuatriciclo y ofertas duplicadas |
 | `modelos_canonicos.json` | **curado a mano** | {_cortes.get('catalogos', '—')} | {_n('productos_canonicos')} productos | Fuente de verdad de la identidad ({_n('productos_excluidos')} excluidos) |
 | `score_modelos.csv` | analisis.py | {_cortes.get('anuncios', '—')} | {_n('modelos_ranking')} filas ({_n('nombres_modelo')} nombres) | Recalculado tras la limpieza de nombres |
 | `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | {_cortes.get('catalogos', '—')} | {len(df_sens)} + {len(df_sens_res)} | 7 escenarios × {_n('modelos_ranking')} modelos; **no altera el score** |

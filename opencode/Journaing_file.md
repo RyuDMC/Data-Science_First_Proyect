@@ -724,3 +724,47 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** el podio no debe depender del orden del CSV ni de `.iloc[0]`; si el resultado importa, se selecciona por un rango explícito y se prueba con el DataFrame desordenado. Y las dependencias del pipeline (`requests`, `bs4`) no estaban declaradas: el reporte funcionaba, el scraping no se podía reproducir
 - **Próxima vez:** revisar/commitear esta ronda; decidir si `Data/empresas/` entra al scoring completo; deploy
 - **Etiquetas:** dependencias, resumen, metadata, pipeline, archivo, streamlit, jinpen, tests, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre de sesión) — el README tenía demasiado texto y la estructura quedaba enterrada entre secciones
+- **Tarea:** dejar el README solo con el árbol de carpetas, con iconos, descripciones y enlaces
+- **Acción(es):**
+  1. **`README.md`:** se reemplazó todo el contenido por un árbol de viñetas anidadas con iconos por tipo de carpeta, una descripción breve y el enlace directo a GitHub en cada nodo
+  2. **Enlaces:** árbol, `Data/`, `reporte/`, `tests/`, `opencode/`, `Prompts/` y archivos de la raíz; los 18 enlaces devuelven HTTP 200
+  3. **Tests:** se retiraron de `tests/test_cifras.py` los dos tests que exigían cifras y resultados dentro del README, porque el README ya no publica cifras; el resto de contratos de metadata sigue igual
+- **Resultado:** `README.md` = 20 líneas, solo título y árbol. `pytest -q tests/` → **33/33**
+- **Error/éxito:** Éxito. No se movió ningún archivo ni se creó ninguna carpeta; el pipeline no se tocó
+- **Lección:** si el README deja de ser la fuente de cifras, los tests que lo validaban como tal dejan de tener sentido; el metadata sigue siendo la única fuente
+- **Próxima vez:** commitear el cierre (`HANDOFF.md` y diario); decidir si `Data/empresas/` entra al scoring completo; deploy
+- **Etiquetas:** readme, estructura, documentacion, enlaces, tests, cierre
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (modelos inválidos) — el catálogo de Bluewave incluía cuatro fichas con nombre genérico `TRICICLO ...` y sin marca; el usuario las declaró inválidas
+- **Tarea:** eliminar de los datos los modelos que contienen `TRICICLO` en el nombre y no tienen marca
+- **Acción(es):**
+  1. **`codes/crear_canonicos.py`:** se quitaron las cuatro entradas de `OVERRIDES` y se añadieron a `EXCLUIDOS` con motivo: `triciclo-electrico`, `triciclo-hibrido-solar`, `triciclo-hibrido-litio` y `triciclo-jmd-hibrido` (Bluewave)
+  2. **Regeneración:** `crear_canonicos.py` → 133 productos / 7 excluidos; `norm_modelo.py --migrar` retiró las 4 fichas de `Data/empresas/bluewavecuba.jsonl` y `Data/clean_data/bluewavecuba.jsonl`; `analisis.py`, `analisis_campo.py`, `sensibilidad.py` y `generar_metadata.py` regenerados
+  3. **Tests:** nuevo `test_triciclo_generico_sin_marca_no_es_valido` en `tests/test_identidad.py`, que revisa la tabla canónica y todos los JSONL; conteos de `test_contratos.py` actualizados (64 fichas, 133 canónicos, 7 excluidos)
+  4. **Página 10:** la nota de versionado ya no habla de "1 genérico, 1 cuatriciclo y 2 accesorios"; describe las exclusiones por categoría
+- **Resultado:** 0 registros `TRICICLO ...` sin marca en canónicos, `Data/empresas/`, `Data/clean_data/` y `Data/raw_data/`. Catálogos: 68 → 64 fichas. `generar_metadata --check` OK, `sensibilidad --check` OK, `crear_canonicos --check` OK, `pytest -q tests/` → **34/34**
+- **Error/éxito:** Éxito. No se editó ningún JSONL a mano: la exclusión se hizo en la tabla canónica y `norm_modelo --migrar` la propagó al origen
+- **Lección:** un título de tienda no es un modelo; si no hay marca ni nombre propio, la ficha no aporta identidad y debe excluirse con motivo, no renombrarse a mano
+- **Próxima vez:** commitear la limpieza; decidir si `Data/empresas/` entra al scoring completo; deploy
+- **Etiquetas:** identidad, modelos, bluewave, exclusion, canonicos, tests, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (marca desde el modelo) — quedaban fichas con `marca=None` aunque el nombre del modelo contenía una marca ya usada en el dataset
+- **Tarea:** si el modelo nombra una marca conocida y `marca` está vacía, escribir la marca en su campo
+- **Acción(es):**
+  1. **Barrido:** 12 registros únicos sin marca (10 de Francis Motors, 1 de Bluewave, 1 de Patuisla). Se cruzaron contra las 43 marcas ya presentes en el dataset
+  2. **Corrección:** `TIGER` en `bluewavecuba.com/triciclos/tiger`, `francismotors.org/triciclos/tiger-hibrido/` y `.../tiger-1800w-hibrido-72v-65ah/`; `HERCULES` en `francismotors.org/triciclos/hercules-pro/`. Se hizo en `OVERRIDES` de `codes/crear_canonicos.py` y se propagó con `norm_modelo.py --migrar`
+  3. **Sin cambios:** `DG BLUE 72V`, `BLUE CARGA 1000W`, `FENIX HIBRIDO`, `WHITE TREK 250CC 4T`, `TRION FM-151`, `PHANTOM 200CC`, `BRAVO 250 CC` y `RICKSHAW`: la fuente no declara marca y no contienen una marca conocida; asignar una sería inventar
+  4. **Test:** `test_marca_presente_si_el_modelo_la_nombra` revisa todos los JSONL y falla si un modelo con marca conocida queda sin `marca`
+- **Resultado:** 0 registros con marca conocida en el modelo y `marca` vacía. `analisis.py` no cambia el score (41 filas); `generar_metadata --check` OK; `pytest -q tests/` → **35/35**
+- **Error/éxito:** Éxito. Las páginas de Francis Motors no declaran `brand` en su JSON-LD (se verificó), así que la marca solo se tomó de la evidencia interna del dataset
+- **Lección:** el nombre del producto puede dar la marca, pero solo cuando esa marca ya existe en los datos; si no, se deja `None` y se documenta
+- **Próxima vez:** commitear la limpieza; decidir si `Data/empresas/` entra al scoring completo; deploy
+- **Etiquetas:** identidad, marca, tiger, hercules, francismotors, bluewave, tests, verificacion

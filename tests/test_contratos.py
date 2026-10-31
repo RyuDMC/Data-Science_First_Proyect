@@ -36,15 +36,15 @@ def test_conteos_del_dataset():
     assert int(SCORE["repuestos_proxy"].fillna(0).sum()) == 9
     assert len(EMPRESAS) == 10
     assert len(pd.concat([pd.read_json(p, lines=True) for p in EMPRESAS],
-                         ignore_index=True)) == 68
+                         ignore_index=True)) == 64
     assert len(CAMPO) == 30
     assert CAMPO["municipio"].nunique() == 5
     assert CAMPO["marca"].nunique() == 12
     canonicos = json.loads(
         (ROOT / "Data" / "modelos_canonicos.json").read_text(encoding="utf-8")
     )
-    assert len(canonicos["por_url"]) == 137
-    assert len(canonicos["excluidos"]) == 3
+    assert len(canonicos["por_url"]) == 133
+    assert len(canonicos["excluidos"]) == 7
 
 
 def test_top_por_anuncios_no_depende_del_orden():
