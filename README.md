@@ -35,14 +35,23 @@ Reporte interactivo de 10 páginas:
 
 ## Estructura
 
-```
-codes/       scrapers, normalización, scoring y análisis de campo
-Data/        datos crudos, catálogos, datos limpios y tablas
-reporte/     app Streamlit multipágina
-tests/       contratos de cifras, privacidad y páginas
-opencode/    handoff y diario de trabajo
-Prompts/     instrucciones y criterios del proyecto
-```
+| Árbol | Descripción | URL |
+|---|---|---|
+| `codes/` | Scripts del pipeline: scraping, parsing, identidad, scoring, campo, sensibilidad y metadata. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/codes) |
+| `Data/` | Datos del proyecto, tabla canónica, metadata y documentación de datos. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data) |
+| `├── archive/` | Versiones históricas; hoy solo el ranking legado del 2026-10-11. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/archive) |
+| `├── clean_data/` | JSONL procesados (anuncios y empresas) y CSV derivados (score, campo, sensibilidad). | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/clean_data) |
+| `├── empresas/` | Catálogos scrapeados de las 10 empresas, en JSONL. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/empresas) |
+| `├── Estructuras/` | Esquema JSON de un anuncio y sus campos. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/Estructuras) |
+| `└── raw_data/` | Capturas crudas de los scrapers y de Facebook. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/raw_data) |
+| `reporte/` | Aplicación Streamlit: `app.py`, `data.py`, `theme.py` y páginas. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte) |
+| `├── .streamlit/` | Configuración de tema y servidor del reporte. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/.streamlit) |
+| `└── pages/` | Las 10 páginas del reporte (Resumen, Método, Ranking, Campo…). | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages) |
+| `tests/` | Pruebas de cifras, contratos, identidad, páginas y privacidad. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/tests) |
+| `opencode/` | Handoff, diario de trabajo y auditoría de identidad JINPEN. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/opencode) |
+| `Prompts/` | Prompts e instrucciones con los criterios del proyecto. | [abrir](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Prompts) |
+
+En la raíz: [`requirements.txt`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/requirements.txt) (pipeline + reporte), [`requirements-dev.txt`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/requirements-dev.txt) (tests) y [`.gitignore`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/.gitignore) (entorno y PII).
 
 ## Uso
 
