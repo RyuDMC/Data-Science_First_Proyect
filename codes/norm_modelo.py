@@ -447,17 +447,11 @@ def _main(argv):
     tareas = [
         (DATA_DIR / "raw_data" / "anuncios_triciclos.jsonl",
          DATA_DIR / "clean_data" / "anuncios_triciclos.jsonl"),
-        (DATA_DIR / "empresas" / "kikihabana.jsonl",
-         DATA_DIR / "clean_data" / "kikihabana.jsonl"),
-        (DATA_DIR / "empresas" / "mzproducts.jsonl",
-         DATA_DIR / "clean_data" / "mzproducts.jsonl"),
-        (DATA_DIR / "empresas" / "mrcuba.jsonl",
-         DATA_DIR / "clean_data" / "mrcuba.jsonl"),
-        (DATA_DIR / "empresas" / "acubaenvioscargo.jsonl",
-         DATA_DIR / "clean_data" / "acubaenvioscargo.jsonl"),
-        (DATA_DIR / "empresas" / "compramasonline.jsonl",
-         DATA_DIR / "clean_data" / "compramasonline.jsonl"),
     ]
+    # Todas las fichas de empresa: un JSONL por catálogo. Se listan desde el
+    # disco para que añadir una fuente nueva no obligue a editar este archivo.
+    for src in sorted((DATA_DIR / "empresas").glob("*.jsonl")):
+        tareas.append((src, DATA_DIR / "clean_data" / src.name))
     for src, dst in tareas:
         if not src.exists():
             print(f"[skip] {src} no existe")

@@ -61,11 +61,111 @@ OVERRIDES = {
     "https://www.acubaenvioscargo.com/tienda/transporte/triciclos-electricos/triciclo-fly-racing-2027/":
         ("FLY RACING 2027", "RACING"),
     # RALLY con extensor de rango de CompraMasonline: el título de la tienda
-    # trae el accesorio ('... + EXTENSOR DE RANGO'). Se deja el nombre corto
-    # del modelo (decisión del usuario, 2026-10-31); el extensor queda
+    # trae el accesorio ('... + EXTENSOR DE RANGO'). El extensor queda
     # documentado en el campo `notas` del registro.
+    #
+    # Variantes RALLY/CYT/MIGHONG/IZUKI separadas el 2026-10-31 (decisión del
+    # usuario): si dos fichas del mismo nombre declaran specs distintas, van
+    # como identidades distintas. El sufijo solo usa el dato declarado que
+    # diferencia la ficha, no una estimación.
     "https://compramasonline.com/tienda/triciclo-de-carga-rally/":
-        ("RALLY", "RALLY"),
+        ("RALLY HIBRIDO", "RALLY"),
+    # KikiHabana: mismas variantes que los catálogos nuevos (CYT 80 km,
+    # IZUKI 120 Ah, MIGHONG 400 kg). Así cada identidad conserva su spec.
+    "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/":
+        ("CYT 80 KM", "CYT"),
+    "https://kikihabana.com/producto/triciclo-electrico-para-cuba-2/":
+        ("IZUKI 120 AH", "IZUKI"),
+    "https://kikihabana.com/producto/mighong-panel-solar/":
+        ("MIGHONG 400 KG", "MIGHONG"),
+    # ---- Catálogos añadidos el 2026-10-31 ----
+    # Se conserva el nombre declarado (sin quitar specs que forman parte del
+    # modelo, p. ej. '250 CC') y se separan las variantes que, tras la
+    # limpieza heurística, quedarían con el mismo nombre.
+    # MundoEnvío
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-2/":
+        ("BOSN BBX-S600", "BOSN"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/":
+        ("CYT 80 KM", "CYT"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/":
+        ("RALLY CARGA 800", "RALLY"),
+    "https://mundoenvio.com/tienda/envio-a-cuba-de-triciclo-electrico/":
+        ("FUGUIGUAN", "FUGUIGUAN"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-3/":
+        ("JOBANG ZUIMI", "JOBANG"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-mighong-con-panel-solar/":
+        ("MIGHONG 600 KG", "MIGHONG"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-4/":
+        ("ONEBOT", "ONEBOT"),
+    "https://mundoenvio.com/tienda/triciclo-electrico-de-carga/":
+        ("MINGHONG", "MINGHONG"),
+    "https://mundoenvio.com/tienda/triciclo-pasajero-para-cuba/":
+        ("HUAIHAI", "HUAIHAI"),
+    "https://mundoenvio.com/tienda/triciclo-marca-sotek/":
+        ("SOTEK", "SOTEK"),
+    # Patuisla (mismos productos que MundoEnvío cuando comparten nombre)
+    "https://patuisla.com/producto/triciclo-panel-solar/":
+        ("CYT 100 KM", "CYT"),
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba/":
+        ("HUAIHAI", "HUAIHAI"),
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-3/":
+        ("IZUKI 127 AH", "IZUKI"),
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba/":
+        ("JOBANG ZUIMI", "JOBANG"),
+    "https://patuisla.com/producto/triciclo-panel-solar-para-cuba/":
+        ("MIGHONG 400 KG", "MIGHONG"),
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-4/":
+        ("MISHOZUKI ULTRA", "MISHOZUKI"),
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba-2/":
+        ("ONEBOT", "ONEBOT"),
+    "https://patuisla.com/producto/triciclo-electrico-panel-solar/":
+        ("RICKSHAW", None),
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba-3/":
+        ("RALLY CARGA", "RALLY"),
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-2/":
+        ("FUGUIGUAN EXTENSOR", "FUGUIGUAN"),
+    "https://patuisla.com/producto/vedca-c800/":
+        ("VEDCA C800", "VEDCA"),
+    # Francis Motors
+    "https://francismotors.org/triciclos/blue-carga-1000w/":
+        ("BLUE CARGA 1000W", None),
+    "https://francismotors.org/triciclos/bravo-250-cc/":
+        ("BRAVO 250 CC", None),
+    "https://francismotors.org/triciclos/dg-blue-72v/":
+        ("DG BLUE 72V", None),
+    "https://francismotors.org/triciclos/fenix-hibrido/":
+        ("FENIX HIBRIDO", None),
+    "https://francismotors.org/triciclos/hercules-pro/":
+        ("HERCULES PRO HIBRIDO 72V 85AH", None),
+    "https://francismotors.org/triciclos/phantom-200cc/":
+        ("PHANTOM 200CC", None),
+    "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/":
+        ("TIGER 1800W HIBRIDO 72V 65AH", None),
+    "https://francismotors.org/triciclos/tiger-hibrido/":
+        ("TIGER HIBRIDO", None),
+    "https://francismotors.org/triciclos/topmaq-2000w/":
+        ("TOPMAQ 2000W", "TOPMAQ"),
+    "https://francismotors.org/triciclos/trion-fm-151/":
+        ("TRION FM-151", None),
+    "https://francismotors.org/triciclos/white-trek-250cc-4t/":
+        ("WHITE TREK 250CC 4T", None),
+    # Bluewave Logistics: el catálogo no declara marca ni modelo propio; se
+    # conserva el nombre tal como lo publica la tienda.
+    "https://bluewavecuba.com/triciclos/tiger":
+        ("TIGER", None),
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-solar":
+        ("TRICICLO HIBRIDO SOLAR", None),
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-litio":
+        ("TRICICLO HIBRIDO LITIO", None),
+    "https://bluewavecuba.com/triciclos/triciclo-jmd-hibrido":
+        ("TRICICLO JMD HIBRIDO", None),
+    "https://bluewavecuba.com/triciclos/triciclo-electrico":
+        ("TRICICLO ELECTRICO", None),
+    # Zona Libre Online
+    "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/":
+        ("ABL PANEL SOLAR", "ABL MOTORS"),
+    "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/":
+        ("MISHOZUKI E-CARGO 8000W", "MISHOZUKI"),
 }
 
 # ---- Productos que el usuario decidió dejar fuera (2026-10-19) ----
@@ -84,6 +184,9 @@ EXCLUIDOS = {
     "https://compramasonline.com/tienda/triciclo-electrico-de-carga/":
         "Sin modelo propio; duplica la identidad de MINGHONG con otro precio; "
         "excluido por decisión del usuario (2026-10-31).",
+    # MundoEnvío: el 'Mini triciclo eléctrico 4 ruedas' es un cuatriciclo.
+    "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/":
+        "Cuatriciclo ('4 ruedas'), fuera del alcance de triciclos.",
 }
 
 # ---- Ficheros que el usuario NO curó: se conservan tal cual y se avisa ----
@@ -100,6 +203,11 @@ ORIGEN_CRUDE = {
     "mrcuba.jsonl": "empresas/mrcuba.jsonl",
     "acubaenvioscargo.jsonl": "empresas/acubaenvioscargo.jsonl",
     "compramasonline.jsonl": "empresas/compramasonline.jsonl",
+    "mundoenvio.jsonl": "empresas/mundoenvio.jsonl",
+    "patuisla.jsonl": "empresas/patuisla.jsonl",
+    "francismotors.jsonl": "empresas/francismotors.jsonl",
+    "bluewavecuba.jsonl": "empresas/bluewavecuba.jsonl",
+    "zonalibreonline.jsonl": "empresas/zonalibreonline.jsonl",
 }
 
 

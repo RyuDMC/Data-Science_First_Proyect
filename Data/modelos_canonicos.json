@@ -1,13 +1,39 @@
 {
   "excluidos": {
     "https://compramasonline.com/tienda/triciclo-electrico-de-carga/": "Sin modelo propio; duplica la identidad de MINGHONG con otro precio; excluido por decisión del usuario (2026-10-31).",
-    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-hibridos-el-mejor-precio-de": "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; excluido por decisión del usuario (2026-10-19)."
+    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-hibridos-el-mejor-precio-de": "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; excluido por decisión del usuario (2026-10-19).",
+    "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/": "Cuatriciclo ('4 ruedas'), fuera del alcance de triciclos."
   },
   "nota": "Tabla curada de identidad de producto (clave: URL). La usan codes/norm_modelo.py y los scrapers, de modo que raw_data nace con los nombres ya normalizados. Editar aquí, no a mano en los JSONL: la siguiente pasada del scraper sobrescribe lo editado a mano.",
   "por_url": {
+    "https://bluewavecuba.com/triciclos/tiger": {
+      "marca": null,
+      "modelo": "TIGER",
+      "origen": "manual"
+    },
+    "https://bluewavecuba.com/triciclos/triciclo-electrico": {
+      "marca": null,
+      "modelo": "TRICICLO ELECTRICO",
+      "origen": "manual"
+    },
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-litio": {
+      "marca": null,
+      "modelo": "TRICICLO HIBRIDO LITIO",
+      "origen": "manual"
+    },
+    "https://bluewavecuba.com/triciclos/triciclo-hibrido-solar": {
+      "marca": null,
+      "modelo": "TRICICLO HIBRIDO SOLAR",
+      "origen": "manual"
+    },
+    "https://bluewavecuba.com/triciclos/triciclo-jmd-hibrido": {
+      "marca": null,
+      "modelo": "TRICICLO JMD HIBRIDO",
+      "origen": "manual"
+    },
     "https://compramasonline.com/tienda/triciclo-de-carga-rally/": {
       "marca": "RALLY",
-      "modelo": "RALLY",
+      "modelo": "RALLY HIBRIDO",
       "origen": "manual"
     },
     "https://compramasonline.com/tienda/triciclo-de-pasajeros-changli/": {
@@ -140,6 +166,61 @@
       "modelo": "TOPMAQ BRIDERK 2026",
       "origen": "curado"
     },
+    "https://francismotors.org/triciclos/blue-carga-1000w/": {
+      "marca": null,
+      "modelo": "BLUE CARGA 1000W",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/bravo-250-cc/": {
+      "marca": null,
+      "modelo": "BRAVO 250 CC",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/dg-blue-72v/": {
+      "marca": null,
+      "modelo": "DG BLUE 72V",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/fenix-hibrido/": {
+      "marca": null,
+      "modelo": "FENIX HIBRIDO",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/hercules-pro/": {
+      "marca": null,
+      "modelo": "HERCULES PRO HIBRIDO 72V 85AH",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/phantom-200cc/": {
+      "marca": null,
+      "modelo": "PHANTOM 200CC",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/": {
+      "marca": null,
+      "modelo": "TIGER 1800W HIBRIDO 72V 65AH",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/tiger-hibrido/": {
+      "marca": null,
+      "modelo": "TIGER HIBRIDO",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/topmaq-2000w/": {
+      "marca": "TOPMAQ",
+      "modelo": "TOPMAQ 2000W",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/trion-fm-151/": {
+      "marca": null,
+      "modelo": "TRION FM-151",
+      "origen": "manual"
+    },
+    "https://francismotors.org/triciclos/white-trek-250cc-4t/": {
+      "marca": null,
+      "modelo": "WHITE TREK 250CC 4T",
+      "origen": "manual"
+    },
     "https://habana.casalindashop.com/triciclo-combustion-de-carga-200cc-enfriamiento-por-aire-m-magic-bike-modelo-m004.html": {
       "marca": "MAGIC BIKE",
       "modelo": "MAGIC BIKE M004",
@@ -217,13 +298,13 @@
     },
     "https://kikihabana.com/producto/mighong-panel-solar/": {
       "marca": "MIGHONG",
-      "modelo": "MIGHONG",
-      "origen": "curado"
+      "modelo": "MIGHONG 400 KG",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-2/": {
       "marca": "IZUKI",
-      "modelo": "IZUKI",
-      "origen": "curado"
+      "modelo": "IZUKI 120 AH",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-3/": {
       "marca": "MOSHOZUKI",
@@ -237,8 +318,8 @@
     },
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/": {
       "marca": "CYT",
-      "modelo": null,
-      "origen": "curado"
+      "modelo": "CYT 80 KM",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/": {
       "marca": "RALLY",
@@ -272,6 +353,111 @@
           "propulsion": "hibrido"
         }
       ]
+    },
+    "https://mundoenvio.com/tienda/envio-a-cuba-de-triciclo-electrico/": {
+      "marca": "FUGUIGUAN",
+      "modelo": "FUGUIGUAN",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-de-carga/": {
+      "marca": "MINGHONG",
+      "modelo": "MINGHONG",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-mighong-con-panel-solar/": {
+      "marca": "MIGHONG",
+      "modelo": "MIGHONG 600 KG",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-2/": {
+      "marca": "BOSN",
+      "modelo": "BOSN BBX-S600",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-3/": {
+      "marca": "JOBANG",
+      "modelo": "JOBANG ZUIMI",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-4/": {
+      "marca": "ONEBOT",
+      "modelo": "ONEBOT",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/": {
+      "marca": "RALLY",
+      "modelo": "RALLY CARGA 800",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/": {
+      "marca": "CYT",
+      "modelo": "CYT 80 KM",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-marca-sotek/": {
+      "marca": "SOTEK",
+      "modelo": "SOTEK",
+      "origen": "manual"
+    },
+    "https://mundoenvio.com/tienda/triciclo-pasajero-para-cuba/": {
+      "marca": "HUAIHAI",
+      "modelo": "HUAIHAI",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-electrico-panel-solar/": {
+      "marca": null,
+      "modelo": "RICKSHAW",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-2/": {
+      "marca": "FUGUIGUAN",
+      "modelo": "FUGUIGUAN EXTENSOR",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-3/": {
+      "marca": "IZUKI",
+      "modelo": "IZUKI 127 AH",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba-4/": {
+      "marca": "MISHOZUKI",
+      "modelo": "MISHOZUKI ULTRA",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-electrico-para-cuba/": {
+      "marca": "HUAIHAI",
+      "modelo": "HUAIHAI",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-panel-solar-para-cuba/": {
+      "marca": "MIGHONG",
+      "modelo": "MIGHONG 400 KG",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclo-panel-solar/": {
+      "marca": "CYT",
+      "modelo": "CYT 100 KM",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba-2/": {
+      "marca": "ONEBOT",
+      "modelo": "ONEBOT",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba-3/": {
+      "marca": "RALLY",
+      "modelo": "RALLY CARGA",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/triciclos-electricos-para-cuba/": {
+      "marca": "JOBANG",
+      "modelo": "JOBANG ZUIMI",
+      "origen": "manual"
+    },
+    "https://patuisla.com/producto/vedca-c800/": {
+      "marca": "VEDCA",
+      "modelo": "VEDCA C800",
+      "origen": "manual"
     },
     "https://t.me/s/MotosBateriasElectricasCuba/1640": {
       "marca": "VEDCA",
@@ -507,6 +693,16 @@
       "marca": "MZ PRODUCTS",
       "modelo": null,
       "origen": "curado"
+    },
+    "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/": {
+      "marca": "ABL MOTORS",
+      "modelo": "ABL PANEL SOLAR",
+      "origen": "manual"
+    },
+    "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/": {
+      "marca": "MISHOZUKI",
+      "modelo": "MISHOZUKI E-CARGO 8000W",
+      "origen": "manual"
     }
   },
   "sin_curar": {},

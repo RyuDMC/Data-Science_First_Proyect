@@ -22,16 +22,16 @@ with st.sidebar:
     st.info("¿Qué triciclo comprar en La Habana y por qué?")
     st.caption(
         "\"Lo más común\" queda como **indicador**, no como respuesta: se mide con 70 "
-        "anuncios + 29 fichas de empresas + 30 observaciones de calle en 5 municipios. "
+        "anuncios + 68 fichas de empresas + 30 observaciones de calle en 5 municipios. "
         "**No hay censo** y el trabajo de campo está cerrado."
     )
     st.markdown("---")
     st.markdown("**Fuentes de datos:**")
     st.markdown("- Anuncios online (6 fuentes)")
-    st.markdown("- Catálogos de empresas (5 empresas)")
+    st.markdown("- Catálogos de empresas (10 empresas)")
     st.markdown("- Trabajo de campo (muestra cerrada, 5 municipios)")
     st.markdown("---")
-    st.caption("Corte de datos: 2026-10-19")
+    st.caption("Corte de datos: anuncios 2026-10-19 · catálogos 2026-10-31")
     st.caption("Stack: Streamlit + Matplotlib + Pandas")
 
 # La navegación multipágina de Streamlit usa la carpeta pages/ automáticamente
@@ -46,7 +46,7 @@ integrando **tres fuentes de evidencia**:
 | Fuente | Qué mide | Registros | Unidades |
 |--------|----------|-----------|----------|
 | **Anuncios online** | Oferta y competencia de precios | 70 | 42 modelos |
-| **Catálogos de empresas** | Oferta formal y disponibilidad | 29 | 29 fichas |
+| **Catálogos de empresas** | Oferta formal y disponibilidad | 68 | 68 fichas |
 | **Trabajo de campo** | Circulación real (inventario municipal) | 30 | 12 marcas, 5 municipios |
 
 *Muestra de campo **cerrada**: 30 observaciones en 5 municipios, dos semanas. No es censo y no se generaliza a toda La Habana.*
@@ -64,7 +64,7 @@ Usa el **menú lateral** (☰) para ir a cada sección:
 6. **🎯 Contendientes** — Top por grupo + radar de criterios
 7. **✅ Mejor opción** — Recomendación por escenario
 8. **🗺️ Trabajo de campo** — Circulación real observada (muestra cerrada, 5 municipios)
-9. **🏢 Empresas** — 29 fichas de catálogos
+9. **🏢 Empresas** — 68 fichas de catálogos
 10. **⚠️ Limitaciones** — Qué no sabemos y por qué
 
 ---

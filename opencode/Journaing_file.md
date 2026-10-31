@@ -606,3 +606,20 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** un cruce que devuelve 0 no es un fallo del código: es un resultado. Se muestra el vacío con su explicación en vez de forzar equivalencias por marca
 - **Próxima vez:** revisar/commitear; decidir si empresas entra al scoring completo (cambiaría extremos min-max y exige antes/después)
 - **Etiquetas:** empresas, integracion, repuestos-proxy, ranking, limitaciones, decisiones, canonicos
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre) — ampliación de catálogos de empresas y revisión final del reporte
+- **Tarea:** sumar catálogos verificados sin tocar el scoring, cerrar la identidad de las variantes nuevas y dejar las cifras coherentes en todo el reporte
+- **Acción(es):**
+  1. **Cinco scrapers nuevos en `codes/scrape_empresas.py`:** `mundoenvio` (10; excluye el cuatriciclo de 4 ruedas), `patuisla` (11; specs en `.summary` cuando la pestaña solo trae el envío), `francismotors` (11 desde JSON-LD: 3 gasolina, 4 híbridos, 4 eléctricos), `bluewavecuba` (5 desde `<dt>/<dd>`; el "extensor de autonomía" es generador → híbrido) y `zonalibreonline` (2 desde JSON-LD + `og:image:alt`)
+  2. **Helpers en el origen:** rangos → límite inferior (motor, autonomía, carga, precio); separadores de miles; `bateria_v` sin `ah` deja `ah=null`; `motor_w > 20000` se descarta con nota (MIGHONG "25000W"); "extensor de autonomía/rango" no contamina la autonomía
+  3. **Identidad:** `crear_canonicos.py` gana `OVERRIDES` para las 39 URLs nuevas y `norm_modelo.py --migrar` descubre empresas por glob. Tabla canónica: **137 productos / 3 excluidos / 126 con nombre**
+  4. **Variantes separadas (decisión del usuario):** RALLY HIBRIDO ≠ RALLY CARGA ≠ RALLY CARGA 800; CYT 80 KM ≠ CYT 100 KM; MIGHONG 400 KG ≠ MIGHONG 600 KG; IZUKI 120 AH ≠ IZUKI 127 AH. Tras el split no queda ninguna identidad multi-fuente con specs declaradas distintas
+  5. **Reporte:** 68 fichas / 10 catálogos en `app.py`, `2_Metodo`, `9_Empresas` y `10_Limitaciones`; nota de marcas que cruzan (ONEBOT, TOPMAQ, VEDCA, MISHOZUKI); corregidas las filas obsoletas de versionado y la lista de empresas
+  6. **Verificación:** `AppTest` 11/11; `crear_canonicos --check` estable; `norm_modelo --migrar` → 0 heurísticos y 0 "revisar"; `analisis.py` → 42 filas y score idéntico (TOPMAQ BRIDERK 0.786)
+- **Resultado:** 68 fichas de 10 catálogos, identidad sin colisiones y reporte coherente; el score no cambia
+- **Error/éxito:** Éxito. El campo `n_empresas` sigue en 0 (ningún modelo cruza con anuncios); solo hay cruce a nivel de marca, y así se muestra
+- **Lección:** el mismo nombre comercial puede esconder specs incompatibles entre vendedores; separar por el dato declarado evita promedios que nadie publicó
+- **Próxima vez:** revisar/commitear los 5 JSONL nuevos, sus copias en `clean_data`, los scrapers, la tabla canónica y las páginas del reporte
+- **Etiquetas:** empresas, scrapers, canonicos, variantes, reporte, verificacion

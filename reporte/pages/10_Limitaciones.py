@@ -44,7 +44,7 @@ limitaciones = pd.DataFrame({
     ],
     "Qué significa": [
         "Anuncios y catálogos miden **oferta declarada**, no triciclos rodando. Un modelo muy anunciado puede no ser el más común en calle.",
-        "42 modelos en el ranking (41 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 29 fichas empresas. Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
+        "42 modelos en el ranking (41 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 68 fichas empresas (10 catálogos). Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
         "Fuentes: clasificados (Revolico), tiendas WooCommerce, Telegram, Facebook. No cubren mercado informal completo ni todas las MIPYMEs.",
         "La muestra de calle es **final**: 30 observaciones en 5 de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n=30 los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
@@ -116,7 +116,7 @@ pip install -r reporte/requirements.txt
 # Pipeline completo (raw → clean → score)
 python3 codes/scrape_triciclos.py    # ~4 min, 5 fuentes online
 python3 codes/parse_fb.py            # Facebook → clean_data/
-python3 codes/scrape_empresas.py     # 5 catálogos empresas
+python3 codes/scrape_empresas.py     # 10 catálogos empresas
 python3 codes/analisis.py            # scoring + CSVs en clean_data/
 
 # Reporte interactivo
@@ -139,8 +139,8 @@ st.markdown("""
 |---------|--------|---------------------|-----------|-------|
 | `anuncios_triciclos.jsonl` | 5 scrapers | 2026-10-19 | 41 | vedca.cu caído; 1 excluido por el usuario |
 | `anuncios_facebook.jsonl` | parse_fb.py | 2026-10-19 | 29 | 1 excluido (Artemisa) |
-| `empresas_*.jsonl` (5) | scrape_empresas.py | 2026-10-31 | 29 | +7 fichas CompraMasonline (1 genérico excluido); MZ 200cc = híbrido |
-| `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 98 productos | Fuente de verdad de la identidad (2 excluidos) |
+| `empresas_*.jsonl` (10) | scrape_empresas.py | 2026-10-31 | 68 | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
+| `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 137 productos | Fuente de verdad de la identidad (3 excluidos) |
 | `score_modelos.csv` | analisis.py | 2026-10-19 | 42 filas (41 nombres) | Recalculado tras la limpieza de nombres |
 | `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | 2026-10-25 | 30 | 5/15 municipios; sin datos personales |
 

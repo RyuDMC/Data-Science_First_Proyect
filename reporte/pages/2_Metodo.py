@@ -47,10 +47,10 @@ fuentes = pd.DataFrame({
         "Circulación real observada en calle"
     ],
     "Registros": [70, 30, 30],
-    "Unidades": ["42 modelos", "29 fichas", "12 marcas"],
+    "Unidades": ["42 modelos", "68 fichas", "12 marcas"],
     "Cobertura": [
         "6 fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
-        "5 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline",
+        "10 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline, MundoEnvío, Patuisla, Francis Motors, Bluewave Logistic, Zona Libre Online",
         "5/15 municipios: Centro Habana, Plaza, Habana del Este, La Lisa, Playa (muestra cerrada, 2026-10-13→25)"
     ],
     "Estado": ["✅ Activo", "✅ Activo", "✅ Cerrado (muestra final)"]

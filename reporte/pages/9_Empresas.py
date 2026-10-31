@@ -1,5 +1,5 @@
 """
-Página 9: Empresas — 29 fichas de catálogos.
+Página 9: Empresas — 68 fichas de catálogos.
 """
 
 import os as _os
@@ -103,8 +103,9 @@ if not df_scores.empty:
         st.info(
             "Ningún modelo coincide exactamente entre catálogos y anuncios: los "
             "catálogos venden otra gama (marcas de importación) y los clasificados "
-            "se centran en el mercado informal. Solo la marca **ONEBOT** aparece "
-            "en ambos mundos. Por eso no se comparan precios modelo a modelo."
+            "se centran en el mercado informal. A nivel de **marca** sí cruzan "
+            "**ONEBOT, TOPMAQ, VEDCA y MISHOZUKI**; por eso no se comparan "
+            "precios modelo a modelo."
         )
 
 st.markdown("---")
@@ -165,10 +166,17 @@ st.markdown("""
 | **A Cuba Envíos Cargo** | WooCommerce | 4 | Solo specs del título (sin página de detalle). Incluye el "Fly Racing 2027" en "Próximamente". |
 | **Mr Cuba** | Wix | 2 | **Frágil**: solo modelo + precio. Sin specs técnicas. |
 | **CompraMasonline** | WooCommerce | 7 | 6 eléctricos + 1 híbrido (RALLY con extensor de rango de gasolina). Specs de la pestaña de descripción; precio actual (`ins`) si hay rebaja. Excluidos 2 extensores sueltos, el "Minicarrito" de 4 ruedas y el genérico "TRICICLO ELÉCTRICO DE CARGA" (sin modelo propio, duplicaba la identidad de MINGHONG con otro precio). |
+| **MundoEnvío** | WooCommerce | 10 | Categoría "Triciclos Eléctricos". Excluido el "Mini triciclo 4 ruedas" (cuatriciclo). Precio de rango = límite inferior. La ficha del MIGHONG declara "Fuerza; 25000W" (errata): no se registra `motor_w` y queda anotado. |
+| **Patuisla** | WooCommerce | 11 | Categoría "Envío de Triciclos a Cuba". En varias fichas las specs están en `.summary` (la pestaña de descripción solo trae el envío). Precio actual (`ins`) en rebajas. |
+| **Francis Motors** | Estático (JSON-LD) | 11 | 3 gasolina, 4 híbridos y 4 eléctricos. Specs desde `additionalProperty`; precio y disponibilidad desde `offers`. Los nombres declarados se conservan en la tabla canónica (p. ej. "BRAVO 250 CC"). |
+| **Bluewave Logistic** | Estático (Next.js) | 5 | Specs en pares `<dt>/<dd>`. El catálogo no declara marca ni modelo propio; se conserva el nombre publicado ("TIGER", "TRICICLO HÍBRIDO SOLAR"...). El extensor de autonomía es generador: se marca híbrido. |
+| **Zona Libre Online** | WooCommerce | 2 | Specs en JSON-LD + `og:image:alt`. ABL 1500W (60V/45Ah) y Mishozuki E-Cargo 8000W (72V/60Ah). |
 
 **Decisiones aplicadas:**
 - Precios en **USD** (`precio_usd` + `moneda="USD"`)
 - `vendedor_tipo="empresa"` para distinguir de particulares/tiendas
-- `disponibilidad` capturada cuando existe (ej. "DISPONIBLE NOVIEMBRE 2026")
+- `disponibilidad` capturada cuando existe (ej. "Consultar disponibilidad")
 - **MAGIKBIKE** excluido en KikiHabana por ser "carrito 4 ruedas" (decisión del usuario)
+- Rangos → **límite inferior** (autonomía, carga, motor, precio)
+- Si la ficha solo declara voltaje, `bateria_ah` queda en `null` (no se inventa)
 """)
