@@ -13,7 +13,10 @@ if _ROOT not in _sys.path:
 
 import streamlit as st
 import pandas as pd
-from reporte.data import load_anuncios, load_empresas, load_campo, load_scores, get_kpis
+from reporte.data import (load_anuncios, load_empresas, load_campo, load_scores,
+                          load_sensibilidad, load_sensibilidad_resumen,
+                          get_kpis, top_por_anuncios, top_por_score,
+                          top_por_propulsion, texto_sensibilidad_electrico)
 from reporte.theme import color_for_prop, label_for_prop, apply_style
 
 
@@ -27,6 +30,8 @@ df_online = load_anuncios()
 df_empresas = load_empresas()
 df_campo = load_campo()
 df_scores = load_scores()
+df_sens = load_sensibilidad()
+df_sens_res = load_sensibilidad_resumen()
 kpis = get_kpis(df_online)
 
 # Contadores
@@ -57,31 +62,37 @@ col_t1, col_t2, col_t3 = st.columns(3)
 
 with col_t1:
     st.markdown("### 1️⃣ Lo más ofertado (indicador)")
-    if not df_scores.empty:
-        top = df_scores.iloc[0]
-        st.success(f"**{top['modelo_norm']}** ({label_for_prop(top['propulsion'])})")
-        st.metric("Score", f"{top['score']:.3f}", help="Score ponderado: precio 40%, autonomía 25%, carga 20%, legalidad 10%, repuestos 5%")
-        st.caption(f"n_anuncios: {int(top['n_anuncios_total'])} | Oferta viva: {'Sí' if top['oferta_viva'] else 'No'}")
+    top_ofertado = top_por_anuncios(df_scores)
+    if top_ofertado is not None:
+        st.success(f"**{top_ofertado['modelo_norm']}** ({label_for_prop(top_ofertado['propulsion'])})")
+        st.metric("Score", f"{top_ofertado['score']:.3f}", help="Score ponderado: precio 40%, autonomía 25%, carga 20%, legalidad 10%, repuestos 5%")
+        st.caption(f"n_anuncios: {int(top_ofertado['n_anuncios_total'])} | Oferta viva: {'Sí' if top_ofertado['oferta_viva'] else 'No'}")
         if not df_campo.empty:
             _m = df_campo["marca"].value_counts()
             st.caption(
                 f"En calle, la marca más vista es **{_m.index[0]}** "
                 f"({_m.iloc[0]}/{len(df_campo)}). Detalle en 🗺️ Trabajo de campo."
             )
+        st.caption("El más anunciado no es necesariamente el mejor valorado.")
     else:
         st.info("Sin datos de scoring")
 
 with col_t2:
-    st.markdown("### 2️⃣ Por qué ese modelo")
+    st.markdown("### 2️⃣ Por qué el mejor valorado")
     st.markdown("""
     - **Mejor equilibrio precio/autonomía/carga** dentro de su grupo de propulsión
     - **Oferta viva** en múltiples fuentes (repuestos_proxy)
     - **Legalidad mencionada** en anuncios/fichas
     - **Volumen de anuncios** > 1 (demanda visible)
     """)
-    if not df_scores.empty:
-        top = df_scores.iloc[0]
-        st.caption(f"Precio: ${top['precio_usd']:,.0f} | Autonomía: {top['autonomia_km']:.0f} km | Carga: {top['carga_kg']:.0f} kg")
+    top_score = top_por_score(df_scores)
+    if top_score is not None:
+        st.caption(
+            f"**{top_score['modelo_norm']}** ({label_for_prop(top_score['propulsion'])}) · "
+            f"Precio: ${top_score['precio_usd']:,.0f} | "
+            f"Autonomía: {top_score['autonomia_km']:.0f} km | "
+            f"Carga: {top_score['carga_kg']:.0f} kg"
+        )
 
 with col_t3:
     st.markdown("### 3️⃣ La mejor opción (según escenario)")
@@ -95,6 +106,10 @@ with col_t3:
     """)
     st.caption("La 'mejor opción' depende de tu caso de uso. Ve a la pestaña **Mejor opción** para el detalle.")
 
+_sens = texto_sensibilidad_electrico(df_sens, df_sens_res)
+if _sens and not _sens.startswith("Pendiente"):
+    st.caption(f"🔎 Robustez del podio eléctrico: {_sens}")
+
 st.markdown("---")
 
 # ======= TOP 3 POR PROPULSIÓN =======
@@ -104,7 +119,7 @@ if not df_scores.empty:
     tabs = st.tabs(["⚡ Eléctricos", "🔄 Híbridos", "⛽ Gasolina"])
     for i, prop in enumerate(["electrico", "hibrido", "gasolina"]):
         with tabs[i]:
-            sub = df_scores[df_scores["propulsion"] == prop].head(3)
+            sub = top_por_propulsion(df_scores, prop, 3)
             if sub.empty:
                 st.info(f"Sin modelos {label_for_prop(prop)}")
             else:

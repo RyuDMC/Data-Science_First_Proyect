@@ -62,7 +62,7 @@ if "fuente_empresa" in df_empresas.columns:
             for col in ["precio_usd", "autonomia_km", "carga_kg", "motor_w", "motor_cc", "bateria_v", "bateria_ah"]:
                 if col in df_show.columns:
                     df_show[col] = df_show[col].apply(lambda v: f"{v:,.0f}" if pd.notna(v) else "—")
-            st.dataframe(df_show, use_container_width=True, hide_index=True)
+            st.dataframe(df_show, width="stretch", hide_index=True)
 
 st.markdown("---")
 
@@ -132,7 +132,7 @@ if not df_scores.empty and en_ambos:
     comp["diferencia"] = comp["precio_empresa"] - comp["precio_online"]
     comp["pct_diff"] = (comp["diferencia"] / comp["precio_online"] * 100).round(1)
     
-    st.dataframe(comp.sort_values("diferencia"), use_container_width=True, hide_index=True,
+    st.dataframe(comp.sort_values("diferencia"), width="stretch", hide_index=True,
                  column_config={
                      "precio_online": st.column_config.NumberColumn("Online ($)", format="$%,.0f"),
                      "precio_empresa": st.column_config.NumberColumn("Empresa ($)", format="$%,.0f"),

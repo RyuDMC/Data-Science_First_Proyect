@@ -152,7 +152,7 @@ else:
             "mejor_modelo": "Modelo mejor valorado",
         })[["Marca", "Calle", "% calle [IC 95%]", "Modelo mejor valorado",
             "Score del mejor modelo", "Precio"]]
-        st.dataframe(tabla, use_container_width=True, hide_index=True)
+        st.dataframe(tabla, width="stretch", hide_index=True)
 
         # Lectura automática, sin inventar: el más visto vs el mejor puntuado.
         mas_visto = comp.sort_values("n_campo", ascending=False).iloc[0]
@@ -206,7 +206,7 @@ else:
                 "autonomia_med": "Autonomía mediana (km)",
                 "n_municipios": "Municipios",
             })[["Uso", "Obs.", "%", "Marcas más vistas", "Autonomía mediana (km)", "Municipios"]]
-            st.dataframe(tabla_uso, use_container_width=True, hide_index=True)
+            st.dataframe(tabla_uso, width="stretch", hide_index=True)
             st.caption(
                 "El uso es **declarado** por el dueño en la entrevista. "
                 "La palabra original de la hoja (\"familiar\", \"pasaje\", \"carga y pasaje\") "
@@ -224,7 +224,7 @@ else:
         # Cruce uso × municipio (densidad de uso por zona).
         st.markdown("**Uso por municipio**")
         cruce = (df_campo.groupby(["municipio", "uso"]).size().unstack(fill_value=0))
-        st.dataframe(cruce, use_container_width=True)
+        st.dataframe(cruce, width="stretch")
     else:
         st.caption("Sin tabla de uso: ejecuta `python3 codes/analisis_campo.py`.")
 
@@ -238,11 +238,11 @@ else:
         muni = (df_campo.groupby(["municipio", "marca"]).size()
                 .reset_index(name="obs")
                 .sort_values(["municipio", "obs"], ascending=[True, False]))
-        st.dataframe(muni, use_container_width=True, hide_index=True)
+        st.dataframe(muni, width="stretch", hide_index=True)
     with der2:
         pivot = df_campo.groupby(["municipio", "marca"]).size().unstack(fill_value=0)
         st.markdown("**Matriz municipio × marca**")
-        st.dataframe(pivot, use_container_width=True)
+        st.dataframe(pivot, width="stretch")
 
     st.warning(f"""
     **Cómo leer estos datos.** Muestra **cerrada** de {_n('observaciones_campo')} observaciones en {_n('municipios_campo')} de los
@@ -289,7 +289,7 @@ if not df_campo.empty:
             for m in municipios_diseno
         ],
     })
-    st.dataframe(estado_muni, use_container_width=True, hide_index=True)
+    st.dataframe(estado_muni, width="stretch", hide_index=True)
 
 # ======= ESQUEMA DE DATOS =======
 st.subheader("📊 Esquema de registro")
@@ -300,7 +300,7 @@ schema = pd.DataFrame({
     "Ejemplo": ["2026-10-15", "Boyeros", "triciclo", "carga", "electrico", "KIVITOVA 2026", "KIVITOVA", "1200W", "bueno", "Juan P.", "Carga 600kg visible"],
     "Obligatorio": ["Sí", "Sí", "Sí", "Sí", "Sí", "No", "No", "No", "No", "Sí", "No"]
 })
-st.dataframe(schema, use_container_width=True, hide_index=True)
+st.dataframe(schema, width="stretch", hide_index=True)
 
 st.markdown("""
 **Valores permitidos:**

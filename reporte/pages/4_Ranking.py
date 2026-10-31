@@ -109,7 +109,7 @@ df_show = df_show.rename(columns=rename_map)
 
 st.dataframe(
     df_show,
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     column_config={
         "Score": st.column_config.NumberColumn(format="%.3f"),
@@ -192,7 +192,7 @@ else:
             "1º": top[0], "2º": top[1], "3º": top[2],
         })
     st.markdown("**Podio bajo cada escenario** (la fila *Base* es el ranking oficial)")
-    st.dataframe(pd.DataFrame(filas_esc), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(filas_esc), hide_index=True, width="stretch")
 
     # --- Estabilidad de los modelos que se están viendo ---
     st.markdown("**Estabilidad de los modelos en la tabla de arriba**")
@@ -219,7 +219,7 @@ else:
         "N crit.": stab["n_criterios"].astype("Int64"),
         "Anuncios": stab["n_anuncios"].astype("Int64"),
     })
-    st.dataframe(stab_show, hide_index=True, use_container_width=True)
+    st.dataframe(stab_show, hide_index=True, width="stretch")
 
     # --- Lectura automática del resultado (sin números escritos a mano) ---
     prop_txt = selected_prop if selected_prop != "Todos" else "electrico"

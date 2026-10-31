@@ -21,9 +21,54 @@
     "catalogos": "2026-10-31",
     "campo": "2026-10-25"
   },
-  "procedencia": {
-    "generado": "2026-10-31T18:13:13-04:00",
-    "commit": "311d71d",
-    "script": "codes/generar_metadata.py"
+  "resultados": {
+    "top_por_propulsion": {
+      "electrico": [
+        {
+          "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+          "score": 0.78554
+        },
+        {
+          "modelo": "ONEBOT CLASIC 2026",
+          "score": 0.774581
+        },
+        {
+          "modelo": "KIVITOVA GELPB",
+          "score": 0.723364
+        }
+      ],
+      "gasolina": [
+        {
+          "modelo": "MAGIC BIKE M004",
+          "score": 0.625
+        },
+        {
+          "modelo": "MAGIC BIKE M005",
+          "score": 0.225
+        }
+      ],
+      "hibrido": [
+        {
+          "modelo": "JINPEN HIBRIDO",
+          "score": 0.725
+        },
+        {
+          "modelo": "JINPEN",
+          "score": 0.70731
+        },
+        {
+          "modelo": "STAR",
+          "score": 0.593693
+        }
+      ]
+    },
+    "campo_marca_top": {
+      "marca": "JINPENG",
+      "n": 6,
+      "total": 30,
+      "pct": 20.0,
+      "ic95_bajo": 9.5,
+      "ic95_alto": 37.3
+    }
   }
 }

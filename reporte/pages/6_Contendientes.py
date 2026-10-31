@@ -138,7 +138,7 @@ if len(selected_models) >= 2:
         norm_display = radar_df.loc[selected_models, avail_n].T
         norm_display.columns = selected_models
         norm_display.index = categories
-        st.dataframe(norm_display.style.format("{:.2f}"), use_container_width=True)
+        st.dataframe(norm_display.style.format("{:.2f}"), width="stretch")
 else:
     st.info("Selecciona al menos 2 modelos para ver el radar.")
 
@@ -174,7 +174,7 @@ if "en_catalogo" in df_show.columns:
 if "marca_en_catalogo" in df_show.columns:
     df_show["marca_en_catalogo"] = df_show["marca_en_catalogo"].map({True: "Sí", False: "No"})
 
-st.dataframe(df_show, use_container_width=True, hide_index=True)
+st.dataframe(df_show, width="stretch", hide_index=True)
 st.caption(
     "**Contexto de catálogo (no entra al score):** 'Marca en catálogo' indica que "
     "la marca se vende en una tienda formal; hoy ningún modelo coincide exactamente "

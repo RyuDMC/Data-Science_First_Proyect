@@ -110,7 +110,7 @@ if not df_online.empty:
                     carga_med=("carga_kg", "median"),
                 ).sort_values("n", ascending=False).head(15)
                 model_stats.columns = ["Anuncios", "Precio med.", "Aut. med.", "Carga med."]
-                st.dataframe(model_stats, use_container_width=True)
+                st.dataframe(model_stats, width="stretch")
 
 st.markdown("---")
 
@@ -133,14 +133,14 @@ if not df_empresas.empty:
             propulsiones=("propulsion", lambda x: ", ".join(x.dropna().unique()))
         )
         emp_stats.columns = ["Fichas", "Precio med.", "Aut. med.", "Propulsiones"]
-        st.dataframe(emp_stats, use_container_width=True)
+        st.dataframe(emp_stats, width="stretch")
 
     # Top modelos empresas
     st.markdown("**Modelos en catálogos:**")
     cols = ["nombre_producto", "marca", "propulsion", "precio_usd", "autonomia_km", "carga_kg", "fuente_empresa"]
     avail = [c for c in cols if c in df_empresas.columns]
     st.dataframe(df_empresas[avail].sort_values(["fuente_empresa", "nombre_producto"]),
-                 use_container_width=True, hide_index=True)
+                 width="stretch", hide_index=True)
 else:
     st.info("Sin datos de empresas")
 

@@ -391,7 +391,15 @@ def score_modelos(df_online: pd.DataFrame) -> pd.DataFrame:
     M = np.where(np.isnan(M), 0.5, M)
     agg["score"] = M @ W
 
-    return agg.sort_values(["propulsion", "score"], ascending=[True, False]).reset_index(drop=True)
+    agg = agg.sort_values(["propulsion", "score"], ascending=[True, False]).reset_index(drop=True)
+    # Rango dentro de cada propulsión: el reporte selecciona por rango, no por
+    # posición del CSV. Así un cambio de orden no altera el podio mostrado.
+    agg["rank_propulsion"] = (
+        agg.groupby("propulsion")["score"]
+        .rank(method="first", ascending=False)
+        .astype(int)
+    )
+    return agg
 
 
 def comparar_campo_online(df_campo: pd.DataFrame, df_online: pd.DataFrame) -> pd.DataFrame:
@@ -465,7 +473,7 @@ def main():
         for prop in df_score["propulsion"].unique():
             sub = df_score[df_score["propulsion"] == prop].head(10)
             print(f"\n--- {prop.upper()} ---")
-            cols = ["modelo_norm", "score", "n_criterios", "precio_usd", "precio_valor", "monedas",
+            cols = ["modelo_norm", "rank_propulsion", "score", "n_criterios", "precio_usd", "precio_valor", "monedas",
                     "autonomia_km", "carga_kg",
                     "legalidad_bin", "repuestos_proxy", "oferta_viva", "n_anuncios", "n_anuncios_total",
                     "motor_w_med", "motor_cc_med", "n_empresas", "precio_empresa_med",

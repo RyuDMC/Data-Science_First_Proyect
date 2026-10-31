@@ -1,0 +1,6 @@
+# Runtime del pipeline completo y del reporte.
+# Versiones exactas probadas en el venv del repo (Python 3.14; compatibles con 3.12).
+# Para desplegar solo el reporte, Streamlit Cloud usa reporte/requirements.txt.
+-r reporte/requirements.txt
+requests==2.34.2
+beautifulsoup4==4.15.0

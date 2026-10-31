@@ -101,11 +101,16 @@ Usa el **menú lateral** (☰) para ir a cada sección:
 # 1. Scraping + análisis
 python3 codes/scrape_triciclos.py
 python3 codes/parse_fb.py
+python3 codes/crear_canonicos.py      # fija los nombres canónicos
 python3 codes/scrape_empresas.py
 python3 codes/parse_campo.py      # hoja de campo -> registro_ubicaciones.csv
+python3 codes/norm_modelo.py --migrar
+python3 codes/crear_canonicos.py      # consolida tras la migración
+python3 codes/norm_modelo.py --migrar
 python3 codes/analisis.py
 python3 codes/analisis_campo.py   # campo: cuotas, IC95, uso, cruce con score
-python3 codes/generar_metadata.py # conteos y cortes -> Data/metadata.json
+python3 codes/sensibilidad.py     # robustez del ranking (no cambia el score)
+python3 codes/generar_metadata.py # conteos, cortes y resultados -> Data/metadata.json
 
 # 2. El reporte lee Data/clean_data/ en vivo → refresca y listo
 streamlit run reporte/app.py

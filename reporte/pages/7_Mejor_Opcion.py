@@ -162,7 +162,7 @@ for _, row in top_overall.iterrows():
     })
 
 matriz_df = pd.DataFrame(matriz_data)
-st.dataframe(matriz_df, use_container_width=True, hide_index=True)
+st.dataframe(matriz_df, width="stretch", hide_index=True)
 
 st.caption("✅ = cumple criterio | ❌ = no cumple | Score ya pondera todos los criterios")
 

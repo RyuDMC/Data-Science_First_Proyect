@@ -180,7 +180,7 @@ if show_frontera and len(pareto_x) > 1:
         x_labels[x_metric]: pareto_x,
         y_labels[y_metric]: pareto_y,
     })
-    st.dataframe(frontera_df, use_container_width=True, hide_index=True)
+    st.dataframe(frontera_df, width="stretch", hide_index=True)
 
 # ======= TABLA COMPLETA =======
 st.markdown("---")
@@ -195,4 +195,4 @@ for col in ["precio_usd", "autonomia_km", "carga_kg", "score"]:
             df_show[col] = df_show[col].apply(lambda v: f"{v:.3f}")
         else:
             df_show[col] = df_show[col].apply(lambda v: f"{v:,.0f}" if pd.notna(v) else "—")
-st.dataframe(df_show, use_container_width=True, hide_index=True)
+st.dataframe(df_show, width="stretch", hide_index=True)

@@ -50,6 +50,9 @@ Prompts/     instrucciones y criterios del proyecto
 # entorno
 python3 -m venv reporte/.venv
 source reporte/.venv/bin/activate
+pip install -r requirements.txt      # pipeline + reporte (versiones exactas)
+
+# solo el reporte (lo usa Streamlit Cloud)
 pip install -r reporte/requirements.txt
 
 # reporte
@@ -70,10 +73,10 @@ python3 codes/norm_modelo.py --migrar
 python3 codes/analisis.py
 python3 codes/analisis_campo.py
 python3 codes/sensibilidad.py         # robustez del ranking (no altera el score)
-python3 codes/generar_metadata.py     # conteos y cortes -> Data/metadata.json
+python3 codes/generar_metadata.py     # conteos, cortes y resultados -> Data/metadata.json
 ```
 
-`Data/metadata.json` es la **única fuente de las cifras** que muestran el reporte y el README (70 anuncios, 41 modelos, 68 fichas, 30 observaciones, cortes). Se genera al final del pipeline; no se edita a mano. Si los datos cambian, se regenera y los tests avisan de cualquier desincronización:
+`Data/metadata.json` es la **única fuente de las cifras** que muestran el reporte y el README (70 anuncios, 41 modelos, 68 fichas, 30 observaciones, cortes, top-3 por propulsión y marca de calle). Se genera al final del pipeline; no se edita a mano y es determinista (la fecha/commit solo se añaden con `--procedencia`). Si los datos cambian, se regenera y los tests avisan de cualquier desincronización:
 
 ```bash
 python3 codes/generar_metadata.py --check   # falla si metadata.json está desactualizado
@@ -100,10 +103,10 @@ Score ponderado de "mejor opción":
 
 ## Resultados
 
-Corte: anuncios 2026-10-19 · catálogos 2026-10-31.
+Corte: anuncios 2026-10-19 · catálogos 2026-10-31 · campo 2026-10-25.
 
-- Mejor score: **TOPMAQ BRIDERK 2026 GELPB** (0.786), seguido de **ONEBOT CLASIC 2026** (0.775) y **KIVITOVA GELPB** (0.723).
-- En calle, la marca más observada es **JINPENG** (20%, 6 de 30; IC95 10–37%).
+- Mejor score **eléctrico**: **TOPMAQ BRIDERK 2026 GELPB** (0.786), seguido de **ONEBOT CLASIC 2026** (0.775) y **KIVITOVA GELPB** (0.723).
+- En calle, la marca más observada es **JINPENG** (20%, 6 de 30; IC95 9.5–37.3%).
 - Ningún modelo de catálogo coincide con un anuncio; a nivel de marca cruzan **ONEBOT, TOPMAQ, VEDCA y MISHOZUKI**.
 
 ## Fuentes

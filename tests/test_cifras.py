@@ -12,6 +12,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 META = json.loads((ROOT / "Data" / "metadata.json").read_text(encoding="utf-8"))
 C = META["conteos"]
+R = META["resultados"]
 
 
 def _jsonl(rutas):
@@ -42,17 +43,59 @@ def test_metadata_coincide_con_los_datos():
     assert C["municipios_campo"] == campo["municipio"].nunique()
     assert C["marcas_campo"] == campo["marca"].nunique()
 
+    top_e = score[score["propulsion"] == "electrico"].sort_values(
+        ["score", "modelo_norm"], ascending=[False, True], kind="mergesort",
+    ).head(3)
+    assert [r["modelo"] for r in R["top_por_propulsion"]["electrico"]] == \
+        top_e["modelo_norm"].tolist()
+
+    campo_res = pd.read_csv(ROOT / "Data" / "clean_data" / "campo_resumen.csv")
+    top_campo = campo_res.sort_values(
+        ["n_campo", "marca_norm"], ascending=[False, True], kind="mergesort",
+    ).iloc[0]
+    assert R["campo_marca_top"]["marca"] == top_campo["marca_norm"]
+    assert R["campo_marca_top"]["n"] == int(top_campo["n_campo"])
+    assert R["campo_marca_top"]["total"] == int(campo_res["n_campo"].sum())
+
+
+def test_metadata_es_determinista_por_defecto():
+    """Sin `--procedencia`, el JSON no lleva fecha ni commit volátiles."""
+    assert "procedencia" not in META
+
+
+def test_score_legado_archivado():
+    """La tabla de la raíz era un legado de 35 filas; solo queda el archivo."""
+    assert not (ROOT / "Data" / "score_modelos.csv").exists()
+    assert (ROOT / "Data" / "archive" / "score_modelos_2026-10-11.csv").exists()
+
 
 def test_readme_coincide_con_metadata():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    cortes = META["cortes"]
     esperados = [
         f'{C["anuncios"]} anuncios · {C["modelos_ranking"]} modelos',
         f'{C["fichas_empresa"]} fichas · {C["empresas"]} empresas',
         f'{C["observaciones_campo"]} observaciones · {C["municipios_campo"]} municipios',
         f'{C["modelos_con_repuestos"]} de {C["modelos_ranking"]} modelos',
+        f'Corte: anuncios {cortes["anuncios"]} · catálogos {cortes["catalogos"]} · campo {cortes["campo"]}.',
     ]
     for texto in esperados:
         assert texto in readme, f"README no contiene: {texto!r}"
+
+
+def test_readme_resultados_coincide_con_metadata():
+    """Los scores y la marca de calle del README salen del metadata."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for r in R["top_por_propulsion"]["electrico"]:
+        texto = f'{r["modelo"]}** ({r["score"]:.3f})'
+        assert texto in readme, f"README no contiene: {texto!r}"
+
+    cm = R["campo_marca_top"]
+    texto = (
+        f'{cm["marca"]}** ({cm["pct"]:.0f}%, {cm["n"]} de {cm["total"]}; '
+        f'IC95 {cm["ic95_bajo"]:.1f}–{cm["ic95_alto"]:.1f}%)'
+    )
+    assert texto in readme, f"README no contiene: {texto!r}"
 
 
 def test_sin_cifras_viejas_en_el_reporte():

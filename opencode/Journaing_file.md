@@ -705,3 +705,22 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** una cifra escrita a mano en seis sitios se desincroniza; generarla al final del pipeline y testear el contrato cuesta menos que perseguir erratas
 - **Próxima vez:** revisar/commitear; decidir el `Data/score_modelos.csv` legado; tests de parsers + CI
 - **Etiquetas:** metadata, cifras, pii, privacidad, tests, streamlit, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre de auditoría de `d45a0ee`) — quedaban siete mejoras del análisis sin ejecutar: dependencias, Resumen engañoso, cifras/results, pipeline, score legado, API deprecada y JINPEN
+- **Tarea:** ejecutar las mejoras 2, 4, 5, 6, 7, 8 y 11 del análisis del repo
+- **Acción(es):**
+  1. **Dependencias (2):** `requirements.txt` raíz con el runtime completo (`-r reporte/requirements.txt` + `requests==2.34.2` + `beautifulsoup4==4.15.0`); `reporte/requirements.txt` solo con lo que necesita el deploy (Streamlit 1.66.0, pandas 3.0.6, numpy 2.5.4, matplotlib 3.11.2); `requirements-dev.txt` = runtime + `pytest==9.2.0`
+  2. **Resumen (4):** `codes/analisis.py` escribe `rank_propulsion`; `reporte/data.py` añade `top_por_anuncios`, `top_por_score`, `top_por_propulsion` y `texto_sensibilidad_electrico`; la portada separa "Lo más ofertado" (`n_anuncios_total`) de "Por qué el mejor valorado" (`score`), avisa de que no son lo mismo y muestra la robustez del podio. `get_top_models` deja de usar `.head(n)` sobre el orden del CSV
+  3. **Cifras (5):** `metadata.json` añade `resultados` (top-3 por propulsión y marca de calle con IC95) y el README se contrasta contra ese bloque en `tests/test_cifras.py`. Se aclara "Mejor score **eléctrico**" porque los scores no se comparan entre propulsiones
+  4. **Pipeline (6):** `reporte/app.py` y la página 10 documentan el orden real (`crear_canonicos` → `norm_modelo --migrar` → `crear_canonicos` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `sensibilidad` → `generar_metadata`). `generar_metadata` es determinista por defecto; `--procedencia` añade fecha/commit y `--check` los ignora
+  5. **Legado (7):** `git mv Data/score_modelos.csv Data/archive/score_modelos_2026-10-11.csv` + `Data/archive/README.md`; no se borra, se archiva con su motivo
+  6. **Streamlit (8):** 27 `use_container_width=True` → `width="stretch"` en las 10 páginas; `tests/test_contratos.py` falla si vuelve
+  7. **JINPEN (11):** `opencode/auditoria_jinpen.md` reúne las cuatro grafías y las specs. Decisión: normalizar la marca a JINPENG, pero **no fusionar productos** (dos híbridos con motor/batería/precio distintos); `JINPEING` es errata ya corregida. `tests/test_identidad.py` lo protege
+  8. **Tests:** nuevos `test_contratos.py`, `test_identidad.py` y `test_paginas.py` (11 `AppTest`); `test_cifras.py` ampliado con `resultados`, determinismo y archivo legado
+- **Resultado:** `analisis.py` → 41 filas con `rank_propulsion` 1..n por propulsión; `sensibilidad --check` OK; `generar_metadata --check` OK (top eléctrico TOPMAQ 0.786 > ONEBOT 0.775 > KIVITOVA 0.723; JINPENG 6/30, IC95 9.5–37.3); `pip install -r requirements.txt` + `pip check` sin conflictos (`requests` 2.34.2, `bs4` 4.15.0); `pytest -q tests/` → **35/35**; `AppTest` 11/11
+- **Error/éxito:** Éxito. El reemplazo masivo de `use_container_width` se hizo con `perl` y se verificó con `git grep` (0 restantes); el único fallo fue un `oldString` con indentación distinta al editar la tabla de Limitaciones, corregido leyendo el bloque real
+- **Lección:** el podio no debe depender del orden del CSV ni de `.iloc[0]`; si el resultado importa, se selecciona por un rango explícito y se prueba con el DataFrame desordenado. Y las dependencias del pipeline (`requests`, `bs4`) no estaban declaradas: el reporte funcionaba, el scraping no se podía reproducir
+- **Próxima vez:** revisar/commitear esta ronda; decidir si `Data/empresas/` entra al scoring completo; deploy
+- **Etiquetas:** dependencias, resumen, metadata, pipeline, archivo, streamlit, jinpen, tests, verificacion

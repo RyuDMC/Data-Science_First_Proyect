@@ -157,6 +157,100 @@ def load_sensibilidad_resumen() -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def top_por_anuncios(df_scores: pd.DataFrame):
+    """Fila con más anuncios (desempate: score y nombre).
+
+    No usa `.iloc[0]`: el orden del CSV no forma parte del contrato. Devuelve
+    una Serie o None si no hay datos.
+    """
+    if df_scores.empty or "n_anuncios_total" not in df_scores.columns:
+        return None
+    return df_scores.sort_values(
+        ["n_anuncios_total", "score", "modelo_norm"],
+        ascending=[False, False, True], kind="mergesort",
+    ).iloc[0]
+
+
+def top_por_score(df_scores: pd.DataFrame):
+    """Fila con mejor score (desempate: anuncios y nombre)."""
+    if df_scores.empty or "score" not in df_scores.columns:
+        return None
+    return df_scores.sort_values(
+        ["score", "n_anuncios_total", "modelo_norm"],
+        ascending=[False, False, True], kind="mergesort",
+    ).iloc[0]
+
+
+def top_por_propulsion(df_scores: pd.DataFrame, prop: str, n: int = 3) -> pd.DataFrame:
+    """Top N de una propulsión, por `rank_propulsion` (o score si falta).
+
+    Es explícito: no depende de que `analisis.py` haya dejado el CSV ordenado.
+    """
+    if df_scores.empty or "propulsion" not in df_scores.columns:
+        return df_scores.head(0)
+    sub = df_scores[df_scores["propulsion"] == prop]
+    if sub.empty:
+        return sub
+    if "rank_propulsion" in sub.columns:
+        return sub.sort_values("rank_propulsion", kind="mergesort").head(n)
+    return sub.sort_values(
+        ["score", "modelo_norm"], ascending=[False, True], kind="mergesort",
+    ).head(n)
+
+
+def texto_sensibilidad_electrico(df_sens: pd.DataFrame,
+                                 df_sens_res: pd.DataFrame) -> str:
+    """Frase de robustez del podio eléctrico, calculada desde los CSV.
+
+    Se usa en Resumen y Limitaciones para que la portada no parezca más firme
+    que el análisis. Si faltan los CSV, devuelve un aviso, no un número.
+    """
+    fallback = (
+        "Pendiente: ejecutar `codes/sensibilidad.py`. El score depende de pesos "
+        "fijos; su estabilidad se mide aparte."
+    )
+    if df_sens.empty or df_sens_res.empty:
+        return fallback
+    requeridas_res = {"propulsion", "rank_base", "top3_pct", "modelo_norm"}
+    requeridas_pesos = {"propulsion", "rank", "escenario", "modelo_norm"}
+    if not requeridas_res <= set(df_sens_res.columns):
+        return fallback
+    if not requeridas_pesos <= set(df_sens.columns):
+        return fallback
+
+    top3 = df_sens_res[df_sens_res["propulsion"] == "electrico"].nsmallest(3, "rank_base")
+    if len(top3) != 3:
+        return fallback
+
+    pcts = top3["top3_pct"].tolist()
+    nombres = top3["modelo_norm"].tolist()
+    cambios = (df_sens[(df_sens["propulsion"] == "electrico")
+                       & (df_sens["rank"] == 1)
+                       & (df_sens["escenario"] != "base")]
+               .set_index("escenario")["modelo_norm"])
+    otros = cambios[cambios != nombres[0]]
+    nombres_esc = {
+        "reponderado": "re-ponderado",
+        "sin_precio_usd": "sin precio",
+        "sin_autonomia_km": "sin autonomía",
+        "sin_carga_kg": "sin carga",
+        "sin_legalidad": "sin legalidad",
+        "sin_repuestos": "sin repuestos",
+    }
+    detalle = "; ".join(
+        (f"al quitar {nombres_esc.get(e, e).replace('sin ', '')}"
+         if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
+        for e, m in otros.items()
+    )
+    return (
+        f"Con 2.000 perturbaciones de ±0.05 en los pesos, el top-3 eléctrico se "
+        f"mantiene en {pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de los casos; "
+        f"el 1º cambia en {len(otros)} de {len(cambios)} escenarios de omisión"
+        + (f" ({detalle})" if detalle else "")
+        + ". El orden exacto depende de los pesos; el podio, no."
+    )
+
+
 @st.cache_data(show_spinner="Cargando comparación campo vs online…")
 def load_comparacion() -> pd.DataFrame:
     """Carga comparacion_campo_online.csv."""
@@ -217,8 +311,9 @@ def filter_by_propulsion(df: pd.DataFrame, prop: str) -> pd.DataFrame:
 
 
 def get_top_models(df_scores: pd.DataFrame, prop: str, n: int = 10) -> pd.DataFrame:
-    """Top N modelos por score para una propulsión."""
-    if df_scores.empty:
-        return df_scores
-    sub = df_scores[df_scores["propulsion"] == prop].head(n)
-    return sub
+    """Top N modelos por score para una propulsión.
+
+    Usa `rank_propulsion` cuando existe; si no, ordena por score. No confía en
+    el orden en que venga el CSV.
+    """
+    return top_por_propulsion(df_scores, prop, n)

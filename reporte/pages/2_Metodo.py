@@ -62,13 +62,13 @@ fuentes = pd.DataFrame({
         f"{_n('marcas_campo')} marcas",
     ],
     "Cobertura": [
-        "6 fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
-        "10 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline, MundoEnvío, Patuisla, Francis Motors, Bluewave Logistic, Zona Libre Online",
-        "5/15 municipios: Centro Habana, Plaza, Habana del Este, La Lisa, Playa (muestra cerrada, 2026-10-13→25)"
+        f"{_n('fuentes_anuncios')} fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
+        f"{_n('empresas')} empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline, MundoEnvío, Patuisla, Francis Motors, Bluewave Logistic, Zona Libre Online",
+        f"{_n('municipios_campo')}/15 municipios: Centro Habana, Plaza, Habana del Este, La Lisa, Playa (muestra cerrada, 2026-10-13→25)"
     ],
     "Estado": ["✅ Activo", "✅ Activo", "✅ Cerrado (muestra final)"]
 })
-st.dataframe(fuentes, use_container_width=True, hide_index=True)
+st.dataframe(fuentes, width="stretch", hide_index=True)
 
 st.caption(
     f"El ranking tiene **{_n('modelos_ranking')} filas** porque el mismo nombre puede "
@@ -89,7 +89,7 @@ pesos = pd.DataFrame({
     "Dirección": ["Menor = mejor", "Mayor = mejor", "Mayor = mejor", "1 = menciona legalidad", "1 = >1 fuente"],
     "Fuente": ["Anuncios/Empresas", "Anuncios/Empresas", "Anuncios/Empresas", "Anuncios/Empresas", "Anuncios"]
 })
-st.dataframe(pesos, use_container_width=True, hide_index=True)
+st.dataframe(pesos, width="stretch", hide_index=True)
 
 st.markdown("""
 **Fórmula:**
@@ -132,7 +132,7 @@ reglas = pd.DataFrame({
         "Cuota con intervalo de Wilson: con 30 casos, el 1º y el 3º no se distinguen. No se ordena 'quién gana'"
     ]
 })
-st.dataframe(reglas, use_container_width=True, hide_index=True)
+st.dataframe(reglas, width="stretch", hide_index=True)
 
 st.markdown("---")
 
@@ -191,7 +191,7 @@ alias_data = [
     ("VIENTO RAPIDO (FB)", "VIENTO RAPIDO (scraper)"),
 ]
 alias_df = pd.DataFrame(alias_data, columns=["Nombre en Facebook", "Nombre canónico (scraper)"])
-st.dataframe(alias_df, use_container_width=True, hide_index=True)
+st.dataframe(alias_df, width="stretch", hide_index=True)
 
 st.caption(
     "Nota: STAR eléctrico (FB) ≠ STAR híbrido (scraper) → NO se fusionan "
@@ -234,7 +234,7 @@ identidad_data = [
     ("Propulsión", "Forma parte de la identidad: mismo nombre + distinta propulsión = productos distintos"),
 ]
 st.dataframe(pd.DataFrame(identidad_data, columns=["Qué se quita / decide", "Regla"]),
-             use_container_width=True, hide_index=True)
+             width="stretch", hide_index=True)
 
 st.caption(
     "La tabla canónica (`Data/modelos_canonicos.json`) se genera con "
