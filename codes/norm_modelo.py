@@ -304,6 +304,42 @@ def aplicar_alias(x):
     return ALIAS_MODELOS.get(x, x)
 
 
+# ==================== ALIAS DE MARCA (nivel marca, no nivel modelo) ====================
+# Grafías de la MISMA marca entre las fuentes (hoja de campo y anuncios).
+# Es un eje distinto de ALIAS_MODELOS: aquí no se afirma nada sobre el modelo.
+# Decisiones del usuario (2026-10-31): VELGA es VEDCA mal escrito, y JINPEN /
+# JIMPENG son la misma marca que JINPENG. Fusionar la MARCA no fusiona los
+# productos: la identidad de producto sigue distinguiendo JINPENG eléctrico de
+# JINPEN híbrido (la propulsión forma parte de la clave).
+MARCA_ALIAS = {
+    "ONEBOOT": "ONEBOT",        # hoja de campo
+    "KVITOVA": "KIVITOVA",      # hoja de campo
+    "MAGICBIKE": "MAGIC BIKE",  # hoja de campo
+    "VELGA": "VEDCA",           # hoja de campo: errata confirmada
+    "JINPEING": "JINPENG",      # anuncio elyerromenu
+    "JINPEN": "JINPENG",        # anuncio elyerromenu (híbrido)
+    "JIMPENG": "JINPENG",       # anuncio Facebook (producto TY150UK)
+}
+
+
+def normalizar_marca(marca):
+    """Devuelve la marca en mayúsculas, sin espacios repetidos y con alias."""
+    if marca is None or (isinstance(marca, float)):
+        return ""
+    m = " ".join(str(marca).upper().split())
+    return MARCA_ALIAS.get(m, m)
+
+
+def marca_norm(df):
+    """Columna `marca_norm` (nivel marca) para comparar campo y anuncios."""
+    import pandas as pd  # import local
+
+    if df.empty or "marca" not in df.columns:
+        return pd.Series([], dtype="object")
+    out = df["marca"].fillna("").astype(str).map(normalizar_marca)
+    return out.where(out.ne(""), pd.NA)
+
+
 def identidad(df, con_alias=True):
     """Calcula la columna `modelo_norm` (identidad del producto).
 
@@ -419,6 +455,8 @@ def _main(argv):
          DATA_DIR / "clean_data" / "mrcuba.jsonl"),
         (DATA_DIR / "empresas" / "acubaenvioscargo.jsonl",
          DATA_DIR / "clean_data" / "acubaenvioscargo.jsonl"),
+        (DATA_DIR / "empresas" / "compramasonline.jsonl",
+         DATA_DIR / "clean_data" / "compramasonline.jsonl"),
     ]
     for src, dst in tareas:
         if not src.exists():

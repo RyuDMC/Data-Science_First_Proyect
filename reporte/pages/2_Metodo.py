@@ -23,7 +23,11 @@ st.title("🔬 Método y Decisiones Metodológicas")
 
 st.markdown("""
 Este reporte integra **tres fuentes de evidencia** para responder a la pregunta central:
-> *¿Cuál es el triciclo más común en La Habana?, ¿por qué es ese?, ¿existe una mejor opción?*
+> *¿Qué triciclo comprar en La Habana y por qué?*
+
+La pregunta es de **decisión**, no de censo. "Lo más común" entra como **indicador**
+(oferta anunciada + lo visto en calle) y no como respuesta: la muestra de campo está
+cerrada en 5 de 15 municipios.
 
 Cada fuente mide algo distinto y se trata de forma separada.
 """)
@@ -42,14 +46,14 @@ fuentes = pd.DataFrame({
         "Oferta formal, disponibilidad, specs de fabricante",
         "Circulación real observada en calle"
     ],
-    "Registros": [70, 22, 0],
-    "Modelos únicos": [41, 22, 0],
+    "Registros": [70, 30, 30],
+    "Unidades": ["42 modelos", "29 fichas", "12 marcas"],
     "Cobertura": [
         "6 fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
-        "4 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba",
-        "15 municipios, 3 rutas × ~2.5h (pendiente)"
+        "5 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline",
+        "5/15 municipios: Centro Habana, Plaza, Habana del Este, La Lisa, Playa (muestra cerrada, 2026-10-13→25)"
     ],
-    "Estado": ["✅ Activo", "✅ Activo", "⏳ Pendiente"]
+    "Estado": ["✅ Activo", "✅ Activo", "✅ Cerrado (muestra final)"]
 })
 st.dataframe(fuentes, use_container_width=True, hide_index=True)
 
@@ -94,7 +98,10 @@ reglas = pd.DataFrame({
         "Oferta viva",
         "Gasolina: autonomía",
         "Repuestos proxy",
-        "Precios EUR (islagrande)"
+        "Precios EUR (islagrande)",
+        "Campo vs online: nivel de comparación",
+        "Campo: alcance (muestra cerrada)",
+        "Campo: incertidumbre (n=30)"
     ],
     "Regla": [
         "Siempre límite inferior (ej. '90-100 km' → 90 km)",
@@ -105,7 +112,10 @@ reglas = pd.DataFrame({
         "Sin fecha = vigente; con fecha → ≥ 2026-01-01; 'agotado' = no viva",
         "NO se estima (prohibido inventar datos)",
         "1 si modelo aparece en >1 fuente, 0 si no",
-        "Se guardan en precio_valor/moneda; NO se convierten a USD"
+        "Se guardan en precio_valor/moneda; NO se convierten a USD",
+        "El campo no distingue modelo → se compara por MARCA; nunca se aplican alias de modelo al campo",
+        "Muestra cerrada: 30 obs en 5 de 15 municipios. Describe la muestra; no se extrapola a La Habana",
+        "Cuota con intervalo de Wilson: con 30 casos, el 1º y el 3º no se distinguen. No se ordena 'quién gana'"
     ]
 })
 st.dataframe(reglas, use_container_width=True, hide_index=True)
@@ -120,10 +130,12 @@ st.markdown("""
 Data/raw_data/           →  Crudos inmutables (write once)
     ├── anuncios_triciclos.jsonl
     ├── anuncios_facebook.jsonl  (parseado desde data_from_FB)
-    └── data_from_FB              (original, no se toca)
+    ├── data_from_FB              (original, no se toca)
+    └── data_personas.txt         (hoja de campo; NO se commitea: datos personales)
 
 codes/parse_fb.py        →  Parsing tolerante a errores + normalización
 codes/scrape_empresas.py →  Scraping catálogos + normalización
+codes/parse_campo.py     →  Hoja de campo: anonimiza (descarta nombre/CI) y normaliza
         ↓
 Data/clean_data/         →  Limpios listos para análisis (entrada de analisis.py)
     ├── anuncios_triciclos.jsonl
@@ -131,14 +143,18 @@ Data/clean_data/         →  Limpios listos para análisis (entrada de analisis
     ├── empresas_kikihabana.jsonl
     ├── empresas_mzproducts.jsonl
     ├── empresas_acubaenvioscargo.jsonl
-    ├── empresas_mrcuba.jsonl
-    └── registro_ubicaciones.csv   (cuando haya campo)
+    └── empresas_mrcuba.jsonl
+
+Data/registro_ubicaciones.csv  →  Inventario de campo (17 columnas, sin datos personales)
 
 codes/analisis.py        →  Carga clean_data/, aplica alias, scoring, genera CSVs
+codes/analisis_campo.py  →  Campo: cuotas por marca, IC95 (Wilson), uso y cruce con el score
         ↓
 Data/clean_data/ (outputs)
     ├── score_modelos.csv
     ├── comparacion_campo_online.csv
+    ├── campo_resumen.csv          (marca: cuota, IC95, uso dominante, score)
+    ├── campo_uso.csv              (uso: cuota, IC95, marcas)
     ├── frecuencia_por_municipio.csv
     └── frecuencia_por_tipo_uso.csv
 """)
@@ -168,6 +184,16 @@ st.caption(
     "(la propulsión forma parte de la identidad). Tampoco se fusionan "
     "OIM / OIM PASAJE, ni DDS-OD (marca KIVITOVA, modelo distinto)."
 )
+
+st.markdown("""
+**Alias de marca (eje distinto).** Para comparar con el trabajo de campo —que
+solo lee la marca— existe una tabla aparte, `MARCA_ALIAS`: `ONEBOOT → ONEBOT`,
+`KVITOVA → KIVITOVA`, `MAGICBIKE → MAGIC BIKE`, `VELGA → VEDCA` (errata
+confirmada) y `JINPEING / JINPEN / JIMPENG → JINPENG`. Fusionar la marca **no**
+fusiona productos: JINPENG eléctrico y JINPEN híbrido siguen siendo identidades
+distintas. Al campo no se le aplica ningún alias de *modelo*: afirmar que un
+ONEBOT visto en calle es el "ONEBOT CLASIC 2026" sería inventar el modelo.
+""")
 
 st.markdown("---")
 

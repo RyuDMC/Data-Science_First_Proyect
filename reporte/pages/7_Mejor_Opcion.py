@@ -15,7 +15,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, filter_by_propulsion
+from reporte.data import load_scores, load_campo_uso, filter_by_propulsion
 from reporte.theme import apply_style, fig_ax, bar_ranking, color_for_prop, label_for_prop
 
 
@@ -35,8 +35,24 @@ df = df_scores[df_scores["oferta_viva"] == True].copy()
 
 st.markdown("""
 La "mejor opción" **depende de tu caso de uso**. No hay un ganador universal.
-Aquí presentamos recomendaciones para los 4 escenarios más comunes.
+Aquí presentamos recomendaciones por escenario, **ordenadas por la frecuencia con
+la que ese uso aparece en la calle** (trabajo de campo), no por un orden arbitrario.
 """)
+
+# ======= USO OBSERVADO (DATO DE CAMPO) =======
+df_uso = load_campo_uso()
+cuota_uso = {}
+if not df_uso.empty:
+    st.markdown("#### 📦 Cómo se usa en la calle")
+    cols = st.columns(len(df_uso))
+    for col, (_, r) in zip(cols, df_uso.iterrows()):
+        col.metric(r["uso"].capitalize(), f"{r['pct']:.0f}%",
+                   help=f"n={int(r['n'])} · IC 95%: {r['ic95_bajo']:.0f}–{r['ic95_alto']:.0f}%")
+    cuota_uso = dict(zip(df_uso["uso"], df_uso["pct"]))
+    st.caption(
+        f"Uso declarado por {int(df_uso['n'].sum())} propietarios en 5 municipios "
+        "(muestra cerrada, no censo). Es la ponderación que ordena los escenarios de abajo."
+    )
 
 # ======= ESCENARIOS =======
 st.subheader("🎯 Recomendaciones por escenario")
@@ -47,6 +63,7 @@ escenarios = [
         "filtro": "carga_kg >= 800",
         "orden": "score",
         "icon": "📦",
+        "uso": "carga",
         "descripcion": "Para mover mercancía, materiales, equipamiento. Prioriza carga y robustez."
     },
     {
@@ -54,6 +71,7 @@ escenarios = [
         "filtro": "autonomia_km >= 100",
         "orden": "score",
         "icon": "👥",
+        "uso": "pasajeros",
         "descripcion": "Para transporte de personas, recorridos largos. Prioriza autonomía y comodidad."
     },
     {
@@ -61,6 +79,7 @@ escenarios = [
         "filtro": "precio_usd < 4000",
         "orden": "score",
         "icon": "💰",
+        "uso": None,
         "descripcion": "Mejor relación valor/precio. Prioriza score alto con precio bajo."
     },
     {
@@ -68,12 +87,22 @@ escenarios = [
         "filtro": "propulsion in ['hibrido', 'gasolina']",
         "orden": "score",
         "icon": "⛽",
+        "uso": None,
         "descripcion": "Donde no hay electricidad confiable. Híbrido = autonomía extendida; Gasolina = simple."
     }
 ]
 
+# Orden por frecuencia observada del uso; los escenarios transversales
+# (presupuesto, sin enchufe) van al final.
 for esc in escenarios:
-    with st.expander(f"{esc['icon']} **{esc['titulo']}**", expanded=True):
+    esc["cuota"] = cuota_uso.get(esc["uso"]) if esc["uso"] else None
+escenarios.sort(key=lambda e: (e["cuota"] is None, -(e["cuota"] or 0)))
+
+for esc in escenarios:
+    etiqueta = f"{esc['icon']} **{esc['titulo']}**"
+    if esc["cuota"] is not None:
+        etiqueta += f" — {esc['cuota']:.0f}% del uso observado"
+    with st.expander(etiqueta, expanded=True):
         st.caption(esc['descripcion'])
         
         # Aplicar filtro

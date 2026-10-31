@@ -34,11 +34,23 @@ Identidad del producto (decisión del usuario, 2026-10-19):
   - La normalización min-max es intra-propulsión: no se comparan scores entre
     propulsiones distintas.
 
+Datos de campo (2026-10-31):
+  - La hoja de captura NO distingue modelo: solo marca. El análisis de campo
+    (cuotas, IC, uso, cruce con el score) vive en codes/analisis_campo.py ->
+    clean_data/campo_resumen.csv + campo_uso.csv.
+  - Aquí solo se mantiene la comparación por IDENTIDAD (campo vs anuncios),
+    que queda casi vacía por diseño: es la prueba de que no se puede comparar
+    por modelo.
+  - Al campo NO se le aplican los alias de modelo (ONEBOT -> "ONEBOT CLASIC
+    2026"): inventaría un modelo que el observador no leyó.
+  - El campo NO entra al scoring: mide circulación real, no oferta.
+
 Uso:
     python3 codes/analisis.py   # lee Data/clean_data/*.jsonl; escribe en clean_data/
 """
 
 import json
+import ast
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -155,16 +167,25 @@ def load_online(jsonl_path: str) -> pd.DataFrame:
     return df
 
 
-def calcular_repuestos_proxy(df_online: pd.DataFrame) -> pd.DataFrame:
+def calcular_repuestos_proxy(df_online: pd.DataFrame,
+                             df_empresas: pd.DataFrame | None = None) -> pd.DataFrame:
     """Marca los modelos que aparecen en más de una fuente (proxy de repuestos).
 
     La identidad incluye la propulsión (decisión del usuario, 2026-10-19): el
     STAR eléctrico y el STAR híbrido son productos distintos y no cuentan como
     el mismo modelo.
+
+    `df_empresas` (decisión del usuario, 2026-10-31): los catálogos de empresas
+    suman fuentes al proxy ('se vende en tienda, no solo en clasificados'),
+    pero NO entran al score ni a los precios del ranking: ver
+    `integrar_empresas()`, que solo añade contexto.
     """
     if df_online.empty:
         return df_online
-    fuente_por_modelo = df_online.groupby(["modelo_norm", "propulsion"])["fuente"].nunique()
+    base = df_online
+    if df_empresas is not None and not df_empresas.empty:
+        base = pd.concat([df_online, df_empresas], ignore_index=True)
+    fuente_por_modelo = base.groupby(["modelo_norm", "propulsion"])["fuente"].nunique()
     df_online["repuestos_proxy"] = [
         int(fuente_por_modelo.get((m, p), 0) > 1)
         for m, p in zip(df_online["modelo_norm"], df_online["propulsion"])
@@ -172,22 +193,110 @@ def calcular_repuestos_proxy(df_online: pd.DataFrame) -> pd.DataFrame:
     return df_online
 
 
+def load_empresas_online() -> pd.DataFrame:
+    """Fichas de catálogos de empresas, normalizadas como los anuncios.
+
+    Solo se usan como fuente adicional del proxy de repuestos y como contexto
+    en `integrar_empresas()`. El score se sigue calculando sin ellas.
+    """
+    empresas_dir = DATA_DIR / "empresas"
+    if not empresas_dir.exists():
+        return pd.DataFrame()
+    frames = []
+    for p in sorted(empresas_dir.glob("*.jsonl")):
+        f = CLEAN_DIR / p.name
+        if f.exists():
+            frames.append(load_online(str(f)))
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
+def _marcas_lista(valor) -> set:
+    """`marcas` viaja como texto de lista ("['ONEBOT']"); tolera nulos."""
+    if isinstance(valor, (list, tuple, set)):
+        return {str(v).strip().upper() for v in valor if v}
+    if not isinstance(valor, str) or not valor.strip():
+        return set()
+    try:
+        parsed = ast.literal_eval(valor)
+    except (ValueError, SyntaxError):
+        parsed = [valor]
+    if isinstance(parsed, str):
+        parsed = [parsed]
+    return {str(v).strip().upper() for v in parsed if v}
+
+
+def integrar_empresas(df_score: pd.DataFrame,
+                      df_empresas: pd.DataFrame) -> pd.DataFrame:
+    """Añade contexto de catálogo al ranking SIN tocar el score.
+
+    Columnas nuevas (nivel MODELO):
+      - `n_empresas`: en cuántos catálogos de empresa aparece el modelo.
+      - `precio_empresa_med`: precio mediano en catálogo (USD).
+      - `en_catalogo`: True si aparece en al menos un catálogo.
+
+    Columnas nuevas (nivel MARCA):
+      - `marca_en_catalogo`: True si la marca del anuncio se vende en algún
+        catálogo de empresa (hoy solo ONEBOT cruza).
+      - `n_empresas_marca`: en cuántos catálogos aparece esa marca.
+
+    Aclaración: las fichas de catálogo y los clasificados **no comparten
+    modelos** hoy (identidad modelo+propulsión), así que el contexto de modelo
+    sale vacío; el de marca sí aporta. No se fuerza la coincidencia por marca
+    para no inventar equivalencias de producto.
+
+    No se mezclan universos: el score y `precio_usd` siguen saliendo solo de
+    anuncios; el precio de tienda se muestra aparte para no comparar peras con
+    manzanas (un clasificado no incluye envío ni garantía de tienda).
+    """
+    if df_score.empty:
+        return df_score
+    if df_empresas is None or df_empresas.empty:
+        df_score["n_empresas"] = 0
+        df_score["precio_empresa_med"] = pd.NA
+        df_score["en_catalogo"] = False
+        df_score["marca_en_catalogo"] = False
+        df_score["n_empresas_marca"] = 0
+        return df_score
+
+    agg = (df_empresas.dropna(subset=["modelo_norm"])
+           .groupby(["modelo_norm", "propulsion"])
+           .agg(n_empresas=("fuente", "nunique"),
+                precio_empresa_med=("precio_usd", "median"))
+           .reset_index())
+    out = df_score.merge(agg, on=["modelo_norm", "propulsion"], how="left")
+    out["n_empresas"] = out["n_empresas"].fillna(0).astype(int)
+    out["en_catalogo"] = out["n_empresas"] > 0
+
+    marca_agg = (df_empresas.dropna(subset=["marca"])
+                 .assign(marca=lambda d: d["marca"].astype(str).str.strip().str.upper())
+                 .groupby("marca")
+                 .agg(n_empresas_marca=("fuente", "nunique"))
+                 .reset_index())
+    cat_marcas = dict(zip(marca_agg["marca"], marca_agg["n_empresas_marca"]))
+    out["n_empresas_marca"] = [max((cat_marcas.get(m, 0)
+                                    for m in _marcas_lista(v)), default=0)
+                               for v in out["marcas"]]
+    out["marca_en_catalogo"] = out["n_empresas_marca"] > 0
+    return out
+
+
 def load_campo(csv_path: str) -> pd.DataFrame:
-    """Carga CSV de inventario municipal."""
+    """Carga CSV de inventario municipal (salida de codes/parse_campo.py)."""
     if not Path(csv_path).exists():
-        return pd.DataFrame(columns=["fecha", "municipio", "tipo", "uso", "propulsion",
-                                      "modelo", "marca", "motor", "estado", "observador", "notas"])
+        return pd.DataFrame(columns=["obs_id", "fecha", "municipio", "tipo", "uso",
+                                      "uso_original", "propulsion", "modelo", "marca",
+                                      "motor", "bateria_v", "bateria_ah", "autonomia_km",
+                                      "con_paneles", "estado", "observador", "notas"])
     df = pd.read_csv(csv_path)
-    # Misma regla de identidad que en los datos online (decisión del usuario,
-    # 2026-10-19): si no hay nombre de modelo, la identidad es la marca.
-    if "marca" in df.columns:
-        base = df["modelo"].where(df["modelo"].notna(), df["marca"])
-    else:
-        base = df["modelo"]
-    df["modelo_norm"] = base.fillna("").astype(str).str.upper().str.strip()
-    # Normalizar propulsión en campo también
     if "propulsion" in df.columns:
         df["propulsion"] = df["propulsion"].fillna("indeterminado").str.lower()
+    # Misma regla de identidad que en los datos online (decisión del usuario,
+    # 2026-10-19): si no hay nombre de modelo, la identidad es la marca.
+    # `con_alias=False`: en la calle solo se ve la marca, así que aplicar los
+    # alias de MODELO (ONEBOT -> "ONEBOT CLASIC 2026") inventaría un modelo
+    # que el observador no pudo leer. La marca ya viene normalizada en origen.
+    df["modelo_norm"] = identidad(df, con_alias=False)
+    # El nivel MARCA (cuotas, IC, uso) lo calcula codes/analisis_campo.py.
     return df
 
 
@@ -325,21 +434,30 @@ def main():
         else:
             print(f"  {p.name}: NO ENCONTRADO")
     df_online = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
-    # El proxy de repuestos necesita el dataset completo (scraper + Facebook).
+    # Empresas: fuente extra del proxy y contexto del ranking (no al score).
+    df_empresas = load_empresas_online()
+    if not df_empresas.empty:
+        print(f"  Empresas (proxy/contexto): {len(df_empresas)} fichas, "
+              f"{df_empresas['fuente'].nunique()} catálogos")
+    # El proxy de repuestos necesita el dataset completo (scraper + Facebook +
+    # catálogos de empresa).
     if not df_online.empty:
-        df_online = calcular_repuestos_proxy(df_online)
+        df_online = calcular_repuestos_proxy(df_online, df_empresas)
     df_campo = load_campo(str(campo_path))
 
     print(f"Online: {len(df_online)} anuncios, {df_online['modelo_norm'].nunique()} modelos únicos")
     if not df_online.empty:
         print(f"  Propulsión: {df_online['propulsion'].value_counts().to_dict()}")
-    print(f"Campo:  {len(df_campo)} observaciones, {df_campo['modelo_norm'].nunique()} modelos únicos")
+    print(f"Campo:  {len(df_campo)} observaciones, {df_campo['marca'].nunique()} marcas únicas")
     if not df_campo.empty and "propulsion" in df_campo.columns:
         print(f"  Propulsión: {df_campo['propulsion'].value_counts().to_dict()}")
 
     # 1. Score de mejor opción (por propulsión)
     print("\n=== SCORE MEJOR OPCIÓN (POR PROPULSIÓN) ===")
     df_score = score_modelos(df_online)
+    # Contexto de catálogo (no cambia el score): cuántas empresas lo venden y
+    # a qué precio. Las empresas NO entran al cálculo del ranking.
+    df_score = integrar_empresas(df_score, df_empresas)
     if not df_score.empty:
         # Mostrar top 10 por propulsión
         for prop in df_score["propulsion"].unique():
@@ -348,7 +466,9 @@ def main():
             cols = ["modelo_norm", "score", "n_criterios", "precio_usd", "precio_valor", "monedas",
                     "autonomia_km", "carga_kg",
                     "legalidad_bin", "repuestos_proxy", "oferta_viva", "n_anuncios", "n_anuncios_total",
-                    "motor_w_med", "motor_cc_med"]
+                    "motor_w_med", "motor_cc_med", "n_empresas", "precio_empresa_med",
+                    "marca_en_catalogo", "n_empresas_marca"]
+            cols = [c for c in cols if c in sub.columns]
             print(sub[cols].to_string(index=False))
 
         df_score.to_csv(CLEAN_DIR / "score_modelos.csv", index=False)

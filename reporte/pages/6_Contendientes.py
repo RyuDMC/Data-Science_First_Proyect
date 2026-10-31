@@ -70,6 +70,18 @@ if not df.empty:
                 c3.metric("Carga", f"{row['carga_kg']:.0f} kg" if pd.notna(row['carga_kg']) else "—")
                 c4.metric("N criterios", f"{int(row['n_criterios'])}/5")
                 st.caption(f"Viva: {'Sí' if row['oferta_viva'] else 'No'} | Anuncios: {int(row['n_anuncios_total'])}")
+                if "en_catalogo" in row.index and row.get("en_catalogo"):
+                    precio_emp = row.get("precio_empresa_med")
+                    precio_txt = f"${precio_emp:,.0f}" if pd.notna(precio_emp) else "—"
+                    st.caption(
+                        f"🏢 En catálogo de empresa ({int(row.get('n_empresas', 0))}) · "
+                        f"precio tienda mediano: {precio_txt}"
+                    )
+                elif "marca_en_catalogo" in row.index and row.get("marca_en_catalogo"):
+                    st.caption(
+                        f"🏢 Marca en catálogo de empresa "
+                        f"({int(row.get('n_empresas_marca', 0))}); el modelo exacto no."
+                    )
 
 st.markdown("---")
 
@@ -138,8 +150,17 @@ st.subheader("📋 Tabla detallada de contendientes")
 display_cols = ["modelo_norm", "propulsion", "score", "n_criterios",
                 "precio_usd", "precio_usd_norm", "autonomia_km", "autonomia_km_norm",
                 "carga_kg", "carga_kg_norm", "legalidad_bin", "legalidad_norm",
-                "repuestos_proxy", "repuestos_norm", "oferta_viva", "n_anuncios_total"]
+                "repuestos_proxy", "repuestos_norm", "oferta_viva", "n_anuncios_total",
+                "en_catalogo", "n_empresas", "precio_empresa_med",
+                "marca_en_catalogo", "n_empresas_marca"]
 avail = [c for c in display_cols if c in df.columns]
+for col, flag in [("en_catalogo", "en_catalogo"),
+                  ("n_empresas", "en_catalogo"),
+                  ("precio_empresa_med", "en_catalogo"),
+                  ("marca_en_catalogo", "marca_en_catalogo"),
+                  ("n_empresas_marca", "marca_en_catalogo")]:
+    if col in avail and flag in df.columns and not df[flag].fillna(False).any():
+        avail.remove(col)
 
 df_show = df[avail].copy()
 for col in df_show.columns:
@@ -148,5 +169,14 @@ for col in df_show.columns:
             df_show[col] = df_show[col].apply(lambda v: f"{v:.3f}")
         else:
             df_show[col] = df_show[col].apply(lambda v: f"{v:,.0f}" if pd.notna(v) else "—")
+if "en_catalogo" in df_show.columns:
+    df_show["en_catalogo"] = df_show["en_catalogo"].map({True: "Sí", False: "No"})
+if "marca_en_catalogo" in df_show.columns:
+    df_show["marca_en_catalogo"] = df_show["marca_en_catalogo"].map({True: "Sí", False: "No"})
 
 st.dataframe(df_show, use_container_width=True, hide_index=True)
+st.caption(
+    "**Contexto de catálogo (no entra al score):** 'Marca en catálogo' indica que "
+    "la marca se vende en una tienda formal; hoy ningún modelo coincide exactamente "
+    "con los anuncios."
+)

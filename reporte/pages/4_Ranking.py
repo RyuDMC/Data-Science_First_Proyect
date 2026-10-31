@@ -59,15 +59,27 @@ display_cols = [
     "precio_usd", "autonomia_km", "carga_kg",
     "legalidad_bin", "repuestos_proxy",
     "oferta_viva", "n_anuncios", "n_anuncios_total",
-    "motor_w_med", "motor_cc_med", "marcas", "fuentes"
+    "motor_w_med", "motor_cc_med", "marcas", "fuentes",
+    "en_catalogo", "n_empresas", "precio_empresa_med",
+    "marca_en_catalogo", "n_empresas_marca",
 ]
 avail = [c for c in display_cols if c in df.columns]
+# Las columnas de catálogo sin ningún positivo se ocultan (evita 3 columnas
+# vacías): el aviso de abajo explica qué significa ese vacío.
+for col, flag in [("en_catalogo", "en_catalogo"),
+                  ("n_empresas", "en_catalogo"),
+                  ("precio_empresa_med", "en_catalogo"),
+                  ("marca_en_catalogo", "marca_en_catalogo"),
+                  ("n_empresas_marca", "marca_en_catalogo")]:
+    if col in avail and flag in df.columns and not df[flag].fillna(False).any():
+        avail.remove(col)
 
 # Formatear para display
 df_show = df[avail].copy()
 fmt_map = {
     "score": "{:.3f}",
     "precio_usd": "${:,.0f}",
+    "precio_empresa_med": "${:,.0f}",
     "autonomia_km": "{:.0f} km",
     "carga_kg": "{:.0f} kg",
     "motor_w_med": "{:,.0f} W",
@@ -76,6 +88,10 @@ fmt_map = {
 for col, fmt in fmt_map.items():
     if col in df_show.columns:
         df_show[col] = df_show[col].apply(lambda v: fmt.format(v) if pd.notna(v) else "—")
+if "en_catalogo" in df_show.columns:
+    df_show["en_catalogo"] = df_show["en_catalogo"].map({True: "Sí", False: "No"})
+if "marca_en_catalogo" in df_show.columns:
+    df_show["marca_en_catalogo"] = df_show["marca_en_catalogo"].map({True: "Sí", False: "No"})
 
 # Renombrar columnas
 rename_map = {
@@ -83,7 +99,10 @@ rename_map = {
     "n_criterios": "N crit.", "precio_usd": "Precio", "autonomia_km": "Autonomía",
     "carga_kg": "Carga", "legalidad_bin": "Legal", "repuestos_proxy": "Repuestos",
     "oferta_viva": "Viva", "n_anuncios": "Anunc. vivos", "n_anuncios_total": "Total anunc.",
-    "motor_w_med": "Motor W", "motor_cc_med": "Motor cc", "marcas": "Marcas", "fuentes": "Fuentes"
+    "motor_w_med": "Motor W", "motor_cc_med": "Motor cc", "marcas": "Marcas", "fuentes": "Fuentes",
+    "en_catalogo": "En catálogo", "n_empresas": "N empresas",
+    "precio_empresa_med": "Precio tienda (med.)",
+    "marca_en_catalogo": "Marca en catálogo", "n_empresas_marca": "N empresas (marca)",
 }
 df_show = df_show.rename(columns=rename_map)
 
@@ -94,6 +113,14 @@ st.dataframe(
     column_config={
         "Score": st.column_config.NumberColumn(format="%.3f"),
     }
+)
+st.caption(
+    "**Contexto de catálogo (no entra al score).** Hoy ningún modelo de los "
+    "catálogos de empresa coincide con la identidad de un anuncio (los catálogos "
+    "venden otras gamas), así que no hay columna de modelo; sí se marca la "
+    "**marca** que alguna tienda formal vende (ONEBOT). El score y el precio "
+    "salen solo de anuncios: el precio de tienda no es comparable (envío, "
+    "garantía y margen distintos)."
 )
 
 # ======= GRÁFICO DE BARRAS =======

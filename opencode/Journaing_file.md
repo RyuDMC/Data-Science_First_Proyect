@@ -498,3 +498,111 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Etiquetas:** curacion-manual, acubaenvioscargo, fly-racing, producto-que-faltaba, permalink, proximamente, scraping-acuba, tabla-canonica, override, idempotencia, e-cargo-revertido
 
 ---
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 — sesión en opencode; el usuario aporta la hoja de campo real (`Data/raw_data/data_personas.txt`, 30 registros, sin trackear)
+- **Tarea:** "Procesa los registros" — convertir la hoja de captura en datos del pipeline
+- **Acción(es):**
+  1. Diagnóstico previo: el `HANDOFF.md` estaba desfasado (`HEAD=afd83b0`, decía que `registro_ubicaciones.csv` seguía con solo cabecera); el repo ya tenía 3 commits más y un `Data/resumen_pesos_scoring.md` nuevo. Verificado con `git log -3` + `git status` antes de escribir
+  2. **Privacidad primero**: la hoja lleva nombre y CI de cada propietario y el repo es público → descartados en la lectura (nunca se copian), verificación de que no queda ningún número de 11 dígitos en la salida, y `.gitignore` para el txt
+  3. `codes/parse_campo.py` (nuevo): txt → `Data/registro_ubicaciones.csv`; fecha ISO, municipio oficial (valida contra los 15), uso al esquema (`familiar`→`ocio_paseo`, `pasaje`→`pasajeros`, `carga y pasaje`→`mixto`) conservando el texto en `uso_original`, `electrico + paneles` → `con_paneles=1`, motor a `1500W`, batería V/Ah, autonomía; `--check` idempotente
+  4. **No inventar**: el registro 2 trae "bateria: 78 50ah" (78 V no es múltiplo de 12) → se conserva y se marca en `notas`; `modelo`, `estado` y `observador` quedan vacíos porque la hoja no los capturó
+  5. Alias de marca a `codes/norm_modelo.py` (`MARCA_ALIAS`: ONEBOOT→ONEBOT, KVITOVA→KIVITOVA, MAGICBIKE→MAGIC BIKE, JINPEING→JINPENG), eje distinto de `ALIAS_MODELOS`; `identidad(df, con_alias=False)` también en `load_campo` (con alias se inventaría "ONEBOT CLASIC 2026" en la calle)
+  6. **Comparación a nivel MARCA**: el campo no distingue modelo, así que la comparación por identidad queda casi vacía (JINPENG vs "JINPENG GELPB"). Nuevo `comparacion_campo_online_marca.csv` con `pct_campo`/`pct_online`/`delta_pct`; la comparación por identidad se conserva como referencia
+  7. Reporte: `8_Trabajo_Campo.py` deja de ser placeholders (KPIs, top marcas, calle vs anuncios en cuotas, tablas por municipio y uso, aviso de muestra de conveniencia); `app.py`, `1_Resumen`, `2_Metodo` y `10_Limitaciones` actualizados a 30 obs / 5-15 municipios. El campo **no** entra al scoring
+  8. Verificado: AppTest 11/11 sin excepciones, servidor real en :8599 (health 200), `parse_campo.py --check` OK, `norm_modelo.py --check` 0 cambios, `score_modelos.csv` intacto
+- **Resultado:** 30 observaciones en 5/15 municipios (Centro Habana, Plaza, Habana del Este, La Lisa, Playa), 12 marcas, 29 eléctricos + 1 híbrido (uno con paneles). En calle JINPENG 20% > KIVITOVA/ONEBOT 16.7% > TOPMAQ 10%; VEDCA encabeza la oferta online (24%) con 0 apariciones en calle. Nada commiteado
+- **Error/éxito:** Éxito, con dos correcciones propias: (1) el primer gráfico comparaba conteos brutos 30 vs 70 (universos distintos) → pasado a cuota dentro de cada fuente; (2) `load_campo` del reporte y el de `analisis.py` normalizaban distinto → unificado en `identidad()` + `marca_norm()`
+- **Lección:** cuando cambia el nivel de agregación (marca vs modelo) hay que cambiar también la comparación, no forzar la identidad; y una muestra de 30 con 70 anuncios solo se compara en porcentajes, nunca en conteos
+- **Próxima vez:**
+  1. Confirmar con el usuario: `familiar`→`ocio_paseo` (¿o `pasajeros`?), y si JINPEN/JIMPENG son la misma marca que JINPENG (cambiaría JINPENG de 6 a 8-9 en calle y de 2 a 4 online)
+  2. Marcas sin par online: DC (2), MINERVA (2), MOTO FORM (1), VELGA (1) — ¿son grafías de marcas ya conocidas?
+  3. Faltan 10 municipios; `tipo=triciclo` es supuesto (la hoja no registra cuatriciclos)
+  4. `HANDOFF.md` sigue con el estado del 2026-10-19: no se toca hasta el cierre de sesión
+- **Etiquetas:** trabajo-campo, parse-campo, privacidad, pii, anonimizacion, alias-de-marca, nivel-marca, cuotas, no-inventar-datos, idempotencia, streamlit
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (misma sesión) — el usuario responde a las 4 preguntas abiertas del ingest de campo
+- **Tarea:** aplicar las decisiones y proponer cómo integrar los datos de campo al pipeline
+- **Acción(es):**
+  1. `familiar` → **pasajeros** (no `ocio_paseo`): uso queda pasajeros 18 / mixto 6 / carga 6
+  2. **JINPEN y JIMPENG son la misma marca que JINPENG**: añadidos a `MARCA_ALIAS` (la marca se fusiona; el producto no: JINPENG eléctrico ≠ JINPEN híbrido)
+  3. **VELGA es VEDCA**: alias añadido; VEDCA pasa a 1 observación en calle (antes 0) frente a 17 anuncios
+  4. **Voltaje 78 V → 72 V** en OBS-002: tabla explícita `CORRECCIONES_BATERIA_V` + columna nueva `bateria_v_origen` (la corrección deja rastro, no sobrescribe la evidencia)
+  5. Reporte: caption de VEDCA en `8_Trabajo_Campo.py` y fila de pendientes en `10_Limitaciones.py` corregidas (VEDCA ya no es "0 en calle"); texto de alias en `2_Metodo.py` ampliado
+- **Resultado:** JINPENG 20% (6) / KIVITOVA 16.7% / ONEBOT 16.7% / TOPMAQ 10% en calle; online JINPENG sube a 5 y VEDCA sigue liderando con 17. `parse_campo.py --check` OK, AppTest 11/11
+- **Error/éxito:** Éxito. Ninguna decisión del usuario obligó a tocar el scoring
+- **Lección:** una errata confirmada por el dueño de los datos se corrige **con tabla y columna de origen**, no reescribiendo el valor: así el dato es auditable y la regla "no inventar" sigue en pie
+- **Próxima vez:** decidir si el campo entra al análisis más allá de lo descriptivo (índice de circulación, uso, promesa vs realidad) — ver propuesta entregada al usuario
+- **Etiquetas:** campo, decisiones-usuario, alias-de-marca, vedca, jinpeng, correccion-trazable, bateria, uso-pasajeros
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (misma sesión) — el usuario aprueba implementar A + C + `analisis_campo.py`
+- **Tarea:** integrar el campo al pipeline más allá de lo descriptivo: índice de circulación con incertidumbre (A) y ponderar escenarios por uso real (C)
+- **Acción(es):**
+  1. **Nuevo `codes/analisis_campo.py`**: única fuente de las cifras de campo. Escribe `campo_resumen.csv` (por marca: n, cuota, **IC 95% de Wilson**, municipios, uso dominante, autonomía/batería/motor medianos, oferta online, mejor modelo y score de la marca) y `campo_uso.csv` (por uso: n, cuota, IC, marcas más vistas)
+  2. **A — "más común vs mejor valorado"**: `8_Trabajo_Campo.py` gana una tabla que cruza calle con el ranking y una lectura automática. Resultado: JINPENG manda en calle (6) pero su mejor modelo puntúa 0.651; el mejor valorado es TOPMAQ BRIDERK (0.786) con 3 avistamientos
+  3. **IC en los gráficos**: barras con error bar asimétrico (Wilson). El gráfico deja ver que con n=30 el 1º (20% [10-37]) y el 3º (17% [7-34]) no se distinguen
+  4. **C — escenarios por uso real**: `7_Mejor_Opcion.py` muestra los 3 usos observados como métricas y **ordena los escenarios por esa frecuencia** (pasajeros 60% primero), con la cuota en el título del expander
+  5. **Refactor**: la comparación por marca salió de `analisis.py` (quedaba duplicada) — ahora `analisis.py` = oferta/identidad y `analisis_campo.py` = campo. Eliminado `comparacion_campo_online_marca.csv`; `data.py` expone `load_campo_resumen`/`load_campo_uso`
+  6. Documentado en `2_Metodo.py` (pipeline, regla de incertidumbre), `10_Limitaciones.py` (IC solapados, sin denominador) y `app.py` (orden de ejecución)
+- **Resultado:** el campo ya responde la pregunta central sin tocar el scoring: uso dominante = pasajeros (60%), marca más vista = JINPENG (20%), y el desajuste calle/oferta/score queda explícito (VEDCA 24% de anuncios y 3% de calle)
+- **Error/éxito:** Éxito. Dos decisiones de diseño: (1) el IC se calcula en el script, no en el gráfico; (2) no se ordena "quién gana" en calle porque los intervalos se solapan — se publica el IC en vez de un ganador falso
+- **Lección:** con n=30 el valor de un ranking no está en el orden sino en el intervalo; y una tabla de "más común vs mejor valorado" contesta la pregunta del estudio mejor que dos rankings separados
+- **Próxima vez:** pendiente B (promesa vs realidad), E (denominador y cuotas por municipio para la 2ª ronda), F/G (perfil del propietario y repuestos con evidencia)
+- **Etiquetas:** campo, analisis-campo, wilson, incertidumbre, mas-comun-vs-mejor, uso-observado, escenarios, refactor, fuente-unica
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre) — el usuario confirma que **no habrá más trabajo de campo**
+- **Tarea:** ajustar todo el proyecto a que la muestra de campo es definitiva y reencuadrar la pregunta central
+- **Acción(es):**
+  1. **Campo cerrado (decisión 2026-10-31)**: 30 observaciones / 5 municipios / 2026-10-13→25 son la evidencia de calle definitiva. Eliminados todos los textos de "en curso", "pendiente", "3 rutas × 5 municipios ≈ 8h", "15 municipios a cubrir" y "faltan 10 municipios"
+  2. `8_Trabajo_Campo.py`: título "Circulación Real (muestra cerrada)"; bloque **"Alcance de la muestra"** con la tabla de los 15 municipios marcados (✅ observado / — no) y dos listas explícitas: qué **se puede** afirmar y qué **NO** (p. ej. "que una marca sea la más común en La Habana")
+  3. `10_Limitaciones.py`: la limitación de campo pasa a "muestra cerrada" con `❌ Cerrado por decisión del usuario`; prioridad ALTA→BAJA; la fila "si tuviéramos 15 municipios" ahora dice *Cerrado: no se hará*
+  4. `2_Metodo.py` y `app.py`: estado de la fuente = "Cerrado (muestra final)"; el protocolo de captura se conserva como documentación histórica de cómo se procesó (no como plan futuro)
+  5. **Reencuadre de la pregunta central** (decisión del usuario): de *"¿Cuál es el triciclo más común en La Habana?, ¿por qué es ese?, ¿existe una mejor opción?"* → **"¿Qué triciclo comprar en La Habana y por qué?"**. "Lo más común" queda como **indicador** (oferta + calle), no como respuesta. Actualizado en portada, `2_Metodo` y el titular 1 de `1_Resumen` ("Lo más ofertado (indicador)")
+  6. Consistencia menor: escenario de presupuesto unificado en **<$4000** (1_Resumen decía <$3500 y 7_Mejor_Opcion usa <$4000)
+- **Resultado:** el reporte ya no promete algo que no puede entregar (un ranking poblacional de La Habana) y la pregunta central coincide con lo que el estudio sí responde: qué comprar y por qué, con la evidencia de oferta + la foto de calle
+- **Error/éxito:** Éxito. `AppTest` 11/11 sin excepciones, `parse_campo --check` OK, servidor real :8601 health 200
+- **Lección:** cuando una fuente se cierra por debajo del diseño previsto, lo honesto es **cambiar la pregunta** al alcance real en vez de dejar la pregunta grande con respuestas chicas
+- **Próxima vez:** `opencode/HANDOFF.md` está desfasado (2026-10-19); reescribir al cierre de sesión. Nada commiteado: revisión y commit a cargo del usuario
+- **Etiquetas:** campo-cerrado, alcance, pregunta-central, decision, limitaciones, coherencia
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (misma sesión) — el usuario pide reescribir el handoff y "añadir más muestras a catálogos de empresas"
+- **Tarea:** ampliar `Data/empresas/` con un catálogo nuevo verificado y refrescar los existentes; reescribir `HANDOFF.md` al estado real
+- **Acción(es):**
+  1. **Búsqueda de fuentes (verificada con HTTP, sin inventar):** `cubancargos` ya está en `scrape_triciclos` (duplicarlo sería doble conteo); `multiservicesxpress`, `sunwellcaribe`, `cubamax`, `cuballama`, `mallhabana`, `dimecuba` → sin triciclos; `kubazuki` sigue "pronto en línea". **CompraMasonline** (WooCommerce) sí: 11 productos en "Triciclos", 8 son vehículos
+  2. **Nuevo `scrape_compramasonline()`** en `codes/scrape_empresas.py`: excluye los 2 "Extensor de rango" sueltos y el "Minicarrito" (4 ruedas); specs de la pestaña de descripción; precio actual con `ins` (rebajas); marca desde la etiqueta `Marca:` (cortando en la siguiente etiqueta de la plantilla, p. ej. "Talla")
+  3. **Tres reglas nuevas, en el scraper (no a mano):** (a) `_cma_bateria` prioriza la etiqueta "Batería" para no confundir el cargador `AC110V` con la batería; (b) `_cma_propulsion` prioriza "Tipo de conducción" porque las fichas son plantillas con `Desplazamiento: <110cc` y todo saldría híbrido; (c) `_cma_carga` solo acepta etiquetas de capacidad de carga (nunca peso neto/bruto)
+  4. **Autonomía:** el patrón ahora reconoce `Gama` y `Kilómetros por carga` (sin unidad repetida). Recupera 2 datos reales en KikiHabana (ONEBOT T414 85 km, HUAIHAI 120 km) y ONEBOT de CompraMasonline (113 km)
+  5. **Refresco completo** de los 4 catálogos previos: sin altas/bajas; solo 2 precios MZ (+$20/+$100) y las 2 autonomías. Total **30 fichas / 5 empresas**
+  6. **Integración:** `norm_modelo.py` copia también `compramasonline` a `clean_data`; `crear_canonicos.py` lo lee; **`reporte/data.py` descubre las empresas por glob** (ya no hay lista fija); tabla canónica **99 productos**; cifras 22→30 en `app.py`, `2_Metodo`, `9_Empresas`, `10_Limitaciones`
+  7. **`HANDOFF.md` reescrito** (2026-10-31): pregunta central nueva, campo cerrado, pipeline con `analisis_campo`, empresas 30/5, 99 canónicos, pendientes y advertencias
+- **Resultado:** el catálogo de empresas crece un 36% (22→30) con datos verificados; el scoring **no cambia** (md5 idéntico); 11/11 páginas OK; `norm_modelo --check` y `parse_campo --check` limpios
+- **Error/éxito:** Éxito. Decisiones anotadas para el usuario: RALLY marcado **híbrido** (extensor de gasolina en el título) y los dos "TRICICLO ELÉCTRICO DE CARGA"/"…MINGHONG" comparten identidad MINGHONG con precios distintos
+- **Lección:** clasificar con el texto completo de estas fichas engaña (plantillas con `110cc` y bloques de accesorios copiados): hay que dar prioridad a las etiquetas explícitas ("Tipo de conducción", "Batería", "Marca") y dejar `null` lo que no está declarado
+- **Próxima vez:** revisar/commitear; decidir la colisión MINGHONG y si empresas entra al scoring
+- **Etiquetas:** empresas, compramasonline, scraper, woocommerce, autonomia, bateria, identidad, canonicos, handoff
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre de sesión) — el usuario confirma RALLY híbrido, excluir el genérico, dejar el nombre "RALLY", integrar empresas con A + B y quitar los pendientes del reporte
+- **Tarea:** cerrar las decisiones abiertas de CompraMasonline, integrar los catálogos al pipeline sin tocar el score y limpiar la página de limitaciones
+- **Acción(es):**
+  1. **Decisiones aplicadas en el origen:** `EXCLUIDOS` de `crear_canonicos.py` incluye el genérico "TRICICLO ELÉCTRICO DE CARGA" (sin modelo propio, duplicaba MINGHONG); `OVERRIDES` fija `("RALLY","RALLY")`. `scrape_empresas compramasonline` baja a **7 fichas**; la tabla canónica queda en **98 productos** (2 excluidos)
+  2. **(A) Proxy de repuestos con empresas:** `calcular_repuestos_proxy(df_online, df_empresas)` y `load_empresas_online()` en `codes/analisis.py`. Los 5 catálogos suman fuentes, pero el proxy sigue en **9/42** porque ningún modelo cruza
+  3. **(B) Contexto de catálogo en el ranking:** `integrar_empresas()` añade `n_empresas`, `precio_empresa_med`, `en_catalogo` (nivel modelo) y `marca_en_catalogo`, `n_empresas_marca` (nivel marca). El score no cambia (columna `score` idéntica, 42 filas)
+  4. **Hallazgo mostrado, no maquillado:** modelos de catálogo y anuncios **no comparten identidad**; solo la marca **ONEBOT** cruza (3 modelos). Ranking y Contendientes muestran la marca en catálogo y ocultan las columnas de modelo vacías; la página 9 avisa de que no hay modelos en común y no compara precios
+  5. **Limpieza del reporte:** eliminada la sección "Pendientes técnicos (datos)" de `10_Limitaciones.py`; renumeradas las secciones 1→5 y título "Limitaciones" (sin "y Pendientes")
+  6. **Cifras corregidas a 29 fichas / 98 productos** en `app.py`, `2_Metodo`, `9_Empresas`, `10_Limitaciones` y `HANDOFF.md`
+- **Resultado:** pipeline con A + B, score intacto, reporte sin pendientes y con el contexto de catálogo visible donde sí aporta (marca). `AppTest` 11/11, `parse_campo --check` OK, `crear_canonicos --check` estable
+- **Error/éxito:** Éxito. Aporta un dato honesto: la oferta formal de importación y el mercado de clasificados son universos casi disjuntos
+- **Lección:** un cruce que devuelve 0 no es un fallo del código: es un resultado. Se muestra el vacío con su explicación en vez de forzar equivalencias por marca
+- **Próxima vez:** revisar/commitear; decidir si empresas entra al scoring completo (cambiaría extremos min-max y exige antes/después)
+- **Etiquetas:** empresas, integracion, repuestos-proxy, ranking, limitaciones, decisiones, canonicos

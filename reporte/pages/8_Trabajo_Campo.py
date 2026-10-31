@@ -1,5 +1,9 @@
 """
-Página 8: Trabajo de Campo — Protocolo + placeholders + comparación.
+Página 8: Trabajo de Campo — circulación real, incertidumbre y uso.
+
+Fuente: Data/registro_ubicaciones.csv (codes/parse_campo.py) y las tablas
+calculadas en codes/analisis_campo.py (campo_resumen.csv, campo_uso.csv).
+El campo NO entra al scoring: mide circulación, no oferta.
 """
 
 import os as _os
@@ -13,60 +17,282 @@ if _ROOT not in _sys.path:
 
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from reporte.data import load_campo, load_comparacion, load_frecuencia_municipio, load_scores
-from reporte.theme import apply_style, fig_ax, donut_chart, bar_ranking, color_for_prop, label_for_prop, PROP_COLORS, PROP_LABELS
+import numpy as np
+from reporte.data import load_campo, load_campo_resumen, load_campo_uso
+from reporte.theme import (apply_style, fig_ax, PROP_COLORS, TEXT_COLOR, MUTED,
+                           ACCENT_RED)
 
 
 st.set_page_config(page_title="Trabajo de Campo", page_icon="🗺️", layout="wide")
 apply_style()
 
-st.title("🗺️ Trabajo de Campo — Inventario Municipal (15 municipios)")
+st.title("🗺️ Trabajo de Campo — Circulación Real (muestra cerrada)")
 
-st.warning("""
-⚠️ **ESTADO: PENDIENTE** — No hay datos de campo aún.
+df_campo = load_campo()
+df_marca = load_campo_resumen()
+df_uso = load_campo_uso()
 
-Esta sección muestra el **protocolo de captura** y los **placeholders** que se activarán
-cuando se ejecute el trabajo de campo (3 rutas × 5 municipios ≈ 8h).
-""")
+TOTAL_MUNICIPIOS = 15
 
-# ======= PROTOCOLO =======
-st.subheader("📋 Protocolo de captura")
+if df_campo.empty:
+    st.warning("""
+    ⚠️ **Sin observaciones de campo en el repositorio.** El trabajo de campo ya
+    está cerrado (decisión del proyecto, 2026-10-31): si esta sección está vacía
+    es porque faltan los datos, no porque se vayan a recoger más adelante. La
+    evidencia disponible es la de anuncios y catálogos de empresas.
+    """)
+else:
+    n_muni = df_campo["municipio"].nunique()
+    periodo = f"{df_campo['fecha'].min()} → {df_campo['fecha'].max()}"
+    st.success(
+        f"✅ **{len(df_campo)} observaciones** de circulación real en "
+        f"**{n_muni} municipios** ({periodo}). **Muestra cerrada**: no habrá más "
+        "trabajo de campo, así que los porcentajes describen esta muestra y no "
+        "se extrapolan a toda La Habana."
+    )
 
-st.markdown("""
-**Objetivo:** Registrar triciclos **en circulación real** (no anuncios) en los 15 municipios de La Habana.
+    # ======= KPIs =======
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Observaciones", len(df_campo))
+    c2.metric("Municipios observados", f"{n_muni}/{TOTAL_MUNICIPIOS}",
+              help="De los 15 municipios que preveía el diseño original.")
+    c3.metric("Marcas distintas", df_campo["marca"].nunique())
+    pct_elec = df_campo["propulsion"].eq("electrico").mean() * 100
+    c4.metric("Eléctricos", f"{pct_elec:.0f}%",
+              help="Resto: híbridos/gasolina. La propulsión se leyó en el vehículo.")
 
-**Metodología:**
-- **3 rutas** × **5 municipios** cada una = 15 municipios totales
-- **~2.5h por ruta** = ~8h totales
-- **Inventario municipal** (espacial), NO conteo horario
-- Un observador por ruta, registro en hoja/celular
+    st.markdown("---")
 
-**15 municipios a cubrir:**
-1. Arroyo Naranjo
-2. Boyeros
-3. Centro Habana
-4. Cerro
-5. Cotorro
-6. Diez de Octubre
-7. Guanabacoa
-8. Habana del Este
-9. Habana Vieja
-10. La Lisa
-11. Marianao
-12. Plaza de la Revolución
-13. Playa
-14. Regla
-15. San Miguel del Padrón
-""")
+    # ======= TOP MARCAS CON INCERTIDUMBRE =======
+    izq, der = st.columns(2)
+
+    with izq:
+        st.markdown("### 🥇 Marcas más vistas en calle")
+        if not df_marca.empty:
+            top = df_marca.sort_values("n_campo", ascending=False)
+            fig, ax = fig_ax(figsize=(7, 4.8))
+            y = np.arange(len(top))
+            err = np.vstack([
+                (top["pct_campo"] - top["ic95_bajo"]).clip(lower=0),
+                (top["ic95_alto"] - top["pct_campo"]).clip(lower=0),
+            ])
+            ax.barh(y, top["pct_campo"], color=PROP_COLORS["electrico"],
+                    edgecolor="white", height=0.65, xerr=err, capsize=3,
+                    error_kw=dict(ecolor=TEXT_COLOR, lw=1, alpha=0.7))
+            ax.set_yticks(y)
+            ax.set_yticklabels(top["marca_norm"], fontsize=9)
+            ax.invert_yaxis()
+            ax.set_xlabel("% de las observaciones (IC 95%)")
+            ax.set_title(f"Marca observada (n={int(top['n_campo'].sum())})", pad=12)
+            for yi, (n, pct) in enumerate(zip(top["n_campo"], top["pct_campo"])):
+                ax.text(top["ic95_alto"].iloc[yi] + 1, yi, f"{int(n)} ({pct:.0f}%)",
+                        va="center", fontsize=8, color=TEXT_COLOR)
+            ax.set_xlim(0, max(45, top["ic95_alto"].max() * 1.25))
+            st.pyplot(fig)
+            primera = top.iloc[0]
+            st.caption(
+                f"**{primera['marca_norm']}** es la más vista ({int(primera['n_campo'])} "
+                f"de {int(top['n_campo'].sum())}), pero su IC va de "
+                f"{primera['ic95_bajo']:.0f}% a {primera['ic95_alto']:.0f}%: con n=30 "
+                "no se distingue estadísticamente de las que le siguen."
+            )
+        else:
+            st.info("Sin resumen por marca. Ejecuta `python3 codes/analisis_campo.py`.")
+
+    with der:
+        st.markdown("### ⚖️ Calle vs anuncios (por marca)")
+        if not df_marca.empty:
+            top = df_marca.sort_values(["n_campo", "n_online"], ascending=False).head(10)
+            fig, ax = fig_ax(figsize=(7, 4.8))
+            y = np.arange(len(top))
+            h = 0.38
+            ax.barh(y - h / 2, top["pct_campo"], height=h, color=PROP_COLORS["electrico"],
+                    edgecolor="white", label=f"Calle ({int(df_marca['n_campo'].sum())} obs.)")
+            ax.barh(y + h / 2, top["pct_online"], height=h, color=MUTED,
+                    edgecolor="white", label=f"Anuncios ({int(df_marca['n_online'].sum())})")
+            ax.set_yticks(y)
+            ax.set_yticklabels(top["marca_norm"], fontsize=9)
+            ax.invert_yaxis()
+            ax.set_xlabel("% dentro de su propia fuente")
+            ax.set_title("Presencia real vs oferta anunciada", pad=12)
+            ax.legend(fontsize=9, loc="lower right")
+            st.pyplot(fig)
+            st.caption(
+                "Se compara **cuota dentro de cada fuente** (no conteos): 30 observaciones "
+                "y 70 anuncios son universos distintos. VEDCA es la marca más anunciada "
+                "(24%) y aparece **una sola vez** en calle (3%)."
+            )
+        else:
+            st.info("Sin datos de oferta para comparar.")
+
+    st.markdown("---")
+
+    # ======= A. MÁS COMÚN vs MEJOR VALORADO =======
+    st.markdown("### 🎯 Más común en calle vs mejor valorado en el ranking")
+
+    if not df_marca.empty and df_marca["mejor_score"].notna().any():
+        comp = df_marca[df_marca["n_campo"] > 0].copy()
+        comp["% calle [IC 95%]"] = (
+            comp["pct_campo"].map(lambda v: f"{v:.1f}") + " [" +
+            comp["ic95_bajo"].map(lambda v: f"{v:.1f}") + "–" +
+            comp["ic95_alto"].map(lambda v: f"{v:.1f}") + "]"
+        )
+        comp["Score del mejor modelo"] = comp["mejor_score"].map(
+            lambda v: f"{v:.3f}" if pd.notna(v) else "— (no está en la oferta)")
+        comp["Precio"] = comp["precio_medio"].map(
+            lambda v: f"${v:,.0f}" if pd.notna(v) else "—")
+        tabla = comp.rename(columns={
+            "marca_norm": "Marca",
+            "n_campo": "Calle",
+            "mejor_modelo": "Modelo mejor valorado",
+        })[["Marca", "Calle", "% calle [IC 95%]", "Modelo mejor valorado",
+            "Score del mejor modelo", "Precio"]]
+        st.dataframe(tabla, use_container_width=True, hide_index=True)
+
+        # Lectura automática, sin inventar: el más visto vs el mejor puntuado.
+        mas_visto = comp.sort_values("n_campo", ascending=False).iloc[0]
+        con_score = comp.dropna(subset=["mejor_score"])
+        mejor = con_score.sort_values("mejor_score", ascending=False).iloc[0]
+        if mas_visto["marca_norm"] != mejor["marca_norm"]:
+            st.info(
+                f"**La más común no es la mejor valorada.** En la muestra de calle, "
+                f"la más vista es **{mas_visto['marca_norm']}** "
+                f"({int(mas_visto['n_campo'])} obs.), "
+                f"mientras el mejor score de su marca es {mas_visto['mejor_score']:.3f} "
+                f"({mas_visto['mejor_modelo']}). El mejor valorado es **{mejor['marca_norm']}** "
+                f"con {mejor['mejor_score']:.3f} ({mejor['mejor_modelo']}), y solo se vio "
+                f"{int(mejor['n_campo'])} vez/veces en calle. Es exactamente el hueco que "
+                "la pregunta central busca: *lo que se compra* ≠ *lo que rinde mejor*."
+            )
+    else:
+        st.caption("Sin cruce con el score: ejecuta `python3 codes/analisis.py`.")
+
+    st.markdown("---")
+
+    # ======= C. USO OBSERVADO =======
+    st.markdown("### 📦 Para qué se usa (uso declarado por el propietario)")
+
+    if not df_uso.empty:
+        izq3, der3 = st.columns([1.1, 1])
+        with izq3:
+            fig, ax = fig_ax(figsize=(6.5, 3.6))
+            y = np.arange(len(df_uso))
+            err = np.vstack([
+                (df_uso["pct"] - df_uso["ic95_bajo"]).clip(lower=0),
+                (df_uso["ic95_alto"] - df_uso["pct"]).clip(lower=0),
+            ])
+            ax.barh(y, df_uso["pct"], color=PROP_COLORS["electrico"],
+                    edgecolor="white", height=0.6, xerr=err, capsize=3,
+                    error_kw=dict(ecolor=TEXT_COLOR, lw=1, alpha=0.7))
+            ax.set_yticks(y)
+            ax.set_yticklabels([u.capitalize() for u in df_uso["uso"]], fontsize=9)
+            ax.invert_yaxis()
+            ax.set_xlabel("% de las observaciones (IC 95%)")
+            ax.set_title("Uso observado en calle", pad=12)
+            for yi, (n, pct) in enumerate(zip(df_uso["n"], df_uso["pct"])):
+                ax.text(df_uso["ic95_alto"].iloc[yi] + 1.5, yi, f"{int(n)} ({pct:.0f}%)",
+                        va="center", fontsize=8, color=TEXT_COLOR)
+            ax.set_xlim(0, max(80, df_uso["ic95_alto"].max() * 1.2))
+            st.pyplot(fig)
+        with der3:
+            tabla_uso = df_uso.rename(columns={
+                "uso": "Uso", "n": "Obs.", "pct": "%",
+                "marcas": "Marcas más vistas",
+                "autonomia_med": "Autonomía mediana (km)",
+                "n_municipios": "Municipios",
+            })[["Uso", "Obs.", "%", "Marcas más vistas", "Autonomía mediana (km)", "Municipios"]]
+            st.dataframe(tabla_uso, use_container_width=True, hide_index=True)
+            st.caption(
+                "El uso es **declarado** por el dueño en la entrevista. "
+                "La palabra original de la hoja (\"familiar\", \"pasaje\", \"carga y pasaje\") "
+                "se conserva en `uso_original`."
+            )
+
+        dominante = df_uso.sort_values("n", ascending=False).iloc[0]
+        st.info(
+            f"El uso dominante es **{dominante['uso']}** "
+            f"({dominante['pct']:.0f}% de la muestra, n={int(dominante['n'])}). "
+            "La página **✅ Mejor opción** ordena sus escenarios con esta frecuencia "
+            "observada, no con un orden arbitrario."
+        )
+
+        # Cruce uso × municipio (densidad de uso por zona).
+        st.markdown("**Uso por municipio**")
+        cruce = (df_campo.groupby(["municipio", "uso"]).size().unstack(fill_value=0))
+        st.dataframe(cruce, use_container_width=True)
+    else:
+        st.caption("Sin tabla de uso: ejecuta `python3 codes/analisis_campo.py`.")
+
+    st.markdown("---")
+
+    # ======= POR MUNICIPIO =======
+    st.markdown("### 📍 Observaciones por municipio y marca")
+
+    izq2, der2 = st.columns([1, 1.2])
+    with izq2:
+        muni = (df_campo.groupby(["municipio", "marca"]).size()
+                .reset_index(name="obs")
+                .sort_values(["municipio", "obs"], ascending=[True, False]))
+        st.dataframe(muni, use_container_width=True, hide_index=True)
+    with der2:
+        pivot = df_campo.groupby(["municipio", "marca"]).size().unstack(fill_value=0)
+        st.markdown("**Matriz municipio × marca**")
+        st.dataframe(pivot, use_container_width=True)
+
+    st.warning("""
+    **Cómo leer estos datos.** Muestra **cerrada** de 30 observaciones en 5 de los
+    15 municipios del diseño, tomadas en dos semanas: **no es un censo** y no se
+    extrapola a La Habana. Sirve para ver qué marcas circulan y con qué uso, no
+    para estimar cuotas poblacionales. Además no hay **denominador** (triciclos
+    vistos por hora o por km), así que no se puede hablar de densidad.
+    El trabajo de campo **no entra al scoring** (ese mide oferta).
+    """)
+
+if not df_campo.empty:
+    # ======= ALCANCE DE LA MUESTRA =======
+    st.markdown("---")
+    st.subheader("📋 Alcance de la muestra (cerrada el 2026-10-31)")
+
+    st.markdown("""
+    **Decisión del proyecto:** no se hará más trabajo de campo. Lo que hay —30
+    observaciones, 5 municipios, 2026-10-13 a 2026-10-25— es la evidencia de calle
+    definitiva del estudio.
+
+    **Qué se puede afirmar con esto**
+    - Qué marcas circulan y en qué proporción **dentro de la muestra** (con intervalo de confianza).
+    - Qué uso declaran los dueños (pasajeros / carga / mixto) y con qué specs reales.
+    - Si la oferta anunciada coincide o no con lo que se ve en calle.
+
+    **Qué NO se puede afirmar**
+    - Que una marca sea "la más común en La Habana": 5 de 15 municipios y sin denominador.
+    - Cuotas por municipio ni densidad de flota.
+    - Comparaciones entre marcas con n=1: los intervalos se solapan.
+    """)
+
+    cubiertos = set(df_campo["municipio"]) if not df_campo.empty else set()
+    municipios_diseno = [
+        "Arroyo Naranjo", "Boyeros", "Centro Habana", "Cerro", "Cotorro",
+        "Diez de Octubre", "Guanabacoa", "Habana del Este", "Habana Vieja",
+        "La Lisa", "Marianao", "Plaza de la Revolución", "Playa", "Regla",
+        "San Miguel del Padrón",
+    ]
+    estado_muni = pd.DataFrame({
+        "Municipio": municipios_diseno,
+        "Observado": ["✅" if m in cubiertos else "—" for m in municipios_diseno],
+        "Observaciones": [
+            int((df_campo["municipio"] == m).sum()) if not df_campo.empty else 0
+            for m in municipios_diseno
+        ],
+    })
+    st.dataframe(estado_muni, use_container_width=True, hide_index=True)
 
 # ======= ESQUEMA DE DATOS =======
-st.subheader("📊 Esquema de registro (11 campos)")
+st.subheader("📊 Esquema de registro")
 
 schema = pd.DataFrame({
     "Campo": ["fecha", "municipio", "tipo", "uso", "propulsion", "modelo", "marca", "motor", "estado", "observador", "notas"],
     "Tipo": ["date", "categoría", "categoría", "categoría", "categoría", "texto", "texto", "texto", "categoría", "texto", "texto"],
-    "Ejemplo": ["2026-11-15", "Boyeros", "triciclo", "carga", "electrico", "KIVITOVA 2026", "KIVITOVA", "1200W", "bueno", "Juan P.", "Carga 600kg visible"],
+    "Ejemplo": ["2026-10-15", "Boyeros", "triciclo", "carga", "electrico", "KIVITOVA 2026", "KIVITOVA", "1200W", "bueno", "Juan P.", "Carga 600kg visible"],
     "Obligatorio": ["Sí", "Sí", "Sí", "Sí", "Sí", "No", "No", "No", "No", "Sí", "No"]
 })
 st.dataframe(schema, use_container_width=True, hide_index=True)
@@ -77,94 +303,37 @@ st.markdown("""
 - `uso`: carga | pasajeros | mixto | ocio_paseo
 - `propulsion`: electrico | gasolina | hibrido | indeterminado
 - `estado`: nuevo_0km | bueno | regular | malo
+
+**Columnas añadidas por la captura real:** `obs_id` (identificador anónimo),
+`uso_original` (palabra textual de la hoja), `bateria_v`, `bateria_v_origen`
+(para correcciones trazables), `bateria_ah`, `autonomia_km` y `con_paneles`.
+`modelo` queda vacío: la hoja registra marca, no modelo.
 """)
 
-# ======= PLACEHOLDERS VISUALES =======
-st.subheader("📈 Placeholders (se activan con datos)")
-
-df_campo = load_campo()
-
-if df_campo.empty:
-    st.info("""
-    **Cuando haya datos, aquí verás:**
-    
-    1. **Distribución por municipio** — Barras apiladas por modelo/propulsión
-    2. **Top modelos en calle** — Ranking real vs ranking online
-    3. **Comparación Campo vs Online** — Qué se ve en calle vs qué se anuncia
-    4. **Por tipo/uso** — Carga vs pasajeros vs mixto
-    5. **Mapa de calor municipal** — Densidad por zona
-    """)
-    
-    # Mostrar placeholders visuales vacíos
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**Frecuencia por municipio (ejemplo)**")
-        fig, ax = fig_ax(figsize=(6, 4))
-        ax.text(0.5, 0.5, "Sin datos de campo\n\nEjecuta el inventario municipal\npara activar este gráfico", 
-                ha="center", va="center", fontsize=12, color="#999")
-        ax.set_xlabel(""); ax.set_ylabel(""); ax.set_xticks([]); ax.set_yticks([])
-        st.pyplot(fig)
-    
-    with col2:
-        st.markdown("**Comparación Campo vs Online (ejemplo)**")
-        fig, ax = fig_ax(figsize=(6, 4))
-        ax.text(0.5, 0.5, "Sin datos de campo\n\nComparará frecuencias\nreales vs anuncios", 
-                ha="center", va="center", fontsize=12, color="#999")
-        ax.set_xlabel(""); ax.set_ylabel(""); ax.set_xticks([]); ax.set_yticks([])
-        st.pyplot(fig)
-
-else:
-    # ======= CON DATOS REALES =======
-    st.success(f"✅ **{len(df_campo)} observaciones** en **{df_campo['municipio'].nunique()} municipios**")
-    
-    # KPIs
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Observaciones", len(df_campo))
-    c2.metric("Municipios", df_campo['municipio'].nunique())
-    c3.metric("Modelos únicos", df_campo['modelo_norm'].nunique())
-    c4.metric("Propulsiones", df_campo['propulsion'].nunique() if 'propulsion' in df_campo.columns else 0)
-    
-    # Por municipio
-    st.markdown("### 📍 Frecuencia por municipio")
-    if 'municipio' in df_campo.columns and 'modelo_norm' in df_campo.columns:
-        muni = df_campo.groupby(["municipio", "modelo_norm", "propulsion"]).size().reset_index(name="count")
-        muni = muni.sort_values(["municipio", "count"], ascending=[True, False])
-        st.dataframe(muni, use_container_width=True, hide_index=True)
-    
-    # Comparación campo vs online
-    df_comp = load_comparacion()
-    if not df_comp.empty:
-        st.markdown("### ⚖️ Comparación Campo vs Online")
-        st.dataframe(df_comp.head(20), use_container_width=True, hide_index=True)
-    
-    # Por tipo/uso
-    if all(c in df_campo.columns for c in ['tipo', 'uso']):
-        st.markdown("### 📦 Por tipo y uso")
-        tipo_uso = df_campo.groupby(["tipo", "uso", "modelo_norm", "propulsion"]).size().reset_index(name="count")
-        tipo_uso = tipo_uso.sort_values(["tipo", "uso", "count"], ascending=[True, True, False])
-        st.dataframe(tipo_uso, use_container_width=True, hide_index=True)
-
-st.markdown("---")
-
-# ======= INSTRUCCIONES DE EJECUCIÓN =======
-st.subheader("▶️ Cómo ejecutar el trabajo de campo")
+# ======= CÓMO SE PROCESÓ =======
+st.subheader("▶️ Cómo se procesó la hoja de campo")
 
 st.code("""
-# 1. Preparar hoja de captura (CSV con cabecera)
-#    Ya existe: Data/registro_ubicaciones.csv (vacía, con 11 columnas)
+# La hoja original (texto libre) NUNCA se commitea: lleva datos personales.
+#    Data/raw_data/data_personas.txt                 (ignorado por git)
 
-# 2. Imprimir o usar en móvil la plantilla
-#    Campos: fecha, municipio, tipo, uso, propulsion, modelo, marca, motor, estado, observador, notas
+# 1. Ingesta: anonimiza (descarta nombre y CI), normaliza y valida
+python3 codes/parse_campo.py
+#    -> Data/registro_ubicaciones.csv
 
-# 3. Ejecutar 3 rutas × 5 municipios (≈8h total)
-#    - Ruta 1: Habana Vieja, Centro Habana, Cerro, Diez de Octubre, San Miguel del Padrón
-#    - Ruta 2: Plaza, Arroyo Naranjo, Boyeros, Cotorro, La Lisa
-#    - Ruta 3: Marianao, Playa, Guanabacoa, Habana del Este, Regla
-
-# 4. Consolidar en Data/registro_ubicaciones.csv
-
-# 5. Re-ejecutar análisis
+# 2. Análisis de oferta + identidad
 python3 codes/analisis.py
+#    -> clean_data/score_modelos.csv
+#    -> clean_data/comparacion_campo_online.csv
 
-# 6. El reporte se actualiza solo al refrescar (lee Data/clean_data/ en vivo)
+# 3. Análisis del campo: cuotas, IC95, uso y cruce con el score
+python3 codes/analisis_campo.py
+#    -> clean_data/campo_resumen.csv
+#    -> clean_data/campo_uso.csv
+
+# 4. Verificar que el CSV coincide con la hoja (idempotencia)
+python3 codes/parse_campo.py --check
+
+# El reporte lee Data/ en vivo -> refresca y listo
+reporte/.venv/bin/streamlit run reporte/app.py
 """, language="bash")

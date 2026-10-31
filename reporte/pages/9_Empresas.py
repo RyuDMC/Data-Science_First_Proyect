@@ -1,5 +1,5 @@
 """
-Página 9: Empresas — 22 fichas de catálogos.
+Página 9: Empresas — 29 fichas de catálogos.
 """
 
 import os as _os
@@ -99,6 +99,14 @@ if not df_scores.empty:
         for m in sorted(solo_empresas):
             st.caption(f"• {m}")
 
+    if not en_ambos:
+        st.info(
+            "Ningún modelo coincide exactamente entre catálogos y anuncios: los "
+            "catálogos venden otra gama (marcas de importación) y los clasificados "
+            "se centran en el mercado informal. Solo la marca **ONEBOT** aparece "
+            "en ambos mundos. Por eso no se comparan precios modelo a modelo."
+        )
+
 st.markdown("---")
 
 # ======= COMPARATIVA DE PRECIOS =======
@@ -112,6 +120,7 @@ if not df_scores.empty and en_ambos:
     # Precio empresa por modelo
     if "modelo_norm" in df_empresas.columns:
         emp_precios = df_empresas[df_empresas["modelo_norm"].isin(en_ambos)][["modelo_norm", "precio_usd"]].copy()
+        emp_precios.columns = ["modelo_norm", "precio_empresa"]
     else:
         emp_precios = df_empresas[df_empresas["modelo"].str.upper().str.strip().isin(en_ambos)][["modelo", "precio_usd"]].copy()
         emp_precios.columns = ["modelo_norm", "precio_empresa"]
@@ -153,8 +162,9 @@ st.markdown("""
 |---------|------------|--------|-------|
 | **KikiHabana** | WooCommerce | 9 | Eléctricos con specs completas (batería, motor, autonomía, carga). Excluidos cuatriciclos (JY-MX8, MAGIKBIKE). ONEBOY T414 conservado. |
 | **MZ Products** | WooCommerce | 7 | 5 eléctricos + 2 gasolina. MZ 200cc clasificado **híbrido** (slug dice "electrico-combustion"). Marca = "MZ PRODUCTS". Specs solo de `div.wd-single-content`. |
-| **A Cuba Envíos Cargo** | WooCommerce | 3 | Solo specs del título (sin página de detalle). |
+| **A Cuba Envíos Cargo** | WooCommerce | 4 | Solo specs del título (sin página de detalle). Incluye el "Fly Racing 2027" en "Próximamente". |
 | **Mr Cuba** | Wix | 2 | **Frágil**: solo modelo + precio. Sin specs técnicas. |
+| **CompraMasonline** | WooCommerce | 7 | 6 eléctricos + 1 híbrido (RALLY con extensor de rango de gasolina). Specs de la pestaña de descripción; precio actual (`ins`) si hay rebaja. Excluidos 2 extensores sueltos, el "Minicarrito" de 4 ruedas y el genérico "TRICICLO ELÉCTRICO DE CARGA" (sin modelo propio, duplicaba la identidad de MINGHONG con otro precio). |
 
 **Decisiones aplicadas:**
 - Precios en **USD** (`precio_usd` + `moneda="USD"`)

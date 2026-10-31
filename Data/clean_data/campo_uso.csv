@@ -1,0 +1,4 @@
+uso,n,pct,ic95_bajo,ic95_alto,marcas,autonomia_med,n_municipios,originales
+pasajeros,18,60.0,42.3,75.4,JINPENG (5); ONEBOT (4); DC (2),100.0,5,familiar/pasaje
+carga,6,20.0,9.5,37.3,KIVITOVA (3); JINPENG (1); MINERVA (1),100.0,4,carga
+mixto,6,20.0,9.5,37.3,OIM (2); MINERVA (1); ONEBOT (1),95.0,4,carga y pasaje

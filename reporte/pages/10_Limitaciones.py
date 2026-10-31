@@ -21,7 +21,7 @@ from reporte.theme import apply_style, fig_ax, color_for_prop, label_for_prop
 st.set_page_config(page_title="Limitaciones", page_icon="⚠️", layout="wide")
 apply_style()
 
-st.title("⚠️ Limitaciones y Pendientes")
+st.title("⚠️ Limitaciones")
 
 st.markdown("""
 Este reporte se basa en **datos observacionales de oferta**, no en un censo de circulación.
@@ -36,7 +36,7 @@ limitaciones = pd.DataFrame({
         "Oferta ≠ Circulación",
         "Tamaño de muestra (n)",
         "Sesgo de fuentes online",
-        "Trabajo de campo ausente",
+        "Trabajo de campo: muestra cerrada",
         "vedca.cu caído",
         "Normalización min-max intra-grupo",
         "Imputación neutra (0.5)",
@@ -44,15 +44,15 @@ limitaciones = pd.DataFrame({
     ],
     "Qué significa": [
         "Anuncios y catálogos miden **oferta declarada**, no triciclos rodando. Un modelo muy anunciado puede no ser el más común en calle.",
-        "42 modelos en el ranking (41 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 22 fichas empresas. Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
+        "42 modelos en el ranking (41 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 29 fichas empresas. Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
         "Fuentes: clasificados (Revolico), tiendas WooCommerce, Telegram, Facebook. No cubren mercado informal completo ni todas las MIPYMEs.",
-        "El único dato de **circulación real** (inventario 15 municipios) está **pendiente** (0 observaciones). Sin él, no podemos validar 'el más común'.",
+        "La muestra de calle es **final**: 30 observaciones en 5 de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n=30 los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
         "Un modelo extremo (muy barato/muy caro) mueve la escala de **todo el grupo**. Al añadir Facebook, el ranking eléctrico cambió.",
         "Ausentes → 0.5 neutro + n_criterios. No castiga, pero oculta que el score se basa en menos evidencia. Ver columna n_criterios.",
         "9/42 modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
     ],
-    "Impacto": ["ALTO", "ALTO", "MEDIO", "CRÍTICO", "MEDIO", "MEDIO", "BAJO", "BAJO"]
+    "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "BAJO"]
 })
 
 st.dataframe(limitaciones, use_container_width=True, hide_index=True,
@@ -62,43 +62,8 @@ st.dataframe(limitaciones, use_container_width=True, hide_index=True,
 
 st.markdown("---")
 
-# ======= PENDIENTES TÉCNICOS =======
-st.header("2️⃣ Pendientes técnicos (datos)")
-
-pendientes = pd.DataFrame({
-    "Item": [
-        "data_from_FB integrado (parcial)",
-        "repuestos_proxy: proxy de '>1 fuente' (9/42 modelos)",
-        "precio_texto_usd: 3 anuncios contradictorios",
-        "VEDCA C400: 3 frentes de conflicto",
-        "MAGIKBIKE: rescatar o descartar",
-        "Mr Cuba (Wix): frágil, solo 2 fichas",
-        "Batería Wh: elyerromenu no lee '72v/58ah' (barra)",
-        "Nombres de modelo: curar acubaenvioscargo (3 fichas)",
-        "Marca 'MAGIC BIKE' en un triciclo eléctrico: sin respaldo en la ficha",
-        "Nombres repetidos en catálogos de empresas (misma identidad, distintas configuraciones)",
-    ],
-    "Estado": [
-        "✅ Integrado como 6ª fuente (parse_fb.py) — ranking recalculado",
-        "✅ Calculado sobre el dataset completo (antes se hacía por archivo y salía 1/35)",
-        "⏳ 3 anuncios con precio en texto ≠ precio campo. ¿Cuál prevalece?",
-        "⏳ Specs/precio/antigüedad: C400 LIFEPO4 (elyerromenu) vs C400 GELPB (islagrande) vs C400A (telegram)",
-        "⏳ KikiHabana lo excluyó como 'carrito 4 ruedas'. ¿Es triciclo? ¿Rescatar?",
-        "⏳ Wix bloquea scraping. Solo modelo+precio. ¿Mantener o descartar?",
-        "⏳ Kivitova queda sin V/Ah. Mejora menor detectada en diario.",
-        "✅ Curado por el usuario: FLY RACING / RACING. Se recuperó además el 4º producto del catálogo (Fly Racing 2027, 'Próximamente')",
-        "⏳ Declarada en la ficha, pero la ficha solo menciona 1800 W y 72 V. ¿Confirmar?",
-        "⏳ 3 'E-CARGO MZ PRODUCTS' (60/80/100 Ah) y 2 'FLY RACING' (1500/2000 W) comparten nombre. En las tablas son fichas separadas; si el dataset de empresas entrara al scoring se agregarían",
-    ],
-    "Prioridad": ["ALTA", "BAJA", "MEDIA", "ALTA", "BAJA", "BAJA", "BAJA", "BAJA", "MEDIA", "MEDIA"]
-})
-
-st.dataframe(pendientes, use_container_width=True, hide_index=True)
-
-st.markdown("---")
-
 # ======= DATA QUALITY =======
-st.header("3️⃣ Calidad de datos conocida")
+st.header("2️⃣ Calidad de datos conocida")
 
 df_online = load_anuncios()
 df_empresas = load_empresas()
@@ -123,12 +88,12 @@ if not df_online.empty:
 st.markdown("---")
 
 # ======= QUÉ CAMBIARÍA CON MÁS DATOS =======
-st.header("4️⃣ Qué cambiaría con más datos")
+st.header("3️⃣ Qué cambiaría con más datos")
 
 st.markdown("""
 | Si tuviéramos... | Cambiaría... |
 |------------------|--------------|
-| **Trabajo de campo (15 municipios)** | Respuesta real a "¿cuál es el más común?". Validación campo vs online. |
+| **Trabajo de campo en los 15 municipios** | *Cerrado: no se hará.* La muestra actual (5 municipios) solo describe la muestra; no responde "el más común de La Habana". |
 | **Más anuncios por modelo** (n ≥ 5) | Scores más estables, n_criterios → 5 para más modelos. |
 | **Precios reales de transacción** (no solo listados) | Precio mediano más representativo, menos sesgo vendedor. |
 | **Datos de repuestos reales** (talleres, importadores) | Criterio repuestos significativo (hoy solo 9/42 modelos tienen >1 fuente). |
@@ -140,7 +105,7 @@ st.markdown("""
 st.markdown("---")
 
 # ======= REPRODUCIBILIDAD =======
-st.header("5️⃣ Reproducibilidad")
+st.header("4️⃣ Reproducibilidad")
 
 st.code("""
 # Entorno
@@ -151,7 +116,7 @@ pip install -r reporte/requirements.txt
 # Pipeline completo (raw → clean → score)
 python3 codes/scrape_triciclos.py    # ~4 min, 5 fuentes online
 python3 codes/parse_fb.py            # Facebook → clean_data/
-python3 codes/scrape_empresas.py     # 4 catálogos empresas
+python3 codes/scrape_empresas.py     # 5 catálogos empresas
 python3 codes/analisis.py            # scoring + CSVs en clean_data/
 
 # Reporte interactivo
@@ -167,17 +132,17 @@ matplotlib --version   # 3.8+
 st.markdown("---")
 
 # ======= VERSIONADO =======
-st.header("6️⃣ Versionado de datos")
+st.header("5️⃣ Versionado de datos")
 
 st.markdown("""
 | Archivo | Fuente | Última actualización | Registros | Notas |
 |---------|--------|---------------------|-----------|-------|
 | `anuncios_triciclos.jsonl` | 5 scrapers | 2026-10-19 | 41 | vedca.cu caído; 1 excluido por el usuario |
 | `anuncios_facebook.jsonl` | parse_fb.py | 2026-10-19 | 29 | 1 excluido (Artemisa) |
-| `empresas_*.jsonl` (4) | scrape_empresas.py | 2026-10-19 | 22 | MZ 200cc = híbrido; +1 producto acuba |
-| `modelos_canonicos.json` | **curado a mano** | 2026-10-19 | 90 productos | Fuente de verdad de la identidad |
+| `empresas_*.jsonl` (5) | scrape_empresas.py | 2026-10-31 | 29 | +7 fichas CompraMasonline (1 genérico excluido); MZ 200cc = híbrido |
+| `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 98 productos | Fuente de verdad de la identidad (2 excluidos) |
 | `score_modelos.csv` | analisis.py | 2026-10-19 | 42 filas (41 nombres) | Recalculado tras la limpieza de nombres |
-| `registro_ubicaciones.csv` | **CAMPO** | **PENDIENTE** | 0 | 15 municipios, 8h |
+| `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | 2026-10-25 | 30 | 5/15 municipios; sin datos personales |
 
 **Corte propuesto para reporte final:** 30 noviembre 2026
 """)

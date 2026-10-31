@@ -16,15 +16,20 @@ st.set_page_config(
 # Sidebar con info del proyecto
 with st.sidebar:
     st.markdown("## 🛺 Triciclos La Habana")
-    st.caption("Investigación de mercado (15 municipios)")
+    st.caption("Investigación de mercado · La Habana")
     st.markdown("---")
     st.markdown("**Pregunta central:**")
-    st.info("¿Cuál es el triciclo más común en La Habana?, ¿por qué es ese?, ¿existe una mejor opción?")
+    st.info("¿Qué triciclo comprar en La Habana y por qué?")
+    st.caption(
+        "\"Lo más común\" queda como **indicador**, no como respuesta: se mide con 70 "
+        "anuncios + 29 fichas de empresas + 30 observaciones de calle en 5 municipios. "
+        "**No hay censo** y el trabajo de campo está cerrado."
+    )
     st.markdown("---")
     st.markdown("**Fuentes de datos:**")
     st.markdown("- Anuncios online (6 fuentes)")
-    st.markdown("- Catálogos de empresas (4 empresas)")
-    st.markdown("- Trabajo de campo (15 municipios)")
+    st.markdown("- Catálogos de empresas (5 empresas)")
+    st.markdown("- Trabajo de campo (muestra cerrada, 5 municipios)")
     st.markdown("---")
     st.caption("Corte de datos: 2026-10-19")
     st.caption("Stack: Streamlit + Matplotlib + Pandas")
@@ -35,16 +40,16 @@ with st.sidebar:
 # Página de portada (esta es la que se ve al entrar)
 st.title("🛺 Triciclos en La Habana: Reporte Interactivo")
 st.markdown("""
-Este reporte presenta el análisis del mercado de triciclos en los 15 municipios de La Habana,
+Este reporte presenta el análisis del mercado de triciclos en La Habana,
 integrando **tres fuentes de evidencia**:
 
-| Fuente | Qué mide | Registros | Modelos únicos |
-|--------|----------|-----------|----------------|
-| **Anuncios online** | Oferta y competencia de precios | 70 | 42 |
-| **Catálogos de empresas** | Oferta formal y disponibilidad | 22 | 22 |
-| **Trabajo de campo** | Circulación real (inventario municipal) | 0* | 0* |
+| Fuente | Qué mide | Registros | Unidades |
+|--------|----------|-----------|----------|
+| **Anuncios online** | Oferta y competencia de precios | 70 | 42 modelos |
+| **Catálogos de empresas** | Oferta formal y disponibilidad | 29 | 29 fichas |
+| **Trabajo de campo** | Circulación real (inventario municipal) | 30 | 12 marcas, 5 municipios |
 
-*Pendiente de ejecución (3 rutas × 5 municipios, ~8h).
+*Muestra de campo **cerrada**: 30 observaciones en 5 municipios, dos semanas. No es censo y no se generaliza a toda La Habana.*
 
 ---
 
@@ -58,8 +63,8 @@ Usa el **menú lateral** (☰) para ir a cada sección:
 5. **💰 Precio / Autonomía / Carga** — Burbuja y frontera eficiente
 6. **🎯 Contendientes** — Top por grupo + radar de criterios
 7. **✅ Mejor opción** — Recomendación por escenario
-8. **🗺️ Trabajo de campo** — Protocolo y placeholders
-9. **🏢 Empresas** — 22 fichas de catálogos
+8. **🗺️ Trabajo de campo** — Circulación real observada (muestra cerrada, 5 municipios)
+9. **🏢 Empresas** — 29 fichas de catálogos
 10. **⚠️ Limitaciones** — Qué no sabemos y por qué
 
 ---
@@ -70,7 +75,9 @@ Usa el **menú lateral** (☰) para ir a cada sección:
 python3 codes/scrape_triciclos.py
 python3 codes/parse_fb.py
 python3 codes/scrape_empresas.py
+python3 codes/parse_campo.py      # hoja de campo -> registro_ubicaciones.csv
 python3 codes/analisis.py
+python3 codes/analisis_campo.py   # campo: cuotas, IC95, uso, cruce con score
 
 # 2. El reporte lee Data/clean_data/ en vivo → refresca y listo
 streamlit run reporte/app.py

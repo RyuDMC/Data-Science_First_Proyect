@@ -31,8 +31,10 @@ Fuentes activas:
                   del fabricante y desambigua las variantes C400/C400A/C600/C800B.
 
 Fuentes descartadas (verificadas muertas/bloqueadas, 2026-10-07):
-  ❌ revolico.com, compramasonline.com, multiservicesxpress.com,
+  ❌ revolico.com, multiservicesxpress.com,
      patuisla.com, mundoenvio.com, envioscubamerica.com → reto de Cloudflare (403 o challenge)
+  ⚠️ compramasonline.com → el 2026-10-07 daba challenge; el 2026-10-31 responde 200
+     y su categoría 'Triciclos' (8 vehículos) se cubre en codes/scrape_empresas.py.
   ❌ vedca.cu → caído (Connection reset by peer; DNS no resuelve) en 2026-10-11.
      Su catálogo se cubre ahora vía islagrande (misma empresa/fabricante).
   ❌ kikihabana.com → DNS no resuelve

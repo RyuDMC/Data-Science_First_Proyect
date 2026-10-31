@@ -60,6 +60,12 @@ VARIANTES = {
 OVERRIDES = {
     "https://www.acubaenvioscargo.com/tienda/transporte/triciclos-electricos/triciclo-fly-racing-2027/":
         ("FLY RACING 2027", "RACING"),
+    # RALLY con extensor de rango de CompraMasonline: el título de la tienda
+    # trae el accesorio ('... + EXTENSOR DE RANGO'). Se deja el nombre corto
+    # del modelo (decisión del usuario, 2026-10-31); el extensor queda
+    # documentado en el campo `notas` del registro.
+    "https://compramasonline.com/tienda/triciclo-de-carga-rally/":
+        ("RALLY", "RALLY"),
 }
 
 # ---- Productos que el usuario decidió dejar fuera (2026-10-19) ----
@@ -71,6 +77,13 @@ EXCLUIDOS = {
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-hibridos-el-mejor-precio-de":
         "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; "
         "excluido por decisión del usuario (2026-10-19).",
+    # CompraMasonline: ficha sin modelo propio ('TRICICLO ELÉCTRICO DE CARGA')
+    # que cae en la marca MINGHONG y duplica la identidad del otro MINGHONG
+    # con distinto precio ($2.500 vs $2.580). Se excluye el genérico y se
+    # conserva el que sí se puede nombrar (decisión del usuario, 2026-10-31).
+    "https://compramasonline.com/tienda/triciclo-electrico-de-carga/":
+        "Sin modelo propio; duplica la identidad de MINGHONG con otro precio; "
+        "excluido por decisión del usuario (2026-10-31).",
 }
 
 # ---- Ficheros que el usuario NO curó: se conservan tal cual y se avisa ----
@@ -86,6 +99,7 @@ ORIGEN_CRUDE = {
     "mzproducts.jsonl": "empresas/mzproducts.jsonl",
     "mrcuba.jsonl": "empresas/mrcuba.jsonl",
     "acubaenvioscargo.jsonl": "empresas/acubaenvioscargo.jsonl",
+    "compramasonline.jsonl": "empresas/compramasonline.jsonl",
 }
 
 

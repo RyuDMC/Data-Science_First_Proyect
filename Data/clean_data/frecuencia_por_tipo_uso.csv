@@ -1,0 +1,18 @@
+tipo,uso,modelo_norm,propulsion,count
+triciclo,carga,KIVITOVA,electrico,3
+triciclo,carga,JINPENG,electrico,1
+triciclo,carga,MINERVA,electrico,1
+triciclo,carga,TOPMAQ,electrico,1
+triciclo,mixto,OIM,electrico,2
+triciclo,mixto,MINERVA,electrico,1
+triciclo,mixto,ONEBOT,electrico,1
+triciclo,mixto,PANTHER,electrico,1
+triciclo,mixto,STAR,hibrido,1
+triciclo,pasajeros,JINPENG,electrico,5
+triciclo,pasajeros,ONEBOT,electrico,4
+triciclo,pasajeros,DC,electrico,2
+triciclo,pasajeros,KIVITOVA,electrico,2
+triciclo,pasajeros,TOPMAQ,electrico,2
+triciclo,pasajeros,MAGIC BIKE,electrico,1
+triciclo,pasajeros,MOTO FORM,electrico,1
+triciclo,pasajeros,VEDCA,electrico,1

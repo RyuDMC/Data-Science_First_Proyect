@@ -36,6 +36,18 @@ col2.metric("Modelos únicos", kpis.get("total_modelos", 0))
 col3.metric("Fichas empresas", len(df_empresas))
 col4.metric("Observaciones campo", len(df_campo))
 
+if not df_campo.empty:
+    _top = df_campo["marca"].value_counts()
+    st.caption(
+        f"Campo: **{len(df_campo)} observaciones** en "
+        f"**{df_campo['municipio'].nunique()} municipios** "
+        f"({df_campo['fecha'].min()} → {df_campo['fecha'].max()}). "
+        f"Marca más vista en calle: **{_top.index[0]}** "
+        f"({_top.iloc[0]} de {len(df_campo)}, "
+        f"{_top.iloc[0] / len(df_campo) * 100:.0f}%). "
+        "Muestra cerrada: describe la muestra, no toda La Habana."
+    )
+
 st.markdown("---")
 
 # ======= TITULARES =======
@@ -44,12 +56,18 @@ st.subheader("🎯 Los 3 titulares")
 col_t1, col_t2, col_t3 = st.columns(3)
 
 with col_t1:
-    st.markdown("### 1️⃣ El más común (proxy de oferta)")
+    st.markdown("### 1️⃣ Lo más ofertado (indicador)")
     if not df_scores.empty:
         top = df_scores.iloc[0]
         st.success(f"**{top['modelo_norm']}** ({label_for_prop(top['propulsion'])})")
         st.metric("Score", f"{top['score']:.3f}", help="Score ponderado: precio 40%, autonomía 25%, carga 20%, legalidad 10%, repuestos 5%")
         st.caption(f"n_anuncios: {int(top['n_anuncios_total'])} | Oferta viva: {'Sí' if top['oferta_viva'] else 'No'}")
+        if not df_campo.empty:
+            _m = df_campo["marca"].value_counts()
+            st.caption(
+                f"En calle, la marca más vista es **{_m.index[0]}** "
+                f"({_m.iloc[0]}/{len(df_campo)}). Detalle en 🗺️ Trabajo de campo."
+            )
     else:
         st.info("Sin datos de scoring")
 
@@ -72,7 +90,7 @@ with col_t3:
     |-----------|---------------|
     | **Carga pesada** (≥800 kg) | Ver Ranking → Eléctricos |
     | **Pasajeros / autonomía** | Ver Ranking → Eléctricos |
-    | **Presupuesto bajo** (<$3500) | Ver Ranking → Eléctricos |
+    | **Presupuesto bajo** (<$4000) | Ver Ranking → Eléctricos |
     | **Sin infraestructura eléctrica** | Ver Ranking → Híbridos / Gasolina |
     """)
     st.caption("La 'mejor opción' depende de tu caso de uso. Ve a la pestaña **Mejor opción** para el detalle.")

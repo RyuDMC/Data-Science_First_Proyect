@@ -20,6 +20,7 @@ from codes.norm_modelo import identidad  # noqa: E402
 
 
 CLEAN_DIR = REPO_ROOT / "Data" / "clean_data"
+EMPRESAS_DIR = REPO_ROOT / "Data" / "empresas"
 
 
 @st.cache_data(show_spinner="Cargando anuncios online…")
@@ -58,13 +59,15 @@ def load_anuncios() -> pd.DataFrame:
 
 @st.cache_data(show_spinner="Cargando catálogos de empresas…")
 def load_empresas() -> pd.DataFrame:
-    """Carga y unifica los 4 JSONL de empresas."""
-    files = [
-        CLEAN_DIR / "kikihabana.jsonl",
-        CLEAN_DIR / "mzproducts.jsonl",
-        CLEAN_DIR / "acubaenvioscargo.jsonl",
-        CLEAN_DIR / "mrcuba.jsonl",
-    ]
+    """Carga y unifica TODOS los JSONL de catálogos de empresas.
+
+    La lista de empresas sale de `Data/empresas/` (lo que escribe
+    `codes/scrape_empresas.py`), así que añadir un catálogo nuevo no obliga a
+    tocar el reporte. El JSONL limpio vive en `Data/clean_data/`.
+    """
+    nombres = (sorted(p.stem for p in EMPRESAS_DIR.glob("*.jsonl"))
+               if EMPRESAS_DIR.exists() else [])
+    files = [CLEAN_DIR / f"{n}.jsonl" for n in nombres]
     dfs = []
     for f in files:
         if f.exists():
@@ -121,6 +124,24 @@ def load_scores() -> pd.DataFrame:
 def load_comparacion() -> pd.DataFrame:
     """Carga comparacion_campo_online.csv."""
     path = CLEAN_DIR / "comparacion_campo_online.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
+@st.cache_data(show_spinner="Cargando resumen de campo (marcas)…")
+def load_campo_resumen() -> pd.DataFrame:
+    """Carga campo_resumen.csv (marca: cuota, IC95, uso dominante, score)."""
+    path = CLEAN_DIR / "campo_resumen.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
+@st.cache_data(show_spinner="Cargando resumen de campo (usos)…")
+def load_campo_uso() -> pd.DataFrame:
+    """Carga campo_uso.csv (uso: cuota, IC95, marcas)."""
+    path = CLEAN_DIR / "campo_uso.csv"
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path)
