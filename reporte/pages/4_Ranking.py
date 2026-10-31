@@ -14,7 +14,8 @@ if _ROOT not in _sys.path:
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, filter_by_propulsion
+from reporte.data import (load_scores, filter_by_propulsion,
+                          load_sensibilidad, load_sensibilidad_resumen)
 from reporte.theme import apply_style, fig_ax, bar_ranking, color_for_prop, label_for_prop
 
 
@@ -143,6 +144,114 @@ if not df.empty:
                 highlight_idx=highlight_idx if highlight_idx >= 0 else None,
                 title=f"Ranking {label_for_prop(selected_prop) if selected_prop != 'Todos' else 'Todos'} (Score 0-1)")
     st.pyplot(fig)
+
+st.markdown("---")
+
+# ======= SENSIBILIDAD DEL RANKING =======
+# Análisis de robustez (codes/sensibilidad.py). NO cambia el score oficial:
+# responde "¿cuánto depende este orden de los pesos y de la imputación 0.5?".
+st.subheader("🎚️ ¿Cuánto depende el ranking de los pesos?")
+
+ESCENARIOS = {
+    "base": "Base (0.5 neutro)",
+    "reponderado": "Re-ponderado (sin imputar)",
+    "sin_precio_usd": "Sin precio",
+    "sin_autonomia_km": "Sin autonomía",
+    "sin_carga_kg": "Sin carga",
+    "sin_legalidad": "Sin legalidad",
+    "sin_repuestos": "Sin repuestos",
+}
+
+df_sens = load_sensibilidad()
+df_sens_res = load_sensibilidad_resumen()
+
+if df_sens.empty or df_sens_res.empty:
+    st.info(
+        "Aún no hay análisis de estabilidad. Ejecuta `python3 codes/sensibilidad.py` "
+        "para medir cuánto aguanta el orden ante cambios de pesos y criterios ausentes."
+    )
+else:
+    st.caption(
+        "El score usa pesos fijos (precio 0.40, autonomía 0.25, carga 0.20, "
+        "legalidad 0.10, repuestos 0.05) e imputación neutra 0.5. Aquí se prueba "
+        "cuánto aguanta el orden: **2.000 perturbaciones** uniformes de ±0.05 en "
+        "los pesos (semilla fija), **omisión de cada criterio** con "
+        "re-normalización y **re-ponderación** solo con los criterios presentes "
+        "(en vez de imputar 0.5). El ranking oficial no cambia."
+    )
+
+    # --- Podio bajo cada escenario (respeta el filtro de propulsión) ---
+    esc = df_sens if selected_prop == "Todos" else df_sens[df_sens["propulsion"] == selected_prop]
+    filas_esc = []
+    for (prop, escenario), sub in esc.groupby(["propulsion", "escenario"], sort=False):
+        top = sub.nsmallest(3, "rank")["modelo_norm"].tolist()
+        top += [""] * (3 - len(top))
+        filas_esc.append({
+            "Propulsión": label_for_prop(prop),
+            "Escenario": ESCENARIOS.get(escenario, escenario),
+            "1º": top[0], "2º": top[1], "3º": top[2],
+        })
+    st.markdown("**Podio bajo cada escenario** (la fila *Base* es el ranking oficial)")
+    st.dataframe(pd.DataFrame(filas_esc), hide_index=True, use_container_width=True)
+
+    # --- Estabilidad de los modelos que se están viendo ---
+    st.markdown("**Estabilidad de los modelos en la tabla de arriba**")
+    res = df_sens_res.merge(
+        df[["modelo_norm", "propulsion"]], on=["modelo_norm", "propulsion"], how="inner",
+    )
+    stab = df[["modelo_norm", "propulsion", "score", "n_criterios", "n_anuncios"]].merge(
+        res[["modelo_norm", "propulsion", "rank_base", "top3_pct", "rank_min",
+             "rank_max", "n_escenarios_top3", "escenario_peor"]],
+        on=["modelo_norm", "propulsion"], how="left",
+    )
+    stab_show = pd.DataFrame({
+        "Modelo": stab["modelo_norm"],
+        "Prop.": stab["propulsion"].map(label_for_prop),
+        "Score": stab["score"].map(lambda v: f"{v:.3f}"),
+        "Rank": stab["rank_base"].astype("Int64"),
+        "Top-3 (±0.05)": stab["top3_pct"].map(lambda v: f"{v:.0f}%" if pd.notna(v) else "—"),
+        "Rank en escenarios (min–max)": stab.apply(
+            lambda r: f"{int(r['rank_min'])}–{int(r['rank_max'])}" if pd.notna(r["rank_min"]) else "—",
+            axis=1,
+        ),
+        "Top-3 en 6 escenarios": stab["n_escenarios_top3"].astype("Int64"),
+        "Peor escenario": stab["escenario_peor"].map(lambda e: ESCENARIOS.get(e, e)),
+        "N crit.": stab["n_criterios"].astype("Int64"),
+        "Anuncios": stab["n_anuncios"].astype("Int64"),
+    })
+    st.dataframe(stab_show, hide_index=True, use_container_width=True)
+
+    # --- Lectura automática del resultado (sin números escritos a mano) ---
+    prop_txt = selected_prop if selected_prop != "Todos" else "electrico"
+    top3 = df_sens_res[df_sens_res["propulsion"] == prop_txt].nsmallest(3, "rank_base")
+    if len(top3) == 3:
+        pcts = top3["top3_pct"].tolist()
+        nombres = top3["modelo_norm"].tolist()
+        cambios = (df_sens[(df_sens["propulsion"] == prop_txt)
+                           & (df_sens["rank"] == 1)
+                           & (df_sens["escenario"] != "base")]
+                   .set_index("escenario")["modelo_norm"])
+        otros = cambios[cambios != nombres[0]]
+        detalle = "; ".join(
+            (f"al quitar {ESCENARIOS[e].replace('Sin ', '').lower()}"
+             if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
+            for e, m in otros.items()
+        )
+        st.markdown(
+            f"**{label_for_prop(prop_txt)}:** el top-3 se mantiene en "
+            f"{pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de las perturbaciones. "
+            f"El 1º puesto aguanta {len(cambios) - len(otros)} de {len(cambios)} "
+            f"escenarios de omisión"
+            + (f"; cambia {detalle}." if len(otros) else ".")
+        )
+    else:
+        st.caption("Con menos de 3 modelos en el grupo, el orden no es informativo.")
+
+    st.caption(
+        "Los porcentajes son la frecuencia con que el modelo cae en el top-3 de su "
+        "propulsión. El score oficial no cambia: esto mide cuánto pesa la decisión "
+        "metodológica, no propone otros pesos."
+    )
 
 st.markdown("---")
 

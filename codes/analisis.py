@@ -366,9 +366,11 @@ def score_modelos(df_online: pd.DataFrame) -> pd.DataFrame:
     agg["legalidad_norm"] = agg["legalidad_bin"]
     agg["repuestos_norm"] = agg["repuestos_proxy"]
 
-    # Score ponderado. Si un criterio no está disponible (NaN), NO se imputa:
-    # se re-pesan los criterios disponibles proporcionalmente, para que un dato
-    # ausente no castigue ni beneficie al modelo.
+    # Score ponderado con imputación neutra 0.5 (decisión del usuario
+    # 2026-10-07, ver PESOS): un criterio ausente vale "medio", ni castiga ni
+    # beneficia, y todos los scores quedan comparables entre sí.
+    # La alternativa (re-ponderar solo con los criterios presentes) NO se
+    # aplica aquí: se evalúa como análisis de robustez en codes/sensibilidad.py.
     # Cobertura real: con cuántos criterios SÍ tiene dato cada modelo.
     # Se calcula sobre los datos CRUDOS, no sobre las normas (que ya van
     # imputadas a 0.5 y ocultarían la ausencia).

@@ -120,6 +120,28 @@ def load_scores() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(show_spinner="Cargando sensibilidad del ranking…")
+def load_sensibilidad() -> pd.DataFrame:
+    """Carga sensibilidad_pesos.csv (largo: modelo × escenario).
+
+    Lo genera `codes/sensibilidad.py`. Si no existe, las páginas muestran un
+    aviso en vez de fallar: el reporte sigue funcionando sin el análisis.
+    """
+    path = CLEAN_DIR / "sensibilidad_pesos.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
+@st.cache_data(show_spinner="Cargando estabilidad del ranking…")
+def load_sensibilidad_resumen() -> pd.DataFrame:
+    """Carga sensibilidad_resumen.csv (uno por modelo: estabilidad del rank)."""
+    path = CLEAN_DIR / "sensibilidad_resumen.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
 @st.cache_data(show_spinner="Cargando comparación campo vs online…")
 def load_comparacion() -> pd.DataFrame:
     """Carga comparacion_campo_online.csv."""

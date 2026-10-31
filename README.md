@@ -68,6 +68,7 @@ python3 codes/crear_canonicos.py      # consolida tras la migración
 python3 codes/norm_modelo.py --migrar
 python3 codes/analisis.py
 python3 codes/analisis_campo.py
+python3 codes/sensibilidad.py         # robustez del ranking (no altera el score)
 ```
 
 ## Metodología

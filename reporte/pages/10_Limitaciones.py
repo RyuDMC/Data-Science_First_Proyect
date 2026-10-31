@@ -14,7 +14,8 @@ if _ROOT not in _sys.path:
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, load_anuncios, load_empresas, load_campo
+from reporte.data import (load_scores, load_anuncios, load_empresas, load_campo,
+                          load_sensibilidad, load_sensibilidad_resumen)
 from reporte.theme import apply_style, fig_ax, color_for_prop, label_for_prop
 
 
@@ -31,6 +32,51 @@ Todas las conclusiones deben leerse con estas limitaciones en mente.
 # ======= LIMITACIONES ESTRUCTURALES =======
 st.header("1️⃣ Limitaciones estructurales")
 
+# La frase de sensibilidad se calcula desde los CSV de codes/sensibilidad.py:
+# así no se desincroniza cuando cambien los pesos o los datos.
+df_sens = load_sensibilidad()
+df_sens_res = load_sensibilidad_resumen()
+if df_sens.empty or df_sens_res.empty:
+    sens_texto = (
+        "Pendiente: ejecutar `codes/sensibilidad.py`. El score depende de pesos "
+        "fijos; su estabilidad se mide aparte."
+    )
+else:
+    top3 = df_sens_res[df_sens_res["propulsion"] == "electrico"].nsmallest(3, "rank_base")
+    if len(top3) == 3:
+        pcts = top3["top3_pct"].tolist()
+        nombres = top3["modelo_norm"].tolist()
+        cambios = (df_sens[(df_sens["propulsion"] == "electrico")
+                           & (df_sens["rank"] == 1)
+                           & (df_sens["escenario"] != "base")]
+                   .set_index("escenario")["modelo_norm"])
+        otros = cambios[cambios != nombres[0]]
+        nombres_esc = {
+            "reponderado": "re-ponderado",
+            "sin_precio_usd": "sin precio",
+            "sin_autonomia_km": "sin autonomía",
+            "sin_carga_kg": "sin carga",
+            "sin_legalidad": "sin legalidad",
+            "sin_repuestos": "sin repuestos",
+        }
+        detalle = "; ".join(
+            (f"al quitar {nombres_esc.get(e, e).replace('sin ', '')}"
+             if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
+            for e, m in otros.items()
+        )
+        sens_texto = (
+            f"Con 2.000 perturbaciones de ±0.05 en los pesos, el top-3 eléctrico se "
+            f"mantiene en {pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de los casos; "
+            f"el 1º cambia en {len(otros)} de {len(cambios)} escenarios de omisión"
+            + (f" ({detalle})" if detalle else "")
+            + ". El orden exacto depende de los pesos; el podio, no."
+        )
+    else:
+        sens_texto = (
+            "El score depende de pesos fijos; su estabilidad se mide en "
+            "`sensibilidad_resumen.csv` (ver página de Ranking)."
+        )
+
 limitaciones = pd.DataFrame({
     "Área": [
         "Oferta ≠ Circulación",
@@ -40,6 +86,7 @@ limitaciones = pd.DataFrame({
         "vedca.cu caído",
         "Normalización min-max intra-grupo",
         "Imputación neutra (0.5)",
+        "Sensibilidad a los pesos",
         "Repuestos proxy débil",
     ],
     "Qué significa": [
@@ -50,9 +97,10 @@ limitaciones = pd.DataFrame({
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
         "Un modelo extremo (muy barato/muy caro) mueve la escala de **todo el grupo**. Al añadir Facebook, el ranking eléctrico cambió.",
         "Ausentes → 0.5 neutro + n_criterios. No castiga, pero oculta que el score se basa en menos evidencia. Ver columna n_criterios.",
+        sens_texto,
         "9/41 modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
     ],
-    "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "BAJO"]
+    "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "MEDIO", "BAJO"]
 })
 
 st.dataframe(limitaciones, use_container_width=True, hide_index=True,
@@ -118,6 +166,7 @@ python3 codes/scrape_triciclos.py    # ~4 min, 5 fuentes online
 python3 codes/parse_fb.py            # Facebook → clean_data/
 python3 codes/scrape_empresas.py     # 10 catálogos empresas
 python3 codes/analisis.py            # scoring + CSVs en clean_data/
+python3 codes/sensibilidad.py        # robustez del ranking (no cambia el score)
 
 # Reporte interactivo
 streamlit run reporte/app.py
@@ -142,6 +191,7 @@ st.markdown("""
 | `empresas_*.jsonl` (10) | scrape_empresas.py | 2026-10-31 | 68 | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
 | `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 137 productos | Fuente de verdad de la identidad (3 excluidos) |
 | `score_modelos.csv` | analisis.py | 2026-10-19 | 41 filas (40 nombres) | Recalculado tras la limpieza de nombres |
+| `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | 2026-10-31 | 287 + 41 | 7 escenarios × 41 modelos; **no altera el score** |
 | `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | 2026-10-25 | 30 | 5/15 municipios; sin datos personales |
 
 **Corte propuesto para reporte final:** 30 noviembre 2026

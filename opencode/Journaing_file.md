@@ -673,3 +673,19 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** los descriptores de uso (`pasaje`, `pasajeros`, `carga`) no deben formar parte de la identidad del modelo; si dos fichas solo se distinguen por eso, se agregan y el precio se trata como oferta
 - **Próxima vez:** revisar/commitear; decidir si se elimina el `Data/score_modelos.csv` legado de la raíz
 - **Etiquetas:** identidad, canonicos, limpieza, pasaje, oim, rally, score, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (robustez del ranking) — el reporte publica un solo orden con pesos fijos y no dice cuánto depende de esa decisión
+- **Tarea:** añadir un análisis de sensibilidad que no cambie el score oficial y mostrarlo en el reporte
+- **Acción(es):**
+  1. **Nuevo `codes/sensibilidad.py`:** lee `score_modelos.csv`, reproduce el score base y falla si no coincide (guarda contra datos desincronizados). Calcula tres bloques: 2.000 perturbaciones uniformes de ±0.05 en los pesos (semilla fija `20261031`), omisión de cada criterio con re-normalización, y re-ponderación solo con los criterios presentes (la alternativa que el comentario viejo de `analisis.py` describía y no implementaba)
+  2. **Salidas:** `sensibilidad_pesos.csv` (287 filas = 41 modelos × 7 escenarios) y `sensibilidad_resumen.csv` (41 filas: `top3_pct`, `top1_pct`, percentiles del rank, rango en los 6 escenarios alternativos, peor/mejor escenario). `--check` compara byte a byte y falla si están desactualizados
+  3. **Página 4:** sección "¿Cuánto depende el ranking de los pesos?" con el podio bajo cada escenario, la estabilidad de los modelos filtrados y una lectura calculada desde los CSV (sin números a mano)
+  4. **Página 10:** nueva limitación "Sensibilidad a los pesos" con la frase generada desde los CSV; el bloque de reproducibilidad y la tabla de versionado incluyen el script y los dos archivos
+  5. **`codes/analisis.py`:** se corrigió el comentario que decía "NO se imputa: se re-pesan" cuando la implementación imputa 0.5 (decisión del usuario 2026-10-07); ahora remite a `sensibilidad.py`
+- **Resultado:** eléctricos: TOPMAQ y ONEBOT en el top-3 en el 100% de las perturbaciones, KIVITOVA en el 99%; el 1º solo cambia al omitir `carga` (pasa a KIVITOVA). Híbridos: el 1º cambia en 2 de 6 escenarios (sin `carga` → STAR; sin `precio` → PORTO BELLO). Gasolina: orden estable (solo 2 modelos). El score oficial no se tocó
+- **Error/éxito:** Éxito. Se verificó a mano que los escenarios coinciden con un cálculo independiente (sin `carga`, sin `autonomía`, sin `precio`, sin `legalidad`, sin `repuestos`). `sensibilidad --check` OK; `AppTest` 11/11
+- **Lección:** el orden exacto es un artefacto de los pesos; el podio no. Un ranking con n=1 en 28 de 41 modelos debe publicar esa distinción, no esconderla
+- **Próxima vez:** revisar/commitear; decidir si se elimina el `Data/score_modelos.csv` legado de la raíz
+- **Etiquetas:** sensibilidad, robustez, pesos, ranking, streamlit, verificacion
