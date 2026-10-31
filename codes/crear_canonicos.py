@@ -28,24 +28,17 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "Data"
 CLEAN_DIR = DATA_DIR / "clean_data"
 OUT_PATH = DATA_DIR / "modelos_canonicos.json"
 
-# ---- Separaciones de variante decididas por el usuario (2026-10-19) ----
-# "si no son exactamente iguales, déjalos separados y cuéntalos por separado"
+# ---- Variantes con el MISMO nombre y specs distintas ----
+# Decisión del usuario (2026-10-31, revisada): el nombre del modelo no lleva
+# aditamentos ni descriptores de uso/propulsión. Si dos fichas del mismo
+# modelo declaran specs distintas, se conservan como fichas separadas y el
+# sufijo usa solo el dato que las diferencia (p. ej. RALLY 800, CYT 80 KM,
+# MIGHONG 400 KG).
 #
-# NOTA (2026-10-19, 2ª corrección del usuario): los tres "E-CARGO" de MZ
-# Products VUELVEN al mismo nombre ("E-CARGO MZ PRODUCTS") porque la
-# capacidad ya está en su propio campo (bateria_ah). Se conservan como
-# fichas separadas en las tablas, pero comparten identidad: si el dataset de
-# empresas entrara en el scoring, se agregarían. Queda anotado como riesgo
-# en el reporte (Limitaciones).
-VARIANTES = {
-    # RALLY de KikiHabana: el de carga (2.000 kg) es un producto distinto del
-    # de pasajeros, que ya se llama solo "RALLY" (ver OVERRIDES).
-    "https://kikihabana.com/producto/triciclos-para-cuba/":
-        ("RALLY CARGA", "RALLY"),
-    # VEDCA C800B: el "fotovoltaico" es una variante con panel (precio propio).
-    "https://islagrande.com/triciclo-electrico-carga-pasajeros-c800b-fotovoltaico-lifepo4-60v-90ah-habana.html":
-        ("VEDCA C800B FOTOVOLTAICO", "VEDCA"),
-}
+# Las antiguas separaciones "RALLY CARGA" y "VEDCA C800B FOTOVOLTAICO" ya no
+# se usan: CARGA y FOTOVOLTAICO no son parte del nombre. Sus URLs se resuelven
+# en OVERRIDES con el nombre limpio.
+VARIANTES = {}
 
 # ---- Nombres fijados a mano (2026-10-19) ----
 # "Fly Racing 2027" de A Cuba Envíos Cargo: no tiene specs en el título ni
@@ -69,20 +62,21 @@ OVERRIDES = {
     # oferta, no como producto).
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-oim-de-pasaje":
         ("OIM", "OIM"),
-    # RALLY de KikiHabana: queda RALLY; no colisiona con RALLY CARGA,
-    # RALLY HIBRIDO ni RALLY CARGA 800.
+    # RALLY de KikiHabana: el nombre del modelo es RALLY. El tipo de carrocería
+    # ("carga") vive en las specs de la ficha, no en el nombre.
+    "https://kikihabana.com/producto/triciclos-para-cuba/":
+        ("RALLY", "RALLY"),
     "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/":
         ("RALLY", "RALLY"),
     # RALLY con extensor de rango de CompraMasonline: el título de la tienda
     # trae el accesorio ('... + EXTENSOR DE RANGO'). El extensor queda
-    # documentado en el campo `notas` del registro.
+    # documentado en el campo `notas` del registro; no forma parte del nombre.
     #
-    # Variantes RALLY/CYT/MIGHONG/IZUKI separadas el 2026-10-31 (decisión del
-    # usuario): si dos fichas del mismo nombre declaran specs distintas, van
-    # como identidades distintas. El sufijo solo usa el dato declarado que
-    # diferencia la ficha, no una estimación.
+    # Variantes RALLY/CYT/MIGHONG/IZUKI: si dos fichas del mismo modelo declaran
+    # specs distintas, se conservan separadas y el sufijo usa solo el dato que
+    # las diferencia (p. ej. RALLY 800). No se usan descriptores de uso.
     "https://compramasonline.com/tienda/triciclo-de-carga-rally/":
-        ("RALLY HIBRIDO", "RALLY"),
+        ("RALLY", "RALLY"),
     # KikiHabana: mismas variantes que los catálogos nuevos (CYT 80 km,
     # IZUKI 120 Ah, MIGHONG 400 kg). Así cada identidad conserva su spec.
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/":
@@ -101,7 +95,7 @@ OVERRIDES = {
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/":
         ("CYT 80 KM", "CYT"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/":
-        ("RALLY CARGA 800", "RALLY"),
+        ("RALLY 800", "RALLY"),
     "https://mundoenvio.com/tienda/envio-a-cuba-de-triciclo-electrico/":
         ("FUGUIGUAN", "FUGUIGUAN"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-3/":
@@ -111,7 +105,7 @@ OVERRIDES = {
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-4/":
         ("ONEBOT", "ONEBOT"),
     "https://mundoenvio.com/tienda/triciclo-electrico-de-carga/":
-        ("MINGHONG", "MINGHONG"),
+        ("MIGHONG", "MIGHONG"),
     "https://mundoenvio.com/tienda/triciclo-pasajero-para-cuba/":
         ("HUAIHAI", "HUAIHAI"),
     "https://mundoenvio.com/tienda/triciclo-marca-sotek/":
@@ -134,28 +128,28 @@ OVERRIDES = {
     "https://patuisla.com/producto/triciclo-electrico-panel-solar/":
         ("RICKSHAW", None),
     "https://patuisla.com/producto/triciclos-electricos-para-cuba-3/":
-        ("RALLY CARGA", "RALLY"),
+        ("RALLY", "RALLY"),
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-2/":
-        ("FUGUIGUAN EXTENSOR", "FUGUIGUAN"),
+        ("FUGUIGUAN", "FUGUIGUAN"),
     "https://patuisla.com/producto/vedca-c800/":
         ("VEDCA C800", "VEDCA"),
     # Francis Motors
     "https://francismotors.org/triciclos/blue-carga-1000w/":
-        ("BLUE CARGA 1000W", None),
+        ("BLUE 1000W", None),
     "https://francismotors.org/triciclos/bravo-250-cc/":
         ("BRAVO 250 CC", None),
     "https://francismotors.org/triciclos/dg-blue-72v/":
         ("DG BLUE 72V", None),
     "https://francismotors.org/triciclos/fenix-hibrido/":
-        ("FENIX HIBRIDO", None),
+        ("FENIX", None),
     "https://francismotors.org/triciclos/hercules-pro/":
-        ("HERCULES PRO HIBRIDO 72V 85AH", "HERCULES"),
+        ("HERCULES PRO 72V 85AH", "HERCULES"),
     "https://francismotors.org/triciclos/phantom-200cc/":
         ("PHANTOM 200CC", None),
     "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/":
-        ("TIGER 1800W HIBRIDO 72V 65AH", "TIGER"),
+        ("TIGER 1800W 72V 65AH", "TIGER"),
     "https://francismotors.org/triciclos/tiger-hibrido/":
-        ("TIGER HIBRIDO", "TIGER"),
+        ("TIGER", "TIGER"),
     "https://francismotors.org/triciclos/topmaq-2000w/":
         ("TOPMAQ 2000W", "TOPMAQ"),
     "https://francismotors.org/triciclos/trion-fm-151/":
@@ -170,9 +164,39 @@ OVERRIDES = {
         ("TIGER", "TIGER"),
     # Zona Libre Online
     "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/":
-        ("ABL PANEL SOLAR", "ABL MOTORS"),
+        ("ABL", "ABL MOTORS"),
     "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/":
         ("MISHOZUKI E-CARGO 8000W", "MISHOZUKI"),
+    # ---- Limpieza de descriptores y grafías (decisión del usuario, 2026-10-31) ----
+    # MINGHONG/MIGHONG es la misma marca y el mismo modelo; se unifica en la
+    # grafía mayoritaria de las fuentes (MIGHONG, 4 fichas frente a 2). La
+    # capacidad (400/600 KG) se conserva como sufijo de variante.
+    "https://compramasonline.com/tienda/triciclo-electrico-de-carga-minghong/":
+        ("MIGHONG", "MIGHONG"),
+    # FUGUIQUAN/FUGUIGUAN: misma marca y modelo; grafía mayoritaria FUGUIGUAN
+    # (MundoEnvío y Patuisla frente a CompraMasonline).
+    "https://compramasonline.com/tienda/triciclo-electrico-para-cuba/":
+        ("FUGUIGUAN", "FUGUIGUAN"),
+    # MOSHOZUKI/MISHOZUKI: la ficha de KikiHabana titula "Mishozuki" y la de
+    # Patuisla también; MOSHOZUKI es la variante aislada.
+    "https://kikihabana.com/producto/triciclo-electrico-para-cuba-3/":
+        ("MISHOZUKI ULTRA", "MISHOZUKI"),
+    # VEDCA C800B: FOTOVOLTAICO es un aditamento (panel solar), no el modelo.
+    "https://islagrande.com/triciclo-electrico-carga-pasajeros-c800b-fotovoltaico-lifepo4-60v-90ah-habana.html":
+        ("VEDCA C800B", "VEDCA"),
+    # MZ Products: "MZ PRODUCTS" ya está en el campo `marca`; no se repite en
+    # el nombre del modelo. E-CARGO POWER y E-CARGO ULTRA sí son líneas
+    # distintas (así las titula la tienda).
+    "https://www.mzproducts.com/producto/triciclo-electrico-100a-mz-products-cargo/":
+        ("E-CARGO", "MZ PRODUCTS"),
+    "https://www.mzproducts.com/producto/triciclo-electrico-72v-60-ah-2500w-mz-products/":
+        ("E-CARGO", "MZ PRODUCTS"),
+    "https://www.mzproducts.com/producto/triciclo-electrico-72v-80ah-mz-products-cargo/":
+        ("E-CARGO", "MZ PRODUCTS"),
+    "https://www.mzproducts.com/producto/triciclo-electrico-72v-100ah-e-cargo-ultra-mz-products/":
+        ("E-CARGO POWER", "MZ PRODUCTS"),
+    "https://www.mzproducts.com/producto/triciclo-electrico-72v-80ah-e-cargo-ultra-mz-products/":
+        ("E-CARGO ULTRA", "MZ PRODUCTS"),
 }
 
 # ---- Productos que el usuario decidió dejar fuera (2026-10-19) ----
@@ -185,7 +209,7 @@ EXCLUIDOS = {
         "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; "
         "excluido por decisión del usuario (2026-10-19).",
     # CompraMasonline: ficha sin modelo propio ('TRICICLO ELÉCTRICO DE CARGA')
-    # que cae en la marca MINGHONG y duplica la identidad del otro MINGHONG
+    # que cae en la marca MIGHONG y duplica la identidad del otro MIGHONG
     # con distinto precio ($2.500 vs $2.580). Se excluye el genérico y se
     # conserva el que sí se puede nombrar (decisión del usuario, 2026-10-31).
     "https://compramasonline.com/tienda/triciclo-electrico-de-carga/":
@@ -264,6 +288,19 @@ def _nombres_crudos(rel):
     return res
 
 
+def _norm_marca(marca):
+    """Marca en mayúsculas y sin espacios repetidos (None si está vacía).
+
+    No aplica alias semánticos: eso vive en `norm_modelo.MARCA_ALIAS` y se
+    decide caso por caso. Aquí solo se evita que la misma marca aparezca como
+    'Hercules' y 'HERCULES' en la tabla.
+    """
+    if marca is None:
+        return None
+    m = " ".join(str(marca).upper().split())
+    return m or None
+
+
 def main():
     check = "--check" in sys.argv
     por_url = {}
@@ -299,11 +336,13 @@ def main():
                 continue
             if url in OVERRIDES:
                 modelo, marca = OVERRIDES[url]
-                por_url[url] = {"modelo": modelo, "marca": marca, "origen": "manual"}
+                por_url[url] = {"modelo": modelo, "marca": _norm_marca(marca),
+                                "origen": "manual"}
                 continue
             if url in VARIANTES:
                 modelo, marca = VARIANTES[url]
-                por_url[url] = {"modelo": modelo, "marca": marca, "origen": "variante"}
+                por_url[url] = {"modelo": modelo, "marca": _norm_marca(marca),
+                                "origen": "variante"}
                 continue
 
             if conteo.get(url, 0) > 1:
@@ -319,14 +358,14 @@ def main():
                     "match": match,
                     "propulsion": (r.get("propulsion") or "").lower(),
                     "modelo": r.get("modelo"),
-                    "marca": r.get("marca"),
+                    "marca": _norm_marca(r.get("marca")),
                     "origen": "curado",
                 })
                 continue
 
             por_url[url] = {
                 "modelo": r.get("modelo"),
-                "marca": r.get("marca"),
+                "marca": _norm_marca(r.get("marca")),
                 "origen": "curado",
             }
             if f.name in SIN_CURAR:
@@ -341,7 +380,8 @@ def main():
     # esté en clean_data (p.ej. un producto recién captado por el scraper):
     # son decisiones del usuario sobre un producto concreto.
     for url, (modelo, marca) in OVERRIDES.items():
-        por_url.setdefault(url, {"modelo": modelo, "marca": marca, "origen": "manual"})
+        por_url.setdefault(url, {"modelo": modelo, "marca": _norm_marca(marca),
+                                 "origen": "manual"})
 
     data = {
         "version": "2026-10-19",

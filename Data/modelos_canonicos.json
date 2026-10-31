@@ -17,7 +17,7 @@
     },
     "https://compramasonline.com/tienda/triciclo-de-carga-rally/": {
       "marca": "RALLY",
-      "modelo": "RALLY HIBRIDO",
+      "modelo": "RALLY",
       "origen": "manual"
     },
     "https://compramasonline.com/tienda/triciclo-de-pasajeros-changli/": {
@@ -26,9 +26,9 @@
       "origen": "curado"
     },
     "https://compramasonline.com/tienda/triciclo-electrico-de-carga-minghong/": {
-      "marca": "MINGHONG",
-      "modelo": "MINGHONG",
-      "origen": "curado"
+      "marca": "MIGHONG",
+      "modelo": "MIGHONG",
+      "origen": "manual"
     },
     "https://compramasonline.com/tienda/triciclo-electrico-mighong-con-panel-solar/": {
       "marca": "MIGHONG",
@@ -46,9 +46,9 @@
       "origen": "curado"
     },
     "https://compramasonline.com/tienda/triciclo-electrico-para-cuba/": {
-      "marca": "FUGUIQUAN",
-      "modelo": "FUGUIQUAN",
-      "origen": "curado"
+      "marca": "FUGUIGUAN",
+      "modelo": "FUGUIGUAN",
+      "origen": "manual"
     },
     "https://cubancargos.com/triciclos/electricos-cuba/porto-bello-panel-solar": {
       "marca": "PORTO BELLO",
@@ -152,7 +152,7 @@
     },
     "https://francismotors.org/triciclos/blue-carga-1000w/": {
       "marca": null,
-      "modelo": "BLUE CARGA 1000W",
+      "modelo": "BLUE 1000W",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/bravo-250-cc/": {
@@ -167,12 +167,12 @@
     },
     "https://francismotors.org/triciclos/fenix-hibrido/": {
       "marca": null,
-      "modelo": "FENIX HIBRIDO",
+      "modelo": "FENIX",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/hercules-pro/": {
       "marca": "HERCULES",
-      "modelo": "HERCULES PRO HIBRIDO 72V 85AH",
+      "modelo": "HERCULES PRO 72V 85AH",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/phantom-200cc/": {
@@ -182,12 +182,12 @@
     },
     "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/": {
       "marca": "TIGER",
-      "modelo": "TIGER 1800W HIBRIDO 72V 65AH",
+      "modelo": "TIGER 1800W 72V 65AH",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/tiger-hibrido/": {
       "marca": "TIGER",
-      "modelo": "TIGER HIBRIDO",
+      "modelo": "TIGER",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/topmaq-2000w/": {
@@ -262,8 +262,8 @@
     },
     "https://islagrande.com/triciclo-electrico-carga-pasajeros-c800b-fotovoltaico-lifepo4-60v-90ah-habana.html": {
       "marca": "VEDCA",
-      "modelo": "VEDCA C800B FOTOVOLTAICO",
-      "origen": "variante"
+      "modelo": "VEDCA C800B",
+      "origen": "manual"
     },
     "https://islagrande.com/triciclo-electrico-carga-pasajeros-c800b-lifepo4-60v-90ah-habana.html": {
       "marca": "VEDCA",
@@ -291,9 +291,9 @@
       "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-3/": {
-      "marca": "MOSHOZUKI",
-      "modelo": "MOSHOZUKI ULTRA",
-      "origen": "curado"
+      "marca": "MISHOZUKI",
+      "modelo": "MISHOZUKI ULTRA",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba-2/": {
       "marca": "BD",
@@ -312,8 +312,8 @@
     },
     "https://kikihabana.com/producto/triciclos-para-cuba/": {
       "marca": "RALLY",
-      "modelo": "RALLY CARGA",
-      "origen": "variante"
+      "modelo": "RALLY",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/trriciclos-electricos-para-cuba/": {
       "marca": "HUAIHAI",
@@ -323,14 +323,14 @@
     "https://mrcubamiami.com/": {
       "opciones": [
         {
-          "marca": "Hercules",
+          "marca": "HERCULES",
           "match": "",
           "modelo": null,
           "origen": "curado",
           "propulsion": "electrico"
         },
         {
-          "marca": "Tiger",
+          "marca": "TIGER",
           "match": "",
           "modelo": null,
           "origen": "curado",
@@ -344,8 +344,8 @@
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-de-carga/": {
-      "marca": "MINGHONG",
-      "modelo": "MINGHONG",
+      "marca": "MIGHONG",
+      "modelo": "MIGHONG",
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-mighong-con-panel-solar/": {
@@ -370,7 +370,7 @@
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/": {
       "marca": "RALLY",
-      "modelo": "RALLY CARGA 800",
+      "modelo": "RALLY 800",
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/": {
@@ -395,7 +395,7 @@
     },
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-2/": {
       "marca": "FUGUIGUAN",
-      "modelo": "FUGUIGUAN EXTENSOR",
+      "modelo": "FUGUIGUAN",
       "origen": "manual"
     },
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-3/": {
@@ -430,7 +430,7 @@
     },
     "https://patuisla.com/producto/triciclos-electricos-para-cuba-3/": {
       "marca": "RALLY",
-      "modelo": "RALLY CARGA",
+      "modelo": "RALLY",
       "origen": "manual"
     },
     "https://patuisla.com/producto/triciclos-electricos-para-cuba/": {
@@ -650,28 +650,28 @@
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-100a-mz-products-cargo/": {
       "marca": "MZ PRODUCTS",
-      "modelo": "E-CARGO MZ PRODUCTS",
-      "origen": "curado"
+      "modelo": "E-CARGO",
+      "origen": "manual"
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-72v-100ah-e-cargo-ultra-mz-products/": {
       "marca": "MZ PRODUCTS",
-      "modelo": "E-CARGO POWER MZ PRODUCTS",
-      "origen": "curado"
+      "modelo": "E-CARGO POWER",
+      "origen": "manual"
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-72v-60-ah-2500w-mz-products/": {
       "marca": "MZ PRODUCTS",
-      "modelo": "E-CARGO MZ PRODUCTS",
-      "origen": "curado"
+      "modelo": "E-CARGO",
+      "origen": "manual"
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-72v-80ah-e-cargo-ultra-mz-products/": {
       "marca": "MZ PRODUCTS",
-      "modelo": "E-CARGO ULTRA MZ PRODUCTS",
-      "origen": "curado"
+      "modelo": "E-CARGO ULTRA",
+      "origen": "manual"
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-72v-80ah-mz-products-cargo/": {
       "marca": "MZ PRODUCTS",
-      "modelo": "E-CARGO MZ PRODUCTS",
-      "origen": "curado"
+      "modelo": "E-CARGO",
+      "origen": "manual"
     },
     "https://www.mzproducts.com/producto/triciclo-electrico-combustion-200cc-mz-products-c-runer/": {
       "marca": "MZ PRODUCTS",
@@ -680,7 +680,7 @@
     },
     "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/": {
       "marca": "ABL MOTORS",
-      "modelo": "ABL PANEL SOLAR",
+      "modelo": "ABL",
       "origen": "manual"
     },
     "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/": {
