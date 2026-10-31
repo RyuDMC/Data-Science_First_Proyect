@@ -131,7 +131,9 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
   3. Buscar fuentes alternativas en `Data/Posibles fuentes de datos.md`
 - **Etiquetas:** debugging, scraping, cloudflare, dns-fail, cubancargos, revolico, fuentes-caidas
 
----### Entrada de diario
+---
+
+### Entrada de diario
 
 - **Fecha/contexto:** 2026-10-07 — sesión en opencode; continúa el debugging del scraping
 - **Tarea:** El usuario reporta "el scraping no extrajo ningún registro"; corregir el pipeline scraper → JSONL → score
@@ -152,7 +154,9 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
   4. Trabajo de campo sin empezar: `Data/registro_ubicaciones.csv` sigue con solo cabecera
 - **Etiquetas:** scraping, duplicados, casalindashop, cubancargos, hibrido, dato-inventado-eliminado, imputacion-neutra, codes-vs-data, cobertura-de-criterios
 
----### Entrada de diario
+---
+
+### Entrada de diario
 
 - **Fecha/contexto:** 2026-10-07 (misma sesión) — el usuario pide: "utilizando como base las páginas que ya scrapeaste, busca otras que sean validas y tambien puedas scrapear"
 - **Tarea:** Sondear candidatas de `Data/Posibles fuentes de datos.md` y búsqueda web, e incorporar al scraper solo las que devuelvan 200 con triciclos realmente listados.
@@ -623,3 +627,17 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** el mismo nombre comercial puede esconder specs incompatibles entre vendedores; separar por el dato declarado evita promedios que nadie publicó
 - **Próxima vez:** revisar/commitear los 5 JSONL nuevos, sus copias en `clean_data`, los scrapers, la tabla canónica y las páginas del reporte
 - **Etiquetas:** empresas, scrapers, canonicos, variantes, reporte, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cierre documental) — tras aplicar el split de variantes y la revisión final del reporte
+- **Tarea:** dejar `HANDOFF.md` y el diario sincronizados con el estado real antes de que el usuario commitee
+- **Acción(es):**
+  1. Confirmado el split RALLY/CYT/MIGHONG/IZUKI en `crear_canonicos.py`; ninguna identidad multi-fuente queda con specs declaradas distintas
+  2. Verificación final: `AppTest` 11/11, `parse_campo --check` OK, `norm_modelo --migrar` sin heurísticos, copias `empresas/`↔`clean_data/` idénticas, score 42 filas intacto
+  3. Corregidos dos encabezados mal formados del diario (`---### Entrada` → `---` + `### Entrada`)
+- **Resultado:** documentación al día; 68 fichas / 10 catálogos, 137 canónicos (126 con nombre, 3 excluidos)
+- **Error/éxito:** Éxito. Sin cambios de datos en este paso
+- **Lección:** el cierre documental debe registrar el HEAD real y qué queda sin commitear, no solo las cifras
+- **Próxima vez:** revisar/commitear; no tocar `Data/raw_data/data_personas.txt` (PII)
+- **Etiquetas:** journaling, handoff, cierre, git, verificacion

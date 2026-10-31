@@ -16,11 +16,11 @@
 - **Scoring intacto:** los scores son idénticos (mismo md5 de la columna `score`); TOPMAQ BRIDERK 0.786 > ONEBOT CLASIC 0.775 > KIVITOVA GELPB 0.723.
 - **Empresas integradas (A + B, decisión del usuario 2026-10-31):** (A) los 10 catálogos suman fuentes al `repuestos_proxy` (sigue en 9/42: no hay modelo que cruce); (B) `integrar_empresas()` añade a `score_modelos.csv` contexto que **no entra al score**: `n_empresas`, `precio_empresa_med`, `en_catalogo` (nivel modelo) y `marca_en_catalogo`, `n_empresas_marca` (nivel marca). Se muestran en Ranking y Contendientes.
 - **Hallazgo:** ningún modelo de catálogo coincide con la identidad de un anuncio. A nivel de marca cruzan **ONEBOT, TOPMAQ, VEDCA y MISHOZUKI**; el resto son marcas de importación que no aparecen en los clasificados. No se fuerza la equivalencia por marca ni modelo.
-- **Verificado:** `AppTest` 11/11 sin excepciones; `parse_campo --check` OK; `crear_canonicos --check` estable; `norm_modelo --migrar` deja 0 heurísticos y 0 "revisar"; el score sigue idéntico (42 filas).
-- **Git:** HEAD `e406bf9`. **Nada commiteado** (modificados + nuevos, incluidos los 5 JSONL nuevos de empresas, `scrape_empresas.py`, `norm_modelo.py`, `crear_canonicos.py`, `modelos_canonicos.json`, las páginas del reporte y el diario).
+- **Verificado (revisión final 2026-10-31):** `AppTest` 11/11 sin excepciones (re-ejecutado tras el split de variantes y los ajustes de texto); `parse_campo --check` OK (30 registros, 5 municipios); `crear_canonicos --check` estable; `norm_modelo --migrar` deja 0 heurísticos y 0 "revisar"; las 10 copias de `Data/empresas/` en `clean_data/` son idénticas; el score sigue idéntico (42 filas).
+- **Git:** HEAD `35e740a` (commit del usuario "massive update"). **Queda sin commitear esta ronda:** los 5 JSONL nuevos de empresas y sus copias en `clean_data/`, `scrape_empresas.py`, `norm_modelo.py`, `crear_canonicos.py`, `modelos_canonicos.json`, `score_modelos.csv`, las páginas del reporte, este `HANDOFF.md` y el diario. El usuario revisa y commitea.
 
 ## 3. Pendiente
-1. **Revisar y commitear** todo lo de esta sesión (campo + 5 catálogos nuevos: `Data/empresas/{mundoenvio,patuisla,francismotors,bluewavecuba,zonalibreonline}.jsonl` y sus copias en `clean_data`, scrapers y tabla canónica).
+1. **Revisar y commitear** todo lo de esta sesión (campo + 5 catálogos nuevos: `Data/empresas/{mundoenvio,patuisla,francismotors,bluewavecuba,zonalibreonline}.jsonl` y sus copias en `clean_data`, scrapers, tabla canónica y el split de variantes ya aplicado).
 2. **Decidir si `Data/empresas/` entra al scoring completo** (hoy solo da contexto; si entra, los 3 E-CARGO y 2 FLY RACING se agregarían y habría que publicar el antes/después).
 3. **Campo: nada más que hacer** — no reabrir la captación ni prometer 15 municipios en el reporte.
 4. Heredados: `use_container_width` → `width="stretch"` (Streamlit 1.66), `precio_texto_usd` (3 contradictorios), conflicto VEDCA C400, MAGIKBIKE, Mr Cuba (Wix frágil), `vedca.cu` caído, llevar `Data/fuentes_justificacion.md` a `2_Metodo`, deploy.
@@ -30,7 +30,7 @@
 - **Pipeline:** `codes/scrape_triciclos.py` (anuncios) · `codes/parse_fb.py` · `codes/scrape_empresas.py` (10 catálogos) · `codes/parse_campo.py` · `codes/analisis.py` (scoring) · `codes/analisis_campo.py` (campo) · `codes/norm_modelo.py` + `codes/crear_canonicos.py` (identidad).
 - **Datos:** `Data/raw_data/` (crudo, PII ignorada) · `Data/empresas/*.jsonl` (10) · `Data/clean_data/` (JSONL + `score_modelos.csv` + `campo_resumen.csv` + `campo_uso.csv`) · `Data/modelos_canonicos.json` (137).
 - **Reporte:** `reporte/app.py`, `reporte/data.py`, `reporte/theme.py`, `reporte/pages/*` (10 páginas).
-- **Docs:** `Data/Posibles fuentes de datos.md`, `Data/Links de Referencias.md`, `Data/fuentes_justificacion.md` · Diario `opencode/Journaing_file.md` (32 entradas).
+- **Docs:** `Data/Posibles fuentes de datos.md`, `Data/Links de Referencias.md`, `Data/fuentes_justificacion.md` · Diario `opencode/Journaing_file.md` (33 entradas).
 - **Orden de ejecución:** `scrape_triciclos` → `parse_fb` → `crear_canonicos` (instala `OVERRIDES` nuevos) → `scrape_empresas` → `parse_campo` → `norm_modelo --migrar` → `crear_canonicos` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `parse_campo --check` → `streamlit run reporte/app.py`.
 - **Pesos (no cambiar sin decisión):** precio 0.40, autonomía 0.25, carga 0.20, legalidad 0.10, repuestos 0.05; min-max intra-propulsión; ausentes 0.5 + `n_criterios`. **No comparar scores entre propulsiones.**
 
