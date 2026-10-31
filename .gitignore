@@ -27,3 +27,7 @@ Thumbs.db
 
 # Data - raw_data is committed, clean_data is generated
 # Data/clean_data/   # uncoment if you don't want generated data in repo
+
+# Datos personales del trabajo de campo (nombre + carné de identidad).
+# Se ingieren con codes/parse_campo.py y NUNCA entran al repo público.
+Data/raw_data/data_personas.txt
