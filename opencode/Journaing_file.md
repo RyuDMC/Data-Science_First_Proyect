@@ -641,3 +641,35 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** el cierre documental debe registrar el HEAD real y qué queda sin commitear, no solo las cifras
 - **Próxima vez:** revisar/commitear; no tocar `Data/raw_data/data_personas.txt` (PII)
 - **Etiquetas:** journaling, handoff, cierre, git, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (corrección de identidad) — el usuario confirma que `JINPEING` y `JINPENG` son lo mismo
+- **Tarea:** corregir la errata en el origen y propagarla sin tocar specs ni scoring
+- **Acción(es):**
+  1. **`codes/crear_canonicos.py`:** `OVERRIDES` de la URL de cubancargos → `("JINPENG", "JINPENG")`; se regenera `Data/modelos_canonicos.json` sin cambios de conteo (137 productos / 126 con nombre / 3 excluidos)
+  2. **`codes/scrape_triciclos.py`:** `normalize_modelo()` traduce `JINPEING`/`JEINPEING` a `JINPENG` y `_marca_from_titulo()` devuelve la marca corregida, para que las próximas capturas nazcan bien
+  3. **`codes/norm_modelo.py`:** alias de modelo de seguridad `JINPEING`/`JEINPEING → JINPENG`; se corrige el comentario de `MARCA_ALIAS` (la errata viene de cubancargos, no de elyerromenu)
+  4. **Migración:** `norm_modelo.py --migrar` renombra `modelo` y `marca` en `raw_data/anuncios_triciclos.jsonl` y en `clean_data/`; `analisis.py` regenera el score con la fila `JINPENG` (híbrido) en lugar de `JINPEING`
+  5. **`reporte/pages/2_Metodo.py`:** aclara que `JINPEING` era una errata de JINPENG, no una marca aparte
+- **Resultado:** no queda `JINPEING` en la tabla canónica, `raw_data` ni `clean_data`; el score mantiene 42 filas y los mismos valores (solo cambia el nombre); `AppTest` 11/11; `parse_campo --check` OK
+- **Error/éxito:** Éxito. El híbrido de cubancargos (1100 W, 72 V/89 Ah, $4.751) sigue separado del JINPENG eléctrico (60 V/45 Ah, $3.300): la propulsión y las specs no se tocaron
+- **Lección:** una errata en el título puede crear una identidad falsa; corregirla en la tabla canónica y en el scraper evita que reaparezca en la próxima captura
+- **Próxima vez:** revisar/commitear; decidir si se elimina el `Data/score_modelos.csv` legado de la raíz (no lo lee el reporte y aún conserva `JINPEING`)
+- **Etiquetas:** identidad, canonicos, jinpeng, errata, scraping, score, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (limpieza de nombres) — el usuario pide quitar `PASAJE` y palabras similares de los nombres de modelo
+- **Tarea:** eliminar los descriptores de uso del nombre canónico sin editar los JSONL a mano y dejando el reporte coherente
+- **Acción(es):**
+  1. **Búsqueda:** solo dos modelos tenían el descriptor: `OIM PASAJE` (elyerromenu) y `RALLY PASAJEROS` (KikiHabana). El resto de apariciones eran URLs o la categoría de uso `pasajeros`, no nombres de modelo
+  2. **`codes/crear_canonicos.py`:** se movieron ambos casos de `VARIANTES` a `OVERRIDES`: `OIM PASAJE → OIM` y `RALLY PASAJEROS → RALLY`; se documenta que `PASAJE`/`PASAJEROS` son descriptores de uso
+  3. **`codes/norm_modelo.py`:** se actualizaron los ejemplos y la nota de “no fusionar”; `RALLY / RALLY CARGA` sustituye a `OIM / OIM PASAJE` como ejemplo de productos distintos
+  4. **`reporte/pages/2_Metodo.py`:** nueva fila “Descriptores de uso” y ejemplos de variantes actualizados (VEDCA C800B / FOTOVOLTAICO); el caption ya no usa OIM como ejemplo de separación
+  5. **Conteos:** el ranking pasa de 42 a **41 filas (40 nombres)**; `score_modelos.csv` se regenera; OIM queda como una sola identidad con 2 anuncios ($3.400 y $3.500, mediana $3.450) y score 0.645 (antes 0.651 y 0.640 por separado). Se actualizaron README, página 2, página 10 y HANDOFF a 41 modelos / 9 de 41 con repuestos_proxy
+- **Resultado:** ningún `modelo` de la tabla canónica, `raw_data` o `clean_data` contiene `PASAJE`/`PASAJEROS`; las URLs de origen se conservan. `AppTest` 11/11; `parse_campo --check` OK; `crear_canonicos --check` estable (2 variantes separadas)
+- **Error/éxito:** Éxito. La fusión de OIM es la consecuencia esperada de quitar un descriptor de uso: las dos fichas comparten batería (60 V/58 Ah GELPB) y autonomía (70 km); el precio distinto se conserva como dos ofertas, no como dos productos
+- **Lección:** los descriptores de uso (`pasaje`, `pasajeros`, `carga`) no deben formar parte de la identidad del modelo; si dos fichas solo se distinguen por eso, se agregan y el precio se trata como oferta
+- **Próxima vez:** revisar/commitear; decidir si se elimina el `Data/score_modelos.csv` legado de la raíz
+- **Etiquetas:** identidad, canonicos, limpieza, pasaje, oim, rally, score, verificacion

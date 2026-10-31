@@ -44,13 +44,13 @@ limitaciones = pd.DataFrame({
     ],
     "Qué significa": [
         "Anuncios y catálogos miden **oferta declarada**, no triciclos rodando. Un modelo muy anunciado puede no ser el más común en calle.",
-        "42 modelos en el ranking (41 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 68 fichas empresas (10 catálogos). Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
+        "41 modelos en el ranking (40 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 68 fichas empresas (10 catálogos). Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
         "Fuentes: clasificados (Revolico), tiendas WooCommerce, Telegram, Facebook. No cubren mercado informal completo ni todas las MIPYMEs.",
         "La muestra de calle es **final**: 30 observaciones en 5 de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n=30 los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
         "Un modelo extremo (muy barato/muy caro) mueve la escala de **todo el grupo**. Al añadir Facebook, el ranking eléctrico cambió.",
         "Ausentes → 0.5 neutro + n_criterios. No castiga, pero oculta que el score se basa en menos evidencia. Ver columna n_criterios.",
-        "9/42 modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
+        "9/41 modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
     ],
     "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "BAJO"]
 })
@@ -96,7 +96,7 @@ st.markdown("""
 | **Trabajo de campo en los 15 municipios** | *Cerrado: no se hará.* La muestra actual (5 municipios) solo describe la muestra; no responde "el más común de La Habana". |
 | **Más anuncios por modelo** (n ≥ 5) | Scores más estables, n_criterios → 5 para más modelos. |
 | **Precios reales de transacción** (no solo listados) | Precio mediano más representativo, menos sesgo vendedor. |
-| **Datos de repuestos reales** (talleres, importadores) | Criterio repuestos significativo (hoy solo 9/42 modelos tienen >1 fuente). |
+| **Datos de repuestos reales** (talleres, importadores) | Criterio repuestos significativo (hoy solo 9/41 modelos tienen >1 fuente). |
 | **VEDCA.cu operativo** | Catálogo oficial completo, specs de fabricante, precios vigentes CUP/USD. |
 | **Todas las MIPYMEs** (MVP, Kvitova, etc.) | Cobertura real de oferta formal en Cuba. |
 | **Histórico de precios 12+ meses** | Tendencias, estacionalidad, inflación real USD/CUP. |
@@ -141,7 +141,7 @@ st.markdown("""
 | `anuncios_facebook.jsonl` | parse_fb.py | 2026-10-19 | 29 | 1 excluido (Artemisa) |
 | `empresas_*.jsonl` (10) | scrape_empresas.py | 2026-10-31 | 68 | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
 | `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 137 productos | Fuente de verdad de la identidad (3 excluidos) |
-| `score_modelos.csv` | analisis.py | 2026-10-19 | 42 filas (41 nombres) | Recalculado tras la limpieza de nombres |
+| `score_modelos.csv` | analisis.py | 2026-10-19 | 41 filas (40 nombres) | Recalculado tras la limpieza de nombres |
 | `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | 2026-10-25 | 30 | 5/15 municipios; sin datos personales |
 
 **Corte propuesto para reporte final:** 30 noviembre 2026

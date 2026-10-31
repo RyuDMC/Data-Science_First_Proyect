@@ -29,9 +29,10 @@ Regla (curada por el usuario el 2026-10-19, tras revisar los datos)
     CYT, KIVITOVA, MAF, LAITUNG, STAR, JINPEN, Hercules, Tiger...).
 
 Dos productos con el mismo nombre pero specs distintas NO se fusionan: se
-separan con un sufijo de variante (OIM / OIM PASAJE, RALLY PASAJEROS /
-RALLY CARGA, E-CARGO 80AH / 60AH / 100AH, VEDCA C800B / VEDCA C800B
-FOTOVOLTAICO). Cada uno se cuenta por separado.
+separan con un sufijo de variante (RALLY / RALLY CARGA, E-CARGO 80AH / 60AH /
+100AH, VEDCA C800B / VEDCA C800B FOTOVOLTAICO). Cada uno se cuenta por
+separado. Los descriptores de uso ("PASAJE", "PASAJEROS") no son nombre de
+modelo y se eliminan.
 
 Cómo se aplica
 --------------
@@ -270,10 +271,16 @@ def url_excluido(url, canon=None):
 #
 # NO fusionar (decisión del usuario):
 #   - STAR: el eléctrico de Facebook y el híbrido de elyerromenu.
-#   - OIM / OIM PASAJE: dos productos distintos.
+#   - RALLY / RALLY CARGA: pasajeros y carga son productos distintos.
 #   - JINPENG (eléctrico), JINPEN (híbrido), TY150UK (Jimpeng): tres productos.
+#     OJO: "JINPEING" NO es un producto aparte: es una errata de JINPENG.
 #   - DDS-OD: marca KIVITOVA, pero modelo distinto de KIVITOVA.
 ALIAS_MODELOS = {
+    # Cubancargos titula "JINPEING" (errata confirmada por el usuario,
+    # 2026-10-31). La tabla canónica ya lo corrige por URL; este alias
+    # protege cualquier registro que llegue sin pasar por ella.
+    "JINPEING": "JINPENG",
+    "JEINPEING": "JINPENG",
     # Facebook "BRIDERK" / "TOPMAQ" + elyerromenu "TOPMAQ BRIDERK 2026"
     "BRIDERK": "TOPMAQ BRIDERK 2026 GELPB",
     "BRIDERK GELPB": "TOPMAQ BRIDERK 2026 GELPB",
@@ -316,7 +323,7 @@ MARCA_ALIAS = {
     "KVITOVA": "KIVITOVA",      # hoja de campo
     "MAGICBIKE": "MAGIC BIKE",  # hoja de campo
     "VELGA": "VEDCA",           # hoja de campo: errata confirmada
-    "JINPEING": "JINPENG",      # anuncio elyerromenu
+    "JINPEING": "JINPENG",      # errata en el título de cubancargos
     "JINPEN": "JINPENG",        # anuncio elyerromenu (híbrido)
     "JIMPENG": "JINPENG",       # anuncio Facebook (producto TY150UK)
 }

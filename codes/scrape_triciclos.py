@@ -301,10 +301,14 @@ def normalize_modelo(text):
         return f"{marca_m.group(1).strip()} {mod_m.group(1)}".strip()
 
     # 2) Códigos de modelo conocidos
-    for k in ["SK-2101", "SK2101", "PORTO BELLO", "JINPEING", "JEINPEING",
-              "FURIKAZAN", "NIPPON SE", "NIPPON"]:
+    for k in ["SK-2101", "SK2101", "PORTO BELLO", "FURIKAZAN",
+              "NIPPON SE", "NIPPON"]:
         if k in u:
             return k
+    # "JINPEING"/"JEINPEING" son erratas de JINPENG (confirmado por el usuario,
+    # 2026-10-31): se corrigen aquí para que raw_data nazca ya normalizado.
+    if "JINPEING" in u or "JEINPEING" in u:
+        return "JINPENG"
 
     # 3) Solo código de modelo: 'MODELO: M005'
     if mod_m:
@@ -1028,7 +1032,8 @@ def _marca_from_titulo(titulo):
               "VEDCA", "ONEBOT", "JINPENG", "JINPEN", "JIPEN", "OIM", "MVP",
               "TOPMAQ", "KVITOVA", "LAITUNG", "RAINBOW", "VIENTO"]:
         if k in u:
-            return k
+            # Errata de la marca JINPENG (confirmada 2026-10-31).
+            return "JINPENG" if k in ("JINPEING", "JEINPEING") else k
     m = re.search(r"MARCA[:\s]+([A-Za-z0-9 ]+?)(?:,|Model|$)", titulo, re.I)
     if m:
         return m.group(1).strip()

@@ -47,7 +47,7 @@ fuentes = pd.DataFrame({
         "Circulación real observada en calle"
     ],
     "Registros": [70, 30, 30],
-    "Unidades": ["42 modelos", "68 fichas", "12 marcas"],
+    "Unidades": ["41 modelos", "68 fichas", "12 marcas"],
     "Cobertura": [
         "6 fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
         "10 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline, MundoEnvío, Patuisla, Francis Motors, Bluewave Logistic, Zona Libre Online",
@@ -58,9 +58,9 @@ fuentes = pd.DataFrame({
 st.dataframe(fuentes, use_container_width=True, hide_index=True)
 
 st.caption(
-    "El ranking tiene **42 filas** porque el mismo nombre puede aparecer en dos "
+    "El ranking tiene **41 filas** porque el mismo nombre puede aparecer en dos "
     "propulsiones (el STAR eléctrico y el STAR híbrido son productos "
-    "distintos): 41 nombres distintos, 42 modelos en el scoring."
+    "distintos): 40 nombres distintos, 41 modelos en el scoring."
 )
 
 st.markdown("---")
@@ -182,16 +182,19 @@ st.dataframe(alias_df, use_container_width=True, hide_index=True)
 st.caption(
     "Nota: STAR eléctrico (FB) ≠ STAR híbrido (scraper) → NO se fusionan "
     "(la propulsión forma parte de la identidad). Tampoco se fusionan "
-    "OIM / OIM PASAJE, ni DDS-OD (marca KIVITOVA, modelo distinto)."
+    "VEDCA C800B / VEDCA C800B FOTOVOLTAICO, ni DDS-OD (marca KIVITOVA, "
+    "modelo distinto)."
 )
 
 st.markdown("""
 **Alias de marca (eje distinto).** Para comparar con el trabajo de campo —que
 solo lee la marca— existe una tabla aparte, `MARCA_ALIAS`: `ONEBOOT → ONEBOT`,
 `KVITOVA → KIVITOVA`, `MAGICBIKE → MAGIC BIKE`, `VELGA → VEDCA` (errata
-confirmada) y `JINPEING / JINPEN / JIMPENG → JINPENG`. Fusionar la marca **no**
-fusiona productos: JINPENG eléctrico y JINPEN híbrido siguen siendo identidades
-distintas. Al campo no se le aplica ningún alias de *modelo*: afirmar que un
+confirmada) y `JINPEN / JIMPENG → JINPENG`. `JINPEING` no es una marca aparte:
+era una errata de JINPENG en el título de Cubancargos, corregida en el origen
+(tabla canónica). Fusionar la marca **no** fusiona productos: JINPENG eléctrico
+y JINPEN híbrido siguen siendo identidades distintas. Al campo no se le aplica
+ningún alias de *modelo*: afirmar que un
 ONEBOT visto en calle es el "ONEBOT CLASIC 2026" sería inventar el modelo.
 """)
 
@@ -212,7 +215,8 @@ identidad_data = [
     ("Marketing / estado", "DISPONIBLE, MAS GRANDE, MEJOR PRECIO, PANEL SOLAR, FOTOVOLTAICO"),
     ("Specs (ya en otros campos)", "72V, 85AH, 1500W, LITHIUM, LIFEPO4, MOTOR, BATERÍA"),
     ("Sin nombre de modelo", "`modelo` = null y la identidad pasa a la MARCA (CHILWEE, CYT, MAF, KIVITOVA…)"),
-    ("Mismo nombre, producto distinto", "Se separan con sufijo de variante y se cuentan aparte (OIM / OIM PASAJE, E-CARGO 80AH / 60AH / 100AH)"),
+    ("Descriptores de uso", "PASAJE / PASAJEROS no identifican el modelo: se quitan del nombre (OIM, RALLY)"),
+    ("Mismo nombre, producto distinto", "Se separan con sufijo de variante y se cuentan aparte (VEDCA C800B / VEDCA C800B FOTOVOLTAICO, E-CARGO 80AH / 60AH / 100AH)"),
     ("Propulsión", "Forma parte de la identidad: mismo nombre + distinta propulsión = productos distintos"),
 ]
 st.dataframe(pd.DataFrame(identidad_data, columns=["Qué se quita / decide", "Regla"]),

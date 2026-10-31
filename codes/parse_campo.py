@@ -106,8 +106,10 @@ USO_MAP = {
 # Erratas de marca: la tabla vive en codes/norm_modelo.py (compartida con los
 # anuncios). Se importa arriba; aquí solo se documenta el porqué.
 
-# No se fusionan (decisión del usuario, 2026-10-19): JINPEN es el híbrido y
-# JIMPENG la grafía de TY150UK. Se dejan como están y se avisan.
+# No se fusionan los PRODUCTOS (decisión del usuario, 2026-10-19): JINPEN es
+# el híbrido y JIMPENG la grafía de TY150UK. La MARCA sí se unifica en
+# `MARCA_ALIAS` (decisión 2026-10-31): JINPEING/JINPEN/JIMPENG -> JINPENG.
+# JINPEING es una errata de JINPENG, no un producto aparte.
 
 # Bloques: "1/ Fecha: 13/10/26" seguido de líneas "clave: valor".
 BLOQUE_RE = re.compile(r"^\s*(\d+)\s*/\s*Fecha:\s*(\d{2})/(\d{2})/(\d{2})\s*$", re.M)

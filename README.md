@@ -12,7 +12,7 @@ Análisis de datos de la oferta y la circulación de triciclos en La Habana.
 
 | Fuente | Qué mide | Registros |
 |---|---|---:|
-| Anuncios online | Oferta y competencia de precios | 70 anuncios · 42 modelos |
+| Anuncios online | Oferta y competencia de precios | 70 anuncios · 41 modelos |
 | Catálogos de empresas | Oferta formal y disponibilidad | 68 fichas · 10 empresas |
 | Trabajo de campo | Circulación observada en calle | 30 observaciones · 5 municipios |
 
@@ -110,10 +110,10 @@ Corte: anuncios 2026-10-19 · catálogos 2026-10-31.
 ## Limitaciones
 
 - Oferta declarada ≠ circulación real.
-- Muestra pequeña: 42 modelos (muchos con n=1) y 30 observaciones de campo en 5 de 15 municipios.
+- Muestra pequeña: 41 modelos (muchos con n=1) y 30 observaciones de campo en 5 de 15 municipios.
 - Las fuentes online no cubren todo el mercado informal ni todas las MIPYMEs.
 - `vedca.cu` está caído; su cobertura es parcial.
-- El proxy de repuestos está activo en 9 de 42 modelos y mide presencia, no stock.
+- El proxy de repuestos está activo en 9 de 41 modelos y mide presencia, no stock.
 
 ## Documentación
 

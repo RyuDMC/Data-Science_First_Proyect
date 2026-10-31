@@ -38,13 +38,8 @@ OUT_PATH = DATA_DIR / "modelos_canonicos.json"
 # empresas entrara en el scoring, se agregarían. Queda anotado como riesgo
 # en el reporte (Limitaciones).
 VARIANTES = {
-    # OIM: el "disponible" ($3.400, 1200 W) y el "de pasaje" ($3.500) son
-    # productos distintos que comparten marca y nombre.
-    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-oim-de-pasaje":
-        ("OIM PASAJE", "OIM"),
-    # RALLY de KikiHabana: uno es de pasajeros (500 kg) y otro de carga (2.000 kg).
-    "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/":
-        ("RALLY PASAJEROS", "RALLY"),
+    # RALLY de KikiHabana: el de carga (2.000 kg) es un producto distinto del
+    # de pasajeros, que ya se llama solo "RALLY" (ver OVERRIDES).
     "https://kikihabana.com/producto/triciclos-para-cuba/":
         ("RALLY CARGA", "RALLY"),
     # VEDCA C800B: el "fotovoltaico" es una variante con panel (precio propio).
@@ -60,6 +55,24 @@ VARIANTES = {
 OVERRIDES = {
     "https://www.acubaenvioscargo.com/tienda/transporte/triciclos-electricos/triciclo-fly-racing-2027/":
         ("FLY RACING 2027", "RACING"),
+    # Cubancargos escribe "JINPEING" en el título y la URL; es una errata de
+    # la marca JINPENG (confirmado por el usuario, 2026-10-31). Se corrige el
+    # nombre canónico en el origen, no el JSONL a mano. El producto sigue
+    # siendo un híbrido distinto del JINPENG eléctrico (la propulsión y las
+    # specs no se tocan).
+    "https://cubancargos.com/triciclos/electricos-cuba/triciclo-jeinpeing":
+        ("JINPENG", "JINPENG"),
+    # "PASAJE"/"PASAJEROS" son descriptores de uso, no nombres de modelo
+    # (decisión del usuario, 2026-10-31): se eliminan del nombre canónico.
+    # OIM: el anuncio "de pasaje" queda en la identidad OIM (misma batería y
+    # autonomía que el "disponible"; el precio distinto se conserva como
+    # oferta, no como producto).
+    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-oim-de-pasaje":
+        ("OIM", "OIM"),
+    # RALLY de KikiHabana: queda RALLY; no colisiona con RALLY CARGA,
+    # RALLY HIBRIDO ni RALLY CARGA 800.
+    "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/":
+        ("RALLY", "RALLY"),
     # RALLY con extensor de rango de CompraMasonline: el título de la tienda
     # trae el accesorio ('... + EXTENSOR DE RANGO'). El extensor queda
     # documentado en el campo `notas` del registro.

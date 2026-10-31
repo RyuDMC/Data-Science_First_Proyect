@@ -77,9 +77,9 @@
       "origen": "curado"
     },
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-jeinpeing": {
-      "marca": "JINPEING",
-      "modelo": "JINPEING",
-      "origen": "curado"
+      "marca": "JINPENG",
+      "modelo": "JINPENG",
+      "origen": "manual"
     },
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-nippon-se": {
       "marca": "NIPPON",
@@ -158,8 +158,8 @@
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-oim-de-pasaje": {
       "marca": "OIM",
-      "modelo": "OIM PASAJE",
-      "origen": "variante"
+      "modelo": "OIM",
+      "origen": "manual"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-topmaq-briderk-2026": {
       "marca": "TOPMAQ",
@@ -323,8 +323,8 @@
     },
     "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/": {
       "marca": "RALLY",
-      "modelo": "RALLY PASAJEROS",
-      "origen": "variante"
+      "modelo": "RALLY",
+      "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclos-para-cuba/": {
       "marca": "RALLY",
