@@ -31,3 +31,5 @@ Thumbs.db
 # Datos personales del trabajo de campo (nombre + carné de identidad).
 # Se ingieren con codes/parse_campo.py y NUNCA entran al repo público.
 Data/raw_data/data_personas.txt
+# Variantes del mismo archivo (p. ej. data_personas_v2.txt) también se ignoran.
+Data/raw_data/*personas*

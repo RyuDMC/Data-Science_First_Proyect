@@ -1,0 +1,29 @@
+{
+  "esquema": 1,
+  "conteos": {
+    "anuncios": 70,
+    "anuncios_scraper": 41,
+    "anuncios_facebook": 29,
+    "fuentes_anuncios": 6,
+    "modelos_ranking": 41,
+    "nombres_modelo": 40,
+    "modelos_con_repuestos": 9,
+    "fichas_empresa": 68,
+    "empresas": 10,
+    "productos_canonicos": 137,
+    "productos_excluidos": 3,
+    "observaciones_campo": 30,
+    "municipios_campo": 5,
+    "marcas_campo": 12
+  },
+  "cortes": {
+    "anuncios": "2026-10-19",
+    "catalogos": "2026-10-31",
+    "campo": "2026-10-25"
+  },
+  "procedencia": {
+    "generado": "2026-10-31T18:13:13-04:00",
+    "commit": "311d71d",
+    "script": "codes/generar_metadata.py"
+  }
+}

@@ -39,6 +39,7 @@ Reporte interactivo de 10 páginas:
 codes/       scrapers, normalización, scoring y análisis de campo
 Data/        datos crudos, catálogos, datos limpios y tablas
 reporte/     app Streamlit multipágina
+tests/       contratos de cifras, privacidad y páginas
 opencode/    handoff y diario de trabajo
 Prompts/     instrucciones y criterios del proyecto
 ```
@@ -69,6 +70,15 @@ python3 codes/norm_modelo.py --migrar
 python3 codes/analisis.py
 python3 codes/analisis_campo.py
 python3 codes/sensibilidad.py         # robustez del ranking (no altera el score)
+python3 codes/generar_metadata.py     # conteos y cortes -> Data/metadata.json
+```
+
+`Data/metadata.json` es la **única fuente de las cifras** que muestran el reporte y el README (70 anuncios, 41 modelos, 68 fichas, 30 observaciones, cortes). Se genera al final del pipeline; no se edita a mano. Si los datos cambian, se regenera y los tests avisan de cualquier desincronización:
+
+```bash
+python3 codes/generar_metadata.py --check   # falla si metadata.json está desactualizado
+pip install -r requirements-dev.txt
+python -m pytest -q tests/
 ```
 
 ## Metodología
@@ -105,8 +115,10 @@ Corte: anuncios 2026-10-19 · catálogos 2026-10-31.
 ## Datos y privacidad
 
 - `Data/clean_data/` se genera desde los scrapers y las tablas de análisis.
-- Los datos personales del trabajo de campo (`Data/raw_data/data_personas.txt`) **no están en el repositorio**.
+- Los datos personales del trabajo de campo (`Data/raw_data/data_personas.txt` y sus variantes `*personas*`) **no están en el repositorio** y están cubiertos por `.gitignore`.
+- `tests/test_privacidad.py` falla si aparece un número de 11 dígitos (carné de identidad) en archivos versionados.
 - Para cambiar un nombre o una variante: `codes/crear_canonicos.py` → `codes/norm_modelo.py --migrar` → `codes/analisis.py`.
+- Tras cambiar datos o nombres: regenerar `Data/metadata.json` y ejecutar `pytest -q tests/`.
 
 ## Limitaciones
 

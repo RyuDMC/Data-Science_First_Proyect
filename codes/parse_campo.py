@@ -15,7 +15,7 @@ real del estudio, pero se anotó en una libreta de texto libre:
        motor: 1500w
        bateria: 72v 58ah
        autonomia: 100km
-       propietario: Nombre Apellido CI: 91010928340
+       propietario: NOMBRE APELLIDO CI: <11 dígitos>
 
 `analisis.py` y el reporte leen `Data/registro_ubicaciones.csv` (11 columnas
 fijas). Este script es el único puente entre ambos, y se aplica en el ORIGEN

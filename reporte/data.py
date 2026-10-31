@@ -3,6 +3,7 @@ Capa de datos para el reporte Streamlit.
 Carga y normaliza datasets desde Data/clean_data/ con st.cache_data.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -21,6 +22,20 @@ from codes.norm_modelo import identidad  # noqa: E402
 
 CLEAN_DIR = REPO_ROOT / "Data" / "clean_data"
 EMPRESAS_DIR = REPO_ROOT / "Data" / "empresas"
+METADATA_PATH = REPO_ROOT / "Data" / "metadata.json"
+
+
+@st.cache_data(show_spinner="Cargando metadatos…")
+def load_metadata() -> dict:
+    """Conteos y cortes del dataset (los genera `codes/generar_metadata.py`).
+
+    Es la única fuente de las cifras que se muestran en portada, Método y
+    Limitaciones. Si el archivo no existe, devuelve {} y las páginas muestran
+    "—" en vez de romperse.
+    """
+    if not METADATA_PATH.exists():
+        return {}
+    return json.loads(METADATA_PATH.read_text(encoding="utf-8"))
 
 
 @st.cache_data(show_spinner="Cargando anuncios online…")

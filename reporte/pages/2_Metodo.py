@@ -13,11 +13,16 @@ if _ROOT not in _sys.path:
 
 import streamlit as st
 import pandas as pd
+from reporte.data import load_metadata
 from reporte.theme import apply_style
 
 
 st.set_page_config(page_title="Método", page_icon="🔬", layout="wide")
 apply_style()
+
+# Cifras desde Data/metadata.json (única fuente; ver codes/generar_metadata.py).
+_c = load_metadata().get("conteos", {})
+_n = lambda clave: _c.get(clave, "—")  # noqa: E731
 
 st.title("🔬 Método y Decisiones Metodológicas")
 
@@ -46,8 +51,16 @@ fuentes = pd.DataFrame({
         "Oferta formal, disponibilidad, specs de fabricante",
         "Circulación real observada en calle"
     ],
-    "Registros": [70, 30, 30],
-    "Unidades": ["41 modelos", "68 fichas", "12 marcas"],
+    "Registros": [
+        _n("anuncios"),
+        _n("fichas_empresa"),
+        _n("observaciones_campo"),
+    ],
+    "Unidades": [
+        f"{_n('modelos_ranking')} modelos",
+        f"{_n('fichas_empresa')} fichas",
+        f"{_n('marcas_campo')} marcas",
+    ],
     "Cobertura": [
         "6 fuentes: elyerromenu, islagrande, vedca_telegram, casalindashop, cubancargos, Facebook",
         "10 empresas: KikiHabana, MZ Products, A Cuba Envíos Cargo, Mr Cuba, CompraMasonline, MundoEnvío, Patuisla, Francis Motors, Bluewave Logistic, Zona Libre Online",
@@ -58,9 +71,10 @@ fuentes = pd.DataFrame({
 st.dataframe(fuentes, use_container_width=True, hide_index=True)
 
 st.caption(
-    "El ranking tiene **41 filas** porque el mismo nombre puede aparecer en dos "
-    "propulsiones (el STAR eléctrico y el STAR híbrido son productos "
-    "distintos): 40 nombres distintos, 41 modelos en el scoring."
+    f"El ranking tiene **{_n('modelos_ranking')} filas** porque el mismo nombre puede "
+    f"aparecer en dos propulsiones (el STAR eléctrico y el STAR híbrido son "
+    f"productos distintos): {_n('nombres_modelo')} nombres distintos, "
+    f"{_n('modelos_ranking')} modelos en el scoring."
 )
 
 st.markdown("---")

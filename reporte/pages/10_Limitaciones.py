@@ -15,12 +15,19 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from reporte.data import (load_scores, load_anuncios, load_empresas, load_campo,
-                          load_sensibilidad, load_sensibilidad_resumen)
+                          load_sensibilidad, load_sensibilidad_resumen,
+                          load_metadata)
 from reporte.theme import apply_style, fig_ax, color_for_prop, label_for_prop
 
 
 st.set_page_config(page_title="Limitaciones", page_icon="⚠️", layout="wide")
 apply_style()
+
+# Cifras desde Data/metadata.json (única fuente; ver codes/generar_metadata.py).
+_meta = load_metadata()
+_c = _meta.get("conteos", {})
+_cortes = _meta.get("cortes", {})
+_n = lambda clave: _c.get(clave, "—")  # noqa: E731
 
 st.title("⚠️ Limitaciones")
 
@@ -91,14 +98,14 @@ limitaciones = pd.DataFrame({
     ],
     "Qué significa": [
         "Anuncios y catálogos miden **oferta declarada**, no triciclos rodando. Un modelo muy anunciado puede no ser el más común en calle.",
-        "41 modelos en el ranking (40 nombres distintos: el STAR aparece en dos propulsiones) de 70 anuncios online + 68 fichas empresas (10 catálogos). Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
+        f"{_n('modelos_ranking')} modelos en el ranking ({_n('nombres_modelo')} nombres distintos: el STAR aparece en dos propulsiones) de {_n('anuncios')} anuncios online + {_n('fichas_empresa')} fichas empresas ({_n('empresas')} catálogos). Muchos modelos con n=1. Scores con n_criterios < 5 son poco fiables.",
         "Fuentes: clasificados (Revolico), tiendas WooCommerce, Telegram, Facebook. No cubren mercado informal completo ni todas las MIPYMEs.",
-        "La muestra de calle es **final**: 30 observaciones en 5 de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n=30 los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
+        f"La muestra de calle es **final**: {_n('observaciones_campo')} observaciones en {_n('municipios_campo')} de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n={_n('observaciones_campo')} los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
         "Un modelo extremo (muy barato/muy caro) mueve la escala de **todo el grupo**. Al añadir Facebook, el ranking eléctrico cambió.",
         "Ausentes → 0.5 neutro + n_criterios. No castiga, pero oculta que el score se basa en menos evidencia. Ver columna n_criterios.",
         sens_texto,
-        "9/41 modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
+        f"{_n('modelos_con_repuestos')}/{_n('modelos_ranking')} modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
     ],
     "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "MEDIO", "BAJO"]
 })
@@ -167,6 +174,7 @@ python3 codes/parse_fb.py            # Facebook → clean_data/
 python3 codes/scrape_empresas.py     # 10 catálogos empresas
 python3 codes/analisis.py            # scoring + CSVs en clean_data/
 python3 codes/sensibilidad.py        # robustez del ranking (no cambia el score)
+python3 codes/generar_metadata.py    # conteos y cortes -> Data/metadata.json
 
 # Reporte interactivo
 streamlit run reporte/app.py
@@ -183,16 +191,16 @@ st.markdown("---")
 # ======= VERSIONADO =======
 st.header("5️⃣ Versionado de datos")
 
-st.markdown("""
+st.markdown(f"""
 | Archivo | Fuente | Última actualización | Registros | Notas |
 |---------|--------|---------------------|-----------|-------|
-| `anuncios_triciclos.jsonl` | 5 scrapers | 2026-10-19 | 41 | vedca.cu caído; 1 excluido por el usuario |
-| `anuncios_facebook.jsonl` | parse_fb.py | 2026-10-19 | 29 | 1 excluido (Artemisa) |
-| `empresas_*.jsonl` (10) | scrape_empresas.py | 2026-10-31 | 68 | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
-| `modelos_canonicos.json` | **curado a mano** | 2026-10-31 | 137 productos | Fuente de verdad de la identidad (3 excluidos) |
-| `score_modelos.csv` | analisis.py | 2026-10-19 | 41 filas (40 nombres) | Recalculado tras la limpieza de nombres |
-| `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | 2026-10-31 | 287 + 41 | 7 escenarios × 41 modelos; **no altera el score** |
-| `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | 2026-10-25 | 30 | 5/15 municipios; sin datos personales |
+| `anuncios_triciclos.jsonl` | 5 scrapers | {_cortes.get('anuncios', '—')} | {_n('anuncios_scraper')} | vedca.cu caído; 1 excluido por el usuario |
+| `anuncios_facebook.jsonl` | parse_fb.py | {_cortes.get('anuncios', '—')} | {_n('anuncios_facebook')} | 1 excluido (Artemisa) |
+| `empresas_*.jsonl` ({_n('empresas')}) | scrape_empresas.py | {_cortes.get('catalogos', '—')} | {_n('fichas_empresa')} | 5 catálogos previos + 5 nuevos; excluidos 1 genérico, 1 cuatriciclo y 2 accesorios |
+| `modelos_canonicos.json` | **curado a mano** | {_cortes.get('catalogos', '—')} | {_n('productos_canonicos')} productos | Fuente de verdad de la identidad ({_n('productos_excluidos')} excluidos) |
+| `score_modelos.csv` | analisis.py | {_cortes.get('anuncios', '—')} | {_n('modelos_ranking')} filas ({_n('nombres_modelo')} nombres) | Recalculado tras la limpieza de nombres |
+| `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | {_cortes.get('catalogos', '—')} | 287 + 41 | 7 escenarios × {_n('modelos_ranking')} modelos; **no altera el score** |
+| `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | {_cortes.get('campo', '—')} | {_n('observaciones_campo')} | 5/15 municipios; sin datos personales |
 
 **Corte propuesto para reporte final:** 30 noviembre 2026
 """)

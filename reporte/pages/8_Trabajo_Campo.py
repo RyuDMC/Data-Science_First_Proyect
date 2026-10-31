@@ -18,13 +18,18 @@ if _ROOT not in _sys.path:
 import streamlit as st
 import pandas as pd
 import numpy as np
-from reporte.data import load_campo, load_campo_resumen, load_campo_uso
+from reporte.data import (load_campo, load_campo_resumen, load_campo_uso,
+                          load_metadata)
 from reporte.theme import (apply_style, fig_ax, PROP_COLORS, TEXT_COLOR, MUTED,
                            ACCENT_RED)
 
 
 st.set_page_config(page_title="Trabajo de Campo", page_icon="🗺️", layout="wide")
 apply_style()
+
+# Cifras desde Data/metadata.json (única fuente; ver codes/generar_metadata.py).
+_c = load_metadata().get("conteos", {})
+_n = lambda clave: _c.get(clave, "—")  # noqa: E731
 
 st.title("🗺️ Trabajo de Campo — Circulación Real (muestra cerrada)")
 
@@ -118,8 +123,8 @@ else:
             ax.legend(fontsize=9, loc="lower right")
             st.pyplot(fig)
             st.caption(
-                "Se compara **cuota dentro de cada fuente** (no conteos): 30 observaciones "
-                "y 70 anuncios son universos distintos. VEDCA es la marca más anunciada "
+                f"Se compara **cuota dentro de cada fuente** (no conteos): {_n('observaciones_campo')} observaciones "
+                f"y {_n('anuncios')} anuncios son universos distintos. VEDCA es la marca más anunciada "
                 "(24%) y aparece **una sola vez** en calle (3%)."
             )
         else:
@@ -239,9 +244,9 @@ else:
         st.markdown("**Matriz municipio × marca**")
         st.dataframe(pivot, use_container_width=True)
 
-    st.warning("""
-    **Cómo leer estos datos.** Muestra **cerrada** de 30 observaciones en 5 de los
-    15 municipios del diseño, tomadas en dos semanas: **no es un censo** y no se
+    st.warning(f"""
+    **Cómo leer estos datos.** Muestra **cerrada** de {_n('observaciones_campo')} observaciones en {_n('municipios_campo')} de los
+    {TOTAL_MUNICIPIOS} municipios del diseño, tomadas en dos semanas: **no es un censo** y no se
     extrapola a La Habana. Sirve para ver qué marcas circulan y con qué uso, no
     para estimar cuotas poblacionales. Además no hay **denominador** (triciclos
     vistos por hora o por km), así que no se puede hablar de densidad.

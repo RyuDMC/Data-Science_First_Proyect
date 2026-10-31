@@ -689,3 +689,19 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** el orden exacto es un artefacto de los pesos; el podio no. Un ranking con n=1 en 28 de 41 modelos debe publicar esa distinción, no esconderla
 - **Próxima vez:** revisar/commitear; decidir si se elimina el `Data/score_modelos.csv` legado de la raíz
 - **Etiquetas:** sensibilidad, robustez, pesos, ranking, streamlit, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (cifras y PII) — el reporte mostraba 42 modelos en portada y 30 fichas en Método, contra 41 y 68 en el resto; quedaba un CI de ejemplo en `parse_campo.py`
+- **Tarea:** ejecutar las mejoras 1 (cifras desincronizadas + `Data/metadata.json`) y 2 (PII) del análisis del repo
+- **Acción(es):**
+  1. **Nuevo `codes/generar_metadata.py`:** calcula los conteos desde los datos (70 anuncios, 41 filas/40 nombres, 9 con repuestos, 68 fichas/10 empresas, 30 obs/5 municipios/12 marcas) y los cortes (anuncios 2026-10-19 por decisión de proyecto; catálogos y campo por fecha máxima). Escribe `Data/metadata.json`; `--check` ignora `procedencia` y falla si conteos o cortes cambian
+  2. **`reporte/data.py`:** `load_metadata()` cacheado; las páginas muestran "—" si el JSON falta en vez de romperse
+  3. **Portada, Método y Limitaciones:** tabla de fuentes, sidebar, cortes, caption del ranking y tabla de versionado leen el metadata. Se corrigen las dos erratas: `app.py` 42 → 41 modelos y `2_Metodo.py` `[70, 30, 30]` → 70/68/30
+  4. **PII:** `codes/parse_campo.py:18` pasa a `CI: <11 dígitos>`; `.gitignore` añade `Data/raw_data/*personas*`
+  5. **Tests:** `tests/test_cifras.py` (metadata ↔ datos ↔ README y guarda contra "42 modelos"/"42 filas"/"9/42") y `tests/test_privacidad.py` (`git grep` de 11 dígitos + `git check-ignore`); `requirements-dev.txt` con `pytest>=8.0`
+- **Resultado:** `generar_metadata.py --check` OK; `pytest -q tests/` 5/5; `AppTest` 11/11; `git grep -nIE "\b[0-9]{11}\b"` sin coincidencias; `git check-ignore` cubre `data_personas.txt` y `data_personas_v2.txt`
+- **Error/éxito:** Éxito. El test de cifras falló primero con el "42 modelos" real (como debía) y pasó tras conectar la portada al metadata
+- **Lección:** una cifra escrita a mano en seis sitios se desincroniza; generarla al final del pipeline y testear el contrato cuesta menos que perseguir erratas
+- **Próxima vez:** revisar/commitear; decidir el `Data/score_modelos.csv` legado; tests de parsers + CI
+- **Etiquetas:** metadata, cifras, pii, privacidad, tests, streamlit, verificacion
