@@ -804,5 +804,21 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Error/éxito:** Éxito. Un tropiezo: se coló una línea suelta en `parse_fb.py` al editar (`TRAKTION = "TRAKTION"`), detectada y borrada en el mismo pase
 - **Lección:** cuando el usuario pide "quitar lo que sobra", no basta el nombre: hay que cubrir el hueco que la extracción deja (unidades sueltas como `AH`) y las capas protectoras (alias y scrapers) para que el mismo criterio sobreviva a la próxima corrida
 - **Consecuencia a vigilar:** la identidad JINPENG híbrido agrega 1100 W / 100 km / 850 kg / $4.300 (medianas de 3 fichas): es el producto mejor valorado en el reporte; el podio eléctrico no cambia
-- **Próxima vez:** commitear; el año (`2026`/`2027`) en nombres como `MISHOZUKI 2026` sigue pendiente de decisión, igual que `TAXI`/`POWER`/`SE`/`PRO`/`ULTRA`
+- **Próxima vez:** commitear; el año (`2026`/`2027`) y `POWER`/`PRO`/`ULTRA`/`SE` se conservan (decisión 2026-11-01); `TAXI` queda fuera
 - **Etiquetas:** identidad, specs, jinpeng, erratas, canonicos, parse_fb, tests, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-11-01 (cierre del criterio de nombres) — quedaban dos dudas abiertas: el año en `MISHOZUKI 2026`/`FLY RACING 2027` y si `TAXI`/`POWER`/`PRO`/`ULTRA`/`SE` eran nombre o descriptor
+- **Tarea:** decidir el destino del año, de `POWER`/`PRO`/`ULTRA`/`SE` y de `TAXI`
+- **Decisión del usuario:** "el año déjalo igualmente con POWER/PRO/ULTRA/SE pero TAXI quítalo"
+- **Acción(es):**
+  1. `codes/crear_canonicos.py`: `OVERRIDE` para la ficha de KikiHabana `triciclo-panel-solar-para-cuba-2` → **`BD`** (antes "BD TAXI")
+  2. `codes/norm_modelo.py`: `TAXI` entra en `GENERICOS` y la docu aclara que el año y `POWER`/`PRO`/`ULTRA`/`SE` se conservan
+  3. Tests: `TAXI` en la lista de prohibidos de `test_nombres_sin_descriptores_ni_grafias_duplicadas`; `2_Metodo` menciona `TAXI` en la fila de descriptores de uso
+  4. Regeneración completa (`crear_canonicos` → `parse_fb` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `sensibilidad` → `generar_metadata`)
+- **Resultado:** tabla canónica **133/122/7** sin cambios de fichas; ranking **38 filas / 37 nombres** sin cambios (BD es ficha de catálogo, no anuncio); suite **36/36**; `generar_metadata --check` y `sensibilidad --check` OK
+- **Error/éxito:** Éxito. Sin tocar JSONL a mano
+- **Lección:** `BD TAXI` solo existía en el catálogo de KikiHabana: un descriptor de uso puede sobrevivir en una fuente y no en el score, así que la limpieza se aplica por igual a tabla canónica y catálogos
+- **Próxima vez:** commitear
+- **Etiquetas:** identidad, taxi, descriptores, canonicos, tests, verificacion

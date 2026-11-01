@@ -74,7 +74,7 @@ def test_nombres_sin_descriptores_ni_grafias_duplicadas():
         "MZ PRODUCTS",                                      # marca repetida
         "MINGHONG", "MOSHOZUKI", "FUGUIQUAN",               # grafía duplicada
         "JIMPEG", "JIMPENG", "JINPEING", "JEINPEING",       # erratas JINPENG
-        "TRICICLO",                                         # genérico
+        "TRICICLO", "TAXI",                                 # genérico / uso
     ]
     errata_jinpen = re.compile(r"(?<![A-Z])JINPEN(?![A-Z])")
     for v in CANON["por_url"].values():

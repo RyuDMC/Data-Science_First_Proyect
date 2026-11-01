@@ -92,6 +92,11 @@ OVERRIDES = {
     # del nombre: vive en los campos de la ficha.
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/":
         ("CYT", "CYT"),
+    # "TAXI" es un descriptor de uso (destino del vehículo), no el modelo
+    # (decisión del usuario, 2026-11-01). El año y POWER/PRO/ULTRA/SE sí se
+    # conservan.
+    "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba-2/":
+        ("BD", "BD"),
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-2/":
         ("IZUKI", "IZUKI"),
     "https://kikihabana.com/producto/mighong-panel-solar/":

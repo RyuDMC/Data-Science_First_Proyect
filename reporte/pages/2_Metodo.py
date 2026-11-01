@@ -236,7 +236,7 @@ identidad_data = [
     ("Specs fuera del nombre", "número+unidad y unidades sueltas: 1800W, 72V 65AH, 200CC, 250 CC, 400 KG, 80 KM, 4T, AH…: viven en sus campos (decisión 2026-10-31, 2ª pasada)"),
     ("Specs / química en campos", "LITHIUM, LIFEPO4, MOTOR, BATERÍA, GELPB/LIFEPO4 como química de batería"),
     ("Sin nombre de modelo", "`modelo` = null y la identidad pasa a la MARCA (CHILWEE, CYT, MAF, KIVITOVA…)"),
-    ("Descriptores de uso", "PASAJE / PASAJEROS no identifican el modelo: se quitan del nombre (OIM)"),
+    ("Descriptores de uso", "PASAJE / PASAJEROS / TAXI no identifican el modelo: se quitan del nombre (OIM, BD)"),
     ("Mismo nombre, specs distintas", "Fichas separadas; el ranking las agrega con la mediana (las 5 fichas RALLY, las 3 fichas CYT) — la spec vive en el campo, no en el nombre"),
     ("Propulsión", "Forma parte de la identidad: mismo nombre + distinta propulsión = productos distintos"),
 ]

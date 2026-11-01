@@ -36,9 +36,11 @@ unidades sueltas que una combinación mal separada podría dejar (AH, AMP,
 W, V, CC, KG, KM). Las fichas del mismo modelo con specs distintas siguen
 siendo fichas separadas; el ranking las agrega por (nombre, propulsión)
 y toma la mediana de las specs. Los descriptores de uso ("PASAJE",
-"PASAJEROS", "CARGA"), los aditamentos ("PANEL SOLAR", "EXTENSOR",
+"PASAJEROS", "CARGA", "TAXI"), los aditamentos ("PANEL SOLAR", "EXTENSOR",
 "FOTOVOLTAICO") y la marca repetida en el nombre tampoco son parte del
-modelo y se eliminan (decisión del usuario, 2026-10-31).
+modelo y se eliminan (decisión del usuario, 2026-10-31). El año (2026) y
+las palabras POWER/PRO/ULTRA/SE sí se conservan: el usuario los trata como
+parte del nombre (decisión del usuario, 2026-11-01).
 
 Cómo se aplica
 --------------
@@ -72,7 +74,7 @@ CANON_PATH = DATA_DIR / "modelos_canonicos.json"
 GENERICOS = {
     "TRICICLO", "TRICICLOS", "ELECTRICO", "ELECTRICOS", "ELECTRICAS",
     "ELECTRICOS", "HIBRIDO", "HIBRIDOS", "HIBRIDA", "COMBUSTION",
-    "GASOLINA", "CARGA", "PASAJEROS", "PASAJE", "DE", "DEL", "LA", "EL",
+    "GASOLINA", "CARGA", "PASAJEROS", "PASAJE", "TAXI", "DE", "DEL", "LA", "EL",
     "LOS", "LAS", "CON", "PARA", "CUBA", "EN", "Y", "A", "POR", "TIPO",
     "CERRADA", "CERRADO", "TRASERO", "TRASERA", "MARCA", "MOTOR", "BATERIA",
     "DEL", "UNA", "UN", "ES", "SU", "AL",
