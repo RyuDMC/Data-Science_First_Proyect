@@ -21,8 +21,55 @@
 
 ## ▶️ Montar la página
 
-Desde la raíz del proyecto:
+**Prerrequisitos:** Python 3.12 o superior y Git.
 
-```bash
-streamlit run reporte/app.py
-```
+Desde la raíz del proyecto, paso a paso:
+
+1. **Clonar el repositorio**
+
+   ```bash
+   git clone https://github.com/RyuDMC/Data-Science_First_Proyect.git
+   cd Data-Science_First_Proyect
+   ```
+
+2. **Crear el entorno e instalar dependencias**
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Montar la página**
+
+   ```bash
+   streamlit run reporte/app.py
+   ```
+
+   Se abre en `http://localhost:8501` (la consola muestra la URL local).
+   Para detenerla, pulsa `Ctrl+C` en la terminal.
+   En Windows, sustituye `python3` por `python`.
+
+> Los datos ya generados (`Data/clean_data/*.csv` y `*.jsonl`, `Data/metadata.json`)
+> están versionados, así que la página funciona sin re-scrapear.
+>
+> **Opcional — regenerar los datos** (requiere red; mismo orden que usa el pipeline):
+>
+> ```bash
+> python3 codes/scrape_triciclos.py
+> python3 codes/parse_fb.py
+> python3 codes/crear_canonicos.py
+> python3 codes/scrape_empresas.py
+> python3 codes/parse_campo.py
+> python3 codes/norm_modelo.py --migrar
+> python3 codes/crear_canonicos.py
+> python3 codes/norm_modelo.py --migrar
+> python3 codes/analisis.py
+> python3 codes/analisis_campo.py
+> python3 codes/sensibilidad.py
+> python3 codes/generar_metadata.py
+> ```
+>
+> Al terminar, verifica la coherencia con `python3 codes/generar_metadata.py --check`
+> y, si instalaste `requirements-dev.txt`, ejecuta la suite con
+> `python3 -m pytest -q tests/`.
