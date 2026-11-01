@@ -36,7 +36,7 @@ Desde la raíz del proyecto, paso a paso:
 
    ```bash
    python3 -m venv .venv
-   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+   source report/.venv/bin/activate        # Windows: .venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
