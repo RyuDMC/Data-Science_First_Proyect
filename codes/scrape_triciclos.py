@@ -889,13 +889,14 @@ _ISLA_NO_HABANA = re.compile(r"-(holguin|santiago|santaclara)\.html$", re.I)
 
 
 def _isla_base_model(slug):
-    """Modelo base a partir del slug; conserva la variante no-química
-    (p. ej. C800B FOTOVOLTAICO). La química se guarda aparte (bateria_quimica)."""
+    """Modelo base a partir del slug; el aditamento del panel solar no forma
+    parte del nombre (decisión del usuario, 2026-10-31): un triciclo C800B con
+    sistema fotovoltaico sigue siendo C800B. La química se guarda aparte."""
     s = slug.lower()
     if "sh001" in s:
         return "VEDCA SH001"
     if "c800b" in s:
-        return "VEDCA C800B" + (" FOTOVOLTAICO" if "fotovoltaico" in s else "")
+        return "VEDCA C800B"
     if "c600" in s:
         return "VEDCA C600"
     if "c400a" in s:

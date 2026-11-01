@@ -195,20 +195,23 @@ st.dataframe(alias_df, width="stretch", hide_index=True)
 
 st.caption(
     "Nota: STAR eléctrico (FB) ≠ STAR híbrido (scraper) → NO se fusionan "
-    "(la propulsión forma parte de la identidad). Tampoco se fusionan "
-    "VEDCA C800B / VEDCA C800B FOTOVOLTAICO, ni DDS-OD (marca KIVITOVA, "
-    "modelo distinto)."
+    "(la propulsión forma parte de la identidad); tampoco DDS-OD (marca "
+    "KIVITOVA, modelo distinto). Desde la 2ª pasada del 2026-10-31 las "
+    "specs ya NO son parte del nombre (RALLY 800 → RALLY, CYT 100 KM → "
+    "CYT): las fichas del mismo modelo se agregan por (nombre, propulsión) "
+    "con la mediana de las specs."
 )
 
 st.markdown("""
 **Alias de marca (eje distinto).** Para comparar con el trabajo de campo —que
 solo lee la marca— existe una tabla aparte, `MARCA_ALIAS`: `ONEBOOT → ONEBOT`,
-`KVITOVA → KIVITOVA`, `MAGICBIKE → MAGIC BIKE`, `VELGA → VEDCA` (errata
-confirmada) y `JINPEN / JIMPENG → JINPENG`. `JINPEING` no es una marca aparte:
-era una errata de JINPENG en el título de Cubancargos, corregida en el origen
-(tabla canónica). Fusionar la marca **no** fusiona productos: JINPENG eléctrico
-y JINPEN híbrido siguen siendo identidades distintas. Al campo no se le aplica
-ningún alias de *modelo*: afirmar que un
+`KVITOVA → KIVITOVA`, `MAGICBIKE → MAGIC BIKE` y `VELGA → VEDCA` (errata
+confirmada). El grupo **JINPENG** quedó unificado el 2026-10-31: `JINPEING`,
+`JIMPEG`, `JINPEN` y `JIMPENG` son erratas de la misma marca, y los nombres
+de modelo (`JINPEN HIBRIDO`, `JIMPEG PANTER 2026`) se corrigieron por URL en
+la tabla canónica; los tres híbridos del grupo comparten la identidad
+`JINPENG` (3 anuncios) y el eléctrico queda separado por propulsión. Al
+campo no se le aplica ningún alias de *modelo*: afirmar que un
 ONEBOT visto en calle es el "ONEBOT CLASIC 2026" sería inventar el modelo.
 """)
 
@@ -225,12 +228,16 @@ que se normalizan en el **origen** (`codes/norm_modelo.py` + la tabla curada
 """)
 
 identidad_data = [
-    ("Genéricos de categoría", "TRICICLO(S), ELÉCTRICO(S), HÍBRIDO(S), DE COMBUSTION, DE CARGA, PASAJEROS"),
+    ("Genéricos de categoría", "TRICICLO(S), ELÉCTRICO(S), HÍBRIDO(S), DE COMBUSTION, CARGA, PASAJEROS"),
     ("Marketing / estado", "DISPONIBLE, MAS GRANDE, MEJOR PRECIO, PANEL SOLAR, FOTOVOLTAICO"),
-    ("Specs (ya en otros campos)", "72V, 85AH, 1500W, LITHIUM, LIFEPO4, MOTOR, BATERÍA"),
+    ("Aditamentos", "PANEL SOLAR, EXTENSOR, FOTOVOLTAICO: accesorios, no el modelo (ABL, FUGUIGUAN, VEDCA C800B)"),
+    ("Marca repetida en el nombre", "E-CARGO MZ PRODUCTS → E-CARGO: la marca ya vive en su campo"),
+    ("Grafías duplicadas de marca", "MIGHONG/MINGHONG, MISHOZUKI/MOSHOZUKI, FUGUIGUAN/FUGUIQUAN: una sola grafía"),
+    ("Specs fuera del nombre", "número+unidad y unidades sueltas: 1800W, 72V 65AH, 200CC, 250 CC, 400 KG, 80 KM, 4T, AH…: viven en sus campos (decisión 2026-10-31, 2ª pasada)"),
+    ("Specs / química en campos", "LITHIUM, LIFEPO4, MOTOR, BATERÍA, GELPB/LIFEPO4 como química de batería"),
     ("Sin nombre de modelo", "`modelo` = null y la identidad pasa a la MARCA (CHILWEE, CYT, MAF, KIVITOVA…)"),
-    ("Descriptores de uso", "PASAJE / PASAJEROS no identifican el modelo: se quitan del nombre (OIM, RALLY)"),
-    ("Mismo nombre, producto distinto", "Se separan con sufijo de variante y se cuentan aparte (VEDCA C800B / VEDCA C800B FOTOVOLTAICO, E-CARGO 80AH / 60AH / 100AH)"),
+    ("Descriptores de uso", "PASAJE / PASAJEROS no identifican el modelo: se quitan del nombre (OIM)"),
+    ("Mismo nombre, specs distintas", "Fichas separadas; el ranking las agrega con la mediana (las 5 fichas RALLY, las 3 fichas CYT) — la spec vive en el campo, no en el nombre"),
     ("Propulsión", "Forma parte de la identidad: mismo nombre + distinta propulsión = productos distintos"),
 ]
 st.dataframe(pd.DataFrame(identidad_data, columns=["Qué se quita / decide", "Regla"]),

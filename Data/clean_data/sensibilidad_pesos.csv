@@ -14,7 +14,7 @@ electrico,DDS-OD,base,0.576104,12
 electrico,MISHOZUKI 2026,base,0.541629,13
 electrico,VEDCA C400 GELPB,base,0.537154,14
 electrico,PANTHER,base,0.464155,15
-electrico,JIMPEG PANTER 2026,base,0.449909,16
+electrico,JINPENG PANTER 2026,base,0.449909,16
 electrico,TY150UK,base,0.419178,17
 electrico,CHILWEE,base,,18
 electrico,MAF LIFEPO4,base,,19
@@ -28,9 +28,8 @@ electrico,VEDCA C400 LIFEPO4MN,base,,26
 electrico,VEDCA C400A GELPB,base,,27
 electrico,VEDCA C600 GELPB,base,,28
 electrico,VEDCA C600 LIFEPO4,base,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,base,,30
-electrico,VEDCA C800B LIFEPO4,base,,31
-electrico,VEDCA SH001 LIFEPO4,base,,32
+electrico,VEDCA C800B LIFEPO4,base,,30
+electrico,VEDCA SH001 LIFEPO4,base,,31
 electrico,TOPMAQ BRIDERK 2026 GELPB,reponderado,0.78554,1
 electrico,ONEBOT CLASIC 2026,reponderado,0.774581,2
 electrico,KIVITOVA GELPB,reponderado,0.723364,3
@@ -46,7 +45,7 @@ electrico,DDS-OD,reponderado,0.576104,12
 electrico,MISHOZUKI 2026,reponderado,0.541629,13
 electrico,VEDCA C400 GELPB,reponderado,0.537154,14
 electrico,PANTHER,reponderado,0.464155,15
-electrico,JIMPEG PANTER 2026,reponderado,0.449909,16
+electrico,JINPENG PANTER 2026,reponderado,0.449909,16
 electrico,TY150UK,reponderado,0.419178,17
 electrico,CHILWEE,reponderado,,18
 electrico,MAF LIFEPO4,reponderado,,19
@@ -60,9 +59,8 @@ electrico,VEDCA C400 LIFEPO4MN,reponderado,,26
 electrico,VEDCA C400A GELPB,reponderado,,27
 electrico,VEDCA C600 GELPB,reponderado,,28
 electrico,VEDCA C600 LIFEPO4,reponderado,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,reponderado,,30
-electrico,VEDCA C800B LIFEPO4,reponderado,,31
-electrico,VEDCA SH001 LIFEPO4,reponderado,,32
+electrico,VEDCA C800B LIFEPO4,reponderado,,30
+electrico,VEDCA SH001 LIFEPO4,reponderado,,31
 electrico,TOPMAQ BRIDERK 2026 GELPB,sin_autonomia_km,0.788128,1
 electrico,JINPENG GELPB,sin_autonomia_km,0.719432,2
 electrico,KIVITOVA GELPB,sin_autonomia_km,0.705226,3
@@ -79,7 +77,7 @@ electrico,MISHOZUKI 2026,sin_autonomia_km,0.462912,13
 electrico,STAR,sin_autonomia_km,0.43998,14
 electrico,TY150UK,sin_autonomia_km,0.410756,15
 electrico,PANTHER,sin_autonomia_km,0.396651,16
-electrico,JIMPEG PANTER 2026,sin_autonomia_km,0.377656,17
+electrico,JINPENG PANTER 2026,sin_autonomia_km,0.377656,17
 electrico,CHILWEE,sin_autonomia_km,,18
 electrico,MAF LIFEPO4,sin_autonomia_km,,19
 electrico,MAGIC BIKE,sin_autonomia_km,,20
@@ -92,9 +90,8 @@ electrico,VEDCA C400 LIFEPO4MN,sin_autonomia_km,,26
 electrico,VEDCA C400A GELPB,sin_autonomia_km,,27
 electrico,VEDCA C600 GELPB,sin_autonomia_km,,28
 electrico,VEDCA C600 LIFEPO4,sin_autonomia_km,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,sin_autonomia_km,,30
-electrico,VEDCA C800B LIFEPO4,sin_autonomia_km,,31
-electrico,VEDCA SH001 LIFEPO4,sin_autonomia_km,,32
+electrico,VEDCA C800B LIFEPO4,sin_autonomia_km,,30
+electrico,VEDCA SH001 LIFEPO4,sin_autonomia_km,,31
 electrico,KIVITOVA GELPB,sin_carga_kg,0.827816,1
 electrico,ONEBOT CLASIC 2026,sin_carga_kg,0.787671,2
 electrico,MVP POWER GELPB,sin_carga_kg,0.773021,3
@@ -110,7 +107,7 @@ electrico,TRAKTION 2026,sin_carga_kg,0.564973,12
 electrico,KN-KO13,sin_carga_kg,0.536149,13
 electrico,MISHOZUKI 2026,sin_carga_kg,0.49648,14
 electrico,PANTHER,sin_carga_kg,0.434361,15
-electrico,JIMPEG PANTER 2026,sin_carga_kg,0.416553,16
+electrico,JINPENG PANTER 2026,sin_carga_kg,0.416553,16
 electrico,TY150UK,sin_carga_kg,0.412861,17
 electrico,CHILWEE,sin_carga_kg,,18
 electrico,MAF LIFEPO4,sin_carga_kg,,19
@@ -124,9 +121,8 @@ electrico,VEDCA C400 LIFEPO4MN,sin_carga_kg,,26
 electrico,VEDCA C400A GELPB,sin_carga_kg,,27
 electrico,VEDCA C600 GELPB,sin_carga_kg,,28
 electrico,VEDCA C600 LIFEPO4,sin_carga_kg,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,sin_carga_kg,,30
-electrico,VEDCA C800B LIFEPO4,sin_carga_kg,,31
-electrico,VEDCA SH001 LIFEPO4,sin_carga_kg,,32
+electrico,VEDCA C800B LIFEPO4,sin_carga_kg,,30
+electrico,VEDCA SH001 LIFEPO4,sin_carga_kg,,31
 electrico,TOPMAQ BRIDERK 2026 GELPB,sin_legalidad,0.761711,1
 electrico,ONEBOT CLASIC 2026,sin_legalidad,0.749535,2
 electrico,KN-KO13,sin_legalidad,0.698799,3
@@ -142,7 +138,7 @@ electrico,MISHOZUKI 2026,sin_legalidad,0.60181,12
 electrico,VEDCA C400 GELPB,sin_legalidad,0.596837,13
 electrico,NIPPON SE,sin_legalidad,0.545875,14
 electrico,PANTHER,sin_legalidad,0.515728,15
-electrico,JIMPEG PANTER 2026,sin_legalidad,0.499899,16
+electrico,JINPENG PANTER 2026,sin_legalidad,0.499899,16
 electrico,TY150UK,sin_legalidad,0.465753,17
 electrico,CHILWEE,sin_legalidad,,18
 electrico,MAF LIFEPO4,sin_legalidad,,19
@@ -156,9 +152,8 @@ electrico,VEDCA C400 LIFEPO4MN,sin_legalidad,,26
 electrico,VEDCA C400A GELPB,sin_legalidad,,27
 electrico,VEDCA C600 GELPB,sin_legalidad,,28
 electrico,VEDCA C600 LIFEPO4,sin_legalidad,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,sin_legalidad,,30
-electrico,VEDCA C800B LIFEPO4,sin_legalidad,,31
-electrico,VEDCA SH001 LIFEPO4,sin_legalidad,,32
+electrico,VEDCA C800B LIFEPO4,sin_legalidad,,30
+electrico,VEDCA SH001 LIFEPO4,sin_legalidad,,31
 electrico,TOPMAQ BRIDERK 2026 GELPB,sin_precio_usd,0.907407,1
 electrico,ONEBOT CLASIC 2026,sin_precio_usd,0.907407,2
 electrico,VEDCA C400 LIFEPO4,sin_precio_usd,0.768519,3
@@ -170,7 +165,7 @@ electrico,TRAKTION 2026,sin_precio_usd,0.564815,8
 electrico,KN-KO13,sin_precio_usd,0.518519,9
 electrico,NIPPON SE,sin_precio_usd,0.5,10
 electrico,JINPENG GELPB,sin_precio_usd,0.5,11
-electrico,JIMPEG PANTER 2026,sin_precio_usd,0.472222,12
+electrico,JINPENG PANTER 2026,sin_precio_usd,0.472222,12
 electrico,PANTHER,sin_precio_usd,0.472222,13
 electrico,DDS-OD,sin_precio_usd,0.425926,14
 electrico,VIENTO RAPIDO,sin_precio_usd,0.37037,15
@@ -188,9 +183,8 @@ electrico,VEDCA C400 LIFEPO4MN,sin_precio_usd,,26
 electrico,VEDCA C400A GELPB,sin_precio_usd,,27
 electrico,VEDCA C600 GELPB,sin_precio_usd,,28
 electrico,VEDCA C600 LIFEPO4,sin_precio_usd,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,sin_precio_usd,,30
-electrico,VEDCA C800B LIFEPO4,sin_precio_usd,,31
-electrico,VEDCA SH001 LIFEPO4,sin_precio_usd,,32
+electrico,VEDCA C800B LIFEPO4,sin_precio_usd,,30
+electrico,VEDCA SH001 LIFEPO4,sin_precio_usd,,31
 electrico,TOPMAQ BRIDERK 2026 GELPB,sin_repuestos,0.774253,1
 electrico,ONEBOT CLASIC 2026,sin_repuestos,0.762717,2
 electrico,KIVITOVA GELPB,sin_repuestos,0.708804,3
@@ -206,7 +200,7 @@ electrico,VIENTO RAPIDO,sin_repuestos,0.585036,12
 electrico,MISHOZUKI 2026,sin_repuestos,0.570135,13
 electrico,VEDCA C400 GELPB,sin_repuestos,0.565425,14
 electrico,PANTHER,sin_repuestos,0.488584,15
-electrico,JIMPEG PANTER 2026,sin_repuestos,0.473588,16
+electrico,JINPENG PANTER 2026,sin_repuestos,0.473588,16
 electrico,TY150UK,sin_repuestos,0.44124,17
 electrico,CHILWEE,sin_repuestos,,18
 electrico,MAF LIFEPO4,sin_repuestos,,19
@@ -220,9 +214,8 @@ electrico,VEDCA C400 LIFEPO4MN,sin_repuestos,,26
 electrico,VEDCA C400A GELPB,sin_repuestos,,27
 electrico,VEDCA C600 GELPB,sin_repuestos,,28
 electrico,VEDCA C600 LIFEPO4,sin_repuestos,,29
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,sin_repuestos,,30
-electrico,VEDCA C800B LIFEPO4,sin_repuestos,,31
-electrico,VEDCA SH001 LIFEPO4,sin_repuestos,,32
+electrico,VEDCA C800B LIFEPO4,sin_repuestos,,30
+electrico,VEDCA SH001 LIFEPO4,sin_repuestos,,31
 gasolina,MAGIC BIKE M004,base,0.625,1
 gasolina,MAGIC BIKE M005,base,0.225,2
 gasolina,MAGIC BIKE M004,reponderado,0.727273,1
@@ -237,52 +230,38 @@ gasolina,MAGIC BIKE M004,sin_precio_usd,0.375,1
 gasolina,MAGIC BIKE M005,sin_precio_usd,0.375,2
 gasolina,MAGIC BIKE M004,sin_repuestos,0.657895,1
 gasolina,MAGIC BIKE M005,sin_repuestos,0.236842,2
-hibrido,JINPEN,base,0.70731,1
-hibrido,STAR,base,0.593693,2
-hibrido,PORTO BELLO,base,0.464286,3
-hibrido,FURIKAZAN,base,0.372105,4
-hibrido,JINPEN HIBRIDO,base,,5
-hibrido,JINPENG,base,,6
-hibrido,LAITUNG,base,,7
-hibrido,JINPEN,reponderado,0.70731,1
-hibrido,STAR,reponderado,0.593693,2
-hibrido,PORTO BELLO,reponderado,0.464286,3
-hibrido,FURIKAZAN,reponderado,0.372105,4
-hibrido,JINPEN HIBRIDO,reponderado,,5
-hibrido,JINPENG,reponderado,,6
-hibrido,LAITUNG,reponderado,,7
-hibrido,JINPEN,sin_autonomia_km,0.757895,1
-hibrido,STAR,sin_autonomia_km,0.532331,2
-hibrido,FURIKAZAN,sin_autonomia_km,0.49614,3
+hibrido,JINPENG,base,0.883473,1
+hibrido,STAR,base,0.707487,2
+hibrido,FURIKAZAN,base,0.5,3
+hibrido,PORTO BELLO,base,0.464286,4
+hibrido,LAITUNG,base,,5
+hibrido,JINPENG,reponderado,0.883473,1
+hibrido,STAR,reponderado,0.707487,2
+hibrido,FURIKAZAN,reponderado,0.5,3
+hibrido,PORTO BELLO,reponderado,0.464286,4
+hibrido,LAITUNG,reponderado,,5
+hibrido,JINPENG,sin_autonomia_km,0.992779,1
+hibrido,STAR,sin_autonomia_km,0.684056,2
+hibrido,FURIKAZAN,sin_autonomia_km,0.666667,3
 hibrido,PORTO BELLO,sin_autonomia_km,0.285714,4
-hibrido,JINPEN HIBRIDO,sin_autonomia_km,,5
-hibrido,JINPENG,sin_autonomia_km,,6
-hibrido,LAITUNG,sin_autonomia_km,,7
-hibrido,STAR,sin_carga_kg,0.670687,1
-hibrido,JINPEN,sin_carga_kg,0.634137,2
-hibrido,FURIKAZAN,sin_carga_kg,0.465132,3
+hibrido,LAITUNG,sin_autonomia_km,,5
+hibrido,JINPENG,sin_carga_kg,0.854341,1
+hibrido,STAR,sin_carga_kg,0.81293,2
+hibrido,FURIKAZAN,sin_carga_kg,0.625,3
 hibrido,PORTO BELLO,sin_carga_kg,0.4375,4
-hibrido,JINPEN HIBRIDO,sin_carga_kg,,5
-hibrido,JINPENG,sin_carga_kg,,6
-hibrido,LAITUNG,sin_carga_kg,,7
-hibrido,JINPEN,sin_legalidad,0.674789,1
-hibrido,STAR,sin_legalidad,0.548547,2
-hibrido,PORTO BELLO,sin_legalidad,0.404762,3
-hibrido,FURIKAZAN,sin_legalidad,0.302339,4
-hibrido,JINPEN HIBRIDO,sin_legalidad,,5
-hibrido,JINPENG,sin_legalidad,,6
-hibrido,LAITUNG,sin_legalidad,,7
-hibrido,PORTO BELLO,sin_precio_usd,0.77381,1
-hibrido,JINPEN,sin_precio_usd,0.731481,2
+hibrido,LAITUNG,sin_carga_kg,,5
+hibrido,JINPENG,sin_legalidad,0.870526,1
+hibrido,STAR,sin_legalidad,0.674985,2
+hibrido,FURIKAZAN,sin_legalidad,0.444444,3
+hibrido,PORTO BELLO,sin_legalidad,0.404762,4
+hibrido,LAITUNG,sin_legalidad,,5
+hibrido,JINPENG,sin_precio_usd,0.814815,1
+hibrido,PORTO BELLO,sin_precio_usd,0.77381,2
 hibrido,STAR,sin_precio_usd,0.585979,3
 hibrido,FURIKAZAN,sin_precio_usd,0.166667,4
-hibrido,JINPEN HIBRIDO,sin_precio_usd,,5
-hibrido,JINPENG,sin_precio_usd,,6
-hibrido,LAITUNG,sin_precio_usd,,7
-hibrido,JINPEN,sin_repuestos,0.744537,1
-hibrido,STAR,sin_repuestos,0.62494,2
-hibrido,PORTO BELLO,sin_repuestos,0.488722,3
-hibrido,FURIKAZAN,sin_repuestos,0.39169,4
-hibrido,JINPEN HIBRIDO,sin_repuestos,,5
-hibrido,JINPENG,sin_repuestos,,6
-hibrido,LAITUNG,sin_repuestos,,7
+hibrido,LAITUNG,sin_precio_usd,,5
+hibrido,JINPENG,sin_repuestos,0.87734,1
+hibrido,STAR,sin_repuestos,0.744723,2
+hibrido,FURIKAZAN,sin_repuestos,0.526316,3
+hibrido,PORTO BELLO,sin_repuestos,0.488722,4
+hibrido,LAITUNG,sin_repuestos,,5

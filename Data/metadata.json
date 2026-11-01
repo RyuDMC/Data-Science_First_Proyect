@@ -5,9 +5,9 @@
     "anuncios_scraper": 41,
     "anuncios_facebook": 29,
     "fuentes_anuncios": 6,
-    "modelos_ranking": 41,
-    "nombres_modelo": 40,
-    "modelos_con_repuestos": 9,
+    "modelos_ranking": 38,
+    "nombres_modelo": 37,
+    "modelos_con_repuestos": 10,
     "fichas_empresa": 64,
     "empresas": 10,
     "productos_canonicos": 133,
@@ -49,16 +49,16 @@
       ],
       "hibrido": [
         {
-          "modelo": "JINPEN HIBRIDO",
-          "score": 0.725
-        },
-        {
-          "modelo": "JINPEN",
-          "score": 0.70731
+          "modelo": "JINPENG",
+          "score": 0.883473
         },
         {
           "modelo": "STAR",
-          "score": 0.593693
+          "score": 0.707487
+        },
+        {
+          "modelo": "FURIKAZAN",
+          "score": 0.5
         }
       ]
     },

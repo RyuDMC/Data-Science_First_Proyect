@@ -14,7 +14,7 @@ electrico,DDS-OD,0.576104,12,0.0,0.0,10.0,12.0,9,14,0,sin_carga_kg,sin_precio_us
 electrico,MISHOZUKI 2026,0.541629,13,0.0,0.0,12.0,14.0,6,14,0,sin_precio_usd,sin_carga_kg,5,1
 electrico,VEDCA C400 GELPB,0.537154,14,0.0,0.0,13.0,14.0,10,17,0,sin_carga_kg,sin_precio_usd,5,4
 electrico,PANTHER,0.464155,15,0.0,0.0,15.0,15.0,13,16,0,sin_precio_usd,sin_autonomia_km,5,1
-electrico,JIMPEG PANTER 2026,0.449909,16,0.0,0.0,16.0,16.0,12,17,0,sin_precio_usd,sin_autonomia_km,5,1
+electrico,JINPENG PANTER 2026,0.449909,16,0.0,0.0,16.0,16.0,12,17,0,sin_precio_usd,sin_autonomia_km,5,1
 electrico,TY150UK,0.419178,17,0.0,0.0,17.0,17.0,15,17,0,sin_autonomia_km,reponderado,5,1
 electrico,CHILWEE,0.683333,18,0.0,0.0,18.0,18.0,18,18,0,reponderado,reponderado,4,1
 electrico,MAF LIFEPO4,0.569102,19,0.0,0.0,19.0,19.0,19,19,0,reponderado,reponderado,4,2
@@ -28,15 +28,12 @@ electrico,VEDCA C400 LIFEPO4MN,0.233333,26,0.0,0.0,26.0,26.0,26,26,0,reponderado
 electrico,VEDCA C400A GELPB,0.422222,27,0.0,0.0,27.0,27.0,27,27,0,reponderado,reponderado,4,2
 electrico,VEDCA C600 GELPB,0.413889,28,0.0,0.0,28.0,28.0,28,28,0,reponderado,reponderado,4,1
 electrico,VEDCA C600 LIFEPO4,0.394444,29,0.0,0.0,29.0,29.0,29,29,0,reponderado,reponderado,4,3
-electrico,VEDCA C800B FOTOVOLTAICO LIFEPO4,0.4,30,0.0,0.0,30.0,30.0,30,30,0,reponderado,reponderado,4,1
-electrico,VEDCA C800B LIFEPO4,0.4,31,0.0,0.0,31.0,31.0,31,31,0,reponderado,reponderado,4,1
-electrico,VEDCA SH001 LIFEPO4,0.494444,32,0.0,0.0,32.0,32.0,32,32,0,reponderado,reponderado,3,1
+electrico,VEDCA C800B LIFEPO4,0.4,30,0.0,0.0,30.0,30.0,30,30,0,reponderado,reponderado,4,2
+electrico,VEDCA SH001 LIFEPO4,0.494444,31,0.0,0.0,31.0,31.0,31,31,0,reponderado,reponderado,3,1
 gasolina,MAGIC BIKE M004,0.625,1,100.0,100.0,1.0,1.0,1,1,6,reponderado,reponderado,3,1
 gasolina,MAGIC BIKE M005,0.225,2,100.0,0.0,2.0,2.0,2,2,6,reponderado,reponderado,3,1
-hibrido,JINPEN,0.70731,1,100.0,100.0,1.0,1.0,1,2,6,reponderado,sin_carga_kg,5,1
-hibrido,STAR,0.593693,2,100.0,0.0,2.0,2.0,1,3,6,sin_carga_kg,sin_precio_usd,5,1
-hibrido,PORTO BELLO,0.464286,3,99.7,0.0,3.0,3.0,1,4,4,sin_precio_usd,sin_autonomia_km,5,1
-hibrido,FURIKAZAN,0.372105,4,0.3,0.0,4.0,4.0,3,4,2,sin_autonomia_km,reponderado,5,1
-hibrido,JINPEN HIBRIDO,0.725,5,0.0,0.0,5.0,5.0,5,5,0,reponderado,reponderado,3,1
-hibrido,JINPENG,0.474737,6,0.0,0.0,6.0,6.0,6,6,0,reponderado,reponderado,3,1
-hibrido,LAITUNG,0.335526,7,0.0,0.0,7.0,7.0,7,7,0,reponderado,reponderado,3,1
+hibrido,JINPENG,0.883473,1,100.0,100.0,1.0,1.0,1,1,6,reponderado,reponderado,5,3
+hibrido,STAR,0.707487,2,100.0,0.0,2.0,2.0,2,3,6,reponderado,sin_precio_usd,5,1
+hibrido,FURIKAZAN,0.5,3,77.5,0.0,3.0,4.0,3,4,5,reponderado,sin_precio_usd,5,1
+hibrido,PORTO BELLO,0.464286,4,22.5,0.0,3.0,4.0,2,4,1,sin_precio_usd,reponderado,5,1
+hibrido,LAITUNG,0.387476,5,0.0,0.0,5.0,5.0,5,5,0,reponderado,reponderado,3,1

@@ -19,6 +19,8 @@ import sys
 from pathlib import Path
 
 # Normalización de la identidad del producto (decisión del usuario, 2026-10-19).
+# 2026-10-31: del grupo JINPENG, "JIMPENG"/"JIMPEG" son erratas de la marca
+# JINPENG; la tabla canónica corrige además los NOMBRES por URL.
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from norm_modelo import canonizar_registro, cargar_canonicos  # noqa: E402
@@ -33,10 +35,10 @@ MARCA_MAP = {
     "topmaq": "TOPMAQ",
     "star": "STAR",
     "panther": "PANTHER",
-    "jimpeng": "JIMPENG",
+    "jimpeng": "JINPENG",       # errata del usuario, 2026-10-31
     "jinghan": "JINGHAN",
     "traktion": "TRAKTION",
-    "jimpeg": "JIMPEG",
+    "jimpeg": "JINPENG",        # errata del usuario, 2026-10-31
     "maf": "MAF",
     "mishozuki": "MISHOZUKI",
     "viento rapido": "VIENTO RAPIDO",
@@ -50,7 +52,7 @@ MODELO_ALIAS = {
     "bryderk-topmaq": "BRIDERK",
     "bryderk-topmaq": "BRIDERK",
     "kvitova premium": "KIVITOVA PREMIUM",
-    "jimpeg panter 2026": "JIMPEG PANTER 2026",
+    "jimpeg panter 2026": "JINPENG PANTER 2026",  # errata, 2026-10-31
     "mvp power": "MVP POWER",
 }
 

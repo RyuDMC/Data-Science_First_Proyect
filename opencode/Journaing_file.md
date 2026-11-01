@@ -768,3 +768,41 @@ Fuente del protocolo: `Prompts/Journaling Prompt.md`.
 - **Lección:** el nombre del producto puede dar la marca, pero solo cuando esa marca ya existe en los datos; si no, se deja `None` y se documenta
 - **Próxima vez:** commitear la limpieza; decidir si `Data/empresas/` entra al scoring completo; deploy
 - **Etiquetas:** identidad, marca, tiger, hercules, francismotors, bluewave, tests, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (limpieza de nombres) — los nombres canónicos arrastraban aditamentos, descriptores de uso y grafías duplicadas de marca (`ABL PANEL SOLAR`, `RALLY CARGA`, `MINGHONG`/`MIGHONG`)
+- **Tarea:** revisar palabra por palabra los nombres de modelo; quitar lo que no es nombre propio y unificar los duplicados, en el origen
+- **Acción(es):**
+  1. **Evidencia:** se revisó cada token contra los `<h1>` de las tiendas. `ABL PANEL SOLAR` = "Triciclo ABL 1500W con Panel Solar"; `RALLY CARGA` = "TRICICLO DE CARGA RALLY"; `FUGUIGUAN EXTENSOR` = "FUGUIGUAN/Extensor de Rango Gratis"; `VEDCA C800B FOTOVOLTAICO` = "C-800B with photovoltaic system". MINGHONG (2 fichas) y MIGHONG (4) son la misma marca/modelo; igual con MOSHOZUKI/MISHOZUKI y FUGUIQUAN/FUGUIGUAN
+  2. **`codes/crear_canonicos.py`:** 22 fichas cambian en la tabla (21 con nombre limpio + 1 marca en mayúsculas, mrcuba): `ABL PANEL SOLAR` → `ABL`, `RALLY CARGA`/`RALLY HIBRIDO` → `RALLY`, `RALLY CARGA 800` → `RALLY 800`, `FUGUIGUAN EXTENSOR` → `FUGUIGUAN`, `VEDCA C800B FOTOVOLTAICO` → `VEDCA C800B`, `BLUE CARGA 1000W` → `BLUE 1000W`, `FENIX HIBRIDO` → `FENIX`, `HERCULES PRO HIBRIDO 72V 85AH` → `HERCULES PRO 72V 85AH`, `TIGER HIBRIDO` → `TIGER`, `TIGER 1800W HIBRIDO 72V 65AH` → `TIGER 1800W 72V 65AH`, `E-CARGO (POWER/ULTRA) MZ PRODUCTS` → `E-CARGO (POWER/ULTRA)`, `MINGHONG`×2 → `MIGHONG`, `FUGUIQUAN` → `FUGUIGUAN`, `MOSHOZUKI ULTRA` → `MISHOZUKI ULTRA`, `Hercules`/`Tiger` (mrcuba) → mayúsculas. Las fichas "curadas" se movieron a `OVERRIDES` para que el cambio viva en el origen. `VARIANTES` queda vacío: CARGA y FOTOVOLTAICO ya no son nombre. Nueva helper `_norm_marca` para mayúsculas y sin espacios
+  3. **`codes/norm_modelo.py`:** docstring actualizado; `MARCA_ALIAS` añade MINGHONG→MIGHONG, MOSHOZUKI→MISHOZUKI y FUGUIQUAN→FUGUIGUAN
+  4. **`codes/scrape_triciclos.py`:** `_isla_base_model` ya no añade " FOTOVOLTAICO" al slug de islagrande
+  5. **Regeneración:** `crear_canonicos` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `sensibilidad` → `generar_metadata`
+  6. **Tests:** `test_rally_y_rally_carga_siguen_separados` se sustituye por `test_rally_distingue_variantes_por_spec_sin_uso_en_el_nombre` + nuevo `test_nombres_sin_descriptores_ni_grafias_duplicadas` (tabla canónica y todos los JSONL); `test_contratos.py` 41/40 → 40/39
+  7. **Reporte:** `2_Metodo` describe la regla nueva (aditamentos, marca repetida, grafías); `9_Empresas` corrige MINGHONG→MIGHONG y el conteo real de Bluewave (5 → 1 ficha)
+- **Resultado:** canónicos **133 → 133** (los nombres cambian, no el número de fichas); `VARIANTES` 2 → 0; ranking **41 → 40 filas (39 nombres)** porque `VEDCA C800B` absorbe la variante fotovoltaica; el podio no cambia. `pytest -q tests/` → **36/36**; `generar_metadata --check`, `sensibilidad --check`, `crear_canonicos --check` OK
+- **Error/éxito:** Éxito. No se editó ningún JSONL a mano
+- **Lección:** las specs sí pueden distinguir variantes del mismo modelo (RALLY 800), pero un aditamento o un tipo de carrocería no: viven en la ficha, no en el nombre
+- **Excepción documentada:** `JINPEN HIBRIDO` conserva HIBRIDO porque es un producto distinto de JINPENG (decisión previa; alias de marca en `MARCA_ALIAS`)
+- **Próxima vez:** commitear; decidir si el año (2026/2027) se quita de nombres como `MISHOZUKI 2026` o `FLY RACING 2027`; decidir si `TAXI`/`POWER`/`SE` son nombre o descriptor
+- **Etiquetas:** identidad, nombres, mighong, mishozuki, fuguiguan, e-cargo, canonicos, tests, verificacion
+
+### Entrada de diario
+
+- **Fecha/contexto:** 2026-10-31 (2ª pasada de identidad) — los nombres canónicos arrastraban specs (`1800W`, `72V 65AH`, `200CC`, `250 CC`, `800 KG`, `80 KM`) y el grupo JINPENG seguía cuarteado (`JIMPEG`, `JINPEN`, `JIMPENG`)
+- **Tarea:** quitar las specs del nombre (viven en los campos de la ficha) y unificar el grupo JINPENG, en el origen
+- **Acción(es):**
+  1. **Decisión del usuario:** "1800w, 72v 65ah, 200w, 72v, 250CC los puedes quitar, JIMPEG es errate de JINPENG y JINPEN hibrido tambien, ahi debe ir JINPENG"
+  2. **`codes/crear_canonicos.py`:** 18 nombres de `OVERRIDES` quedan sin specs (`BLUE 1000W` → `BLUE`, `BRAVO 250 CC` → `BRAVO`, `DG BLUE 72V` → `DG BLUE`, `HERCULES PRO 72V 85AH` → `HERCULES PRO`, `PHANTOM 200CC` → `PHANTOM`, `TIGER 1800W 72V 65AH` → `TIGER`, `TOPMAQ 2000W` → `TOPMAQ`, `WHITE TREK 250CC 4T` → `WHITE TREK`, `MISHOZUKI E-CARGO 8000W` → `MISHOZUKI E-CARGO`, `RALLY 800` → `RALLY`, `CYT 80/100 KM` → `CYT` ×3, `IZUKI 120/127 AH` → `IZUKI` ×2, `MIGHONG 400/600 KG` → `MIGHONG` ×3) y 4 `OVERRIDES` nuevos de JINPENG (`triciclo-jinpen-hibrido`, `triciclo-jimpeng-hibrido-2026`, el permalink de FB con "JIMPEG PANTER 2026" y la ficha `TY150UK`). `VARIANTES` queda vacío con la nota del criterio nuevo: la spec va en campos
+  3. **`codes/norm_modelo.py`:** docu reescrito (número+unidad y unidades sueltas fuera del nombre; fichas separadas se agregan con la mediana); `GENERICOS` absorbe AH/AMP/W/V/CC/KG/KM/4T…; `MARCA_ALIAS` añade `JIMPEG` y `JEINPEING`; `ALIAS_MODELOS` protege `JIMPEG PANTER 2026` y `JINPEN`/`JINPEN HIBRIDO`
+  4. **`codes/parse_fb.py`:** capa protectora (`jimpeg`/`jimpeng` → `JINPENG`; "jimpeg panter 2026" → JINPENG PANTER 2026) y regenerado `Data/clean_data/anuncios_facebook.jsonl` desde `raw_data/data_from_FB` (sin tocar el crudo)
+  5. **Regeneración:** `crear_canonicos` → `parse_fb` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `sensibilidad` → `generar_metadata`; 0 heurísticos/revisar/excluidos en la migración
+  6. **Tests:** `test_rally_distingue_variantes…` → `test_rally_sin_especificacion_en_el_nombre`; `test_nombres_sin_descriptores_ni_grafias_duplicadas` añade unidades y erratas JINPENG (canónicos + JSONL); `test_jinpen_y_jinpeng_estan_documentados` → `test_grupo_jinpeng_esta_unificado` (5 grafías → JINPENG, híbrido n=3); `test_contratos.py` 40/39 → **38/37**, `repuestos_proxy` 9 → 10 y top score ahora `JINPENG`
+  7. **Reporte:** `2_Metodo` (alias de marca, caption del score y tabla de identidad) y `9_Empresas` (ejemplos BRAVO/HERCULES PRO/MISHOZUKI E-CARGO)
+- **Resultado:** canónicos **133/122/7** sin cambio de fichas; ranking **40 → 38 filas (37 nombres)** por los dos merges híbridos de JINPENG; **JINPENG híbrido (n=3, score 0.883) pasa a ser el mejor puntuado global** (TOPMAQ sigue 1º eléctrico); `sensibilidad` 266 filas (38 × 7); suite **36/36**; `generar_metadata --check`, `sensibilidad --check`, `crear_canonicos --check` OK
+- **Error/éxito:** Éxito. Un tropiezo: se coló una línea suelta en `parse_fb.py` al editar (`TRAKTION = "TRAKTION"`), detectada y borrada en el mismo pase
+- **Lección:** cuando el usuario pide "quitar lo que sobra", no basta el nombre: hay que cubrir el hueco que la extracción deja (unidades sueltas como `AH`) y las capas protectoras (alias y scrapers) para que el mismo criterio sobreviva a la próxima corrida
+- **Consecuencia a vigilar:** la identidad JINPENG híbrido agrega 1100 W / 100 km / 850 kg / $4.300 (medianas de 3 fichas): es el producto mejor valorado en el reporte; el podio eléctrico no cambia
+- **Próxima vez:** commitear; el año (`2026`/`2027`) en nombres como `MISHOZUKI 2026` sigue pendiente de decisión, igual que `TAXI`/`POWER`/`SE`/`PRO`/`ULTRA`
+- **Etiquetas:** identidad, specs, jinpeng, erratas, canonicos, parse_fb, tests, verificacion

@@ -26,6 +26,10 @@ def test_no_quedan_erratas_en_el_ranking():
     nombres = SCORE["modelo_norm"].astype(str).str.upper()
     assert not nombres.str.contains("JINPEING", na=False).any()
     assert not nombres.str.contains("PASAJ", na=False).any()
+    erratas = nombres.str.contains(
+        r"(?<![A-Z])JINPEN(?![A-Z])|JIMPEG|JIMPENG", regex=True
+    ).any()
+    assert not erratas
 
 
 def test_oim_agrega_las_dos_ofertas():
@@ -40,25 +44,106 @@ def test_star_electrico_y_hibrido_son_productos_distintos():
     assert len(star) == 2
 
 
-def test_rally_y_rally_carga_siguen_separados():
+def test_rally_sin_especificacion_en_el_nombre():
+    """La spec no forma parte del nombre (decisión del usuario, 2026-10-31).
+
+    Las 5 fichas RALLY siguen separadas por URL; la variante de 800 kg se
+    distingue con el campo `carga_kg`, no con "RALLY 800".
+    """
     modelos = set(_modelos_canonicos())
-    assert {"RALLY", "RALLY CARGA", "RALLY CARGA 800"} <= modelos
+    assert "RALLY" in modelos
+    assert "RALLY 800" not in modelos
     # El nombre de uso no debe volver al nombre canónico.
     assert not any("PASAJ" in m for m in modelos)
 
 
-def test_jinpen_y_jinpeng_estan_documentados():
-    """JINPEN/JINPENG comparten marca, pero son productos distintos.
+UNIDADES = {"AH", "AMP", "AMPERIOS", "W", "WATT", "WATTS", "V", "CC", "KG",
+            "KGS", "KM", "KM/H", "4T", "VOLT", "VOLTIOS"}
 
-    El alias de marca (`normalizar_marca`) los une a nivel marca; la identidad
-    de producto los mantiene separados porque las specs difieren. La auditoría
-    está en `opencode/auditoria_jinpen.md`; no se fusionan sin decisión.
+
+def test_nombres_sin_descriptores_ni_grafias_duplicadas():
+    """Los aditamentos, el uso, la propulsión y las specs no son parte del
+    nombre.
+
+    Tampoco las grafías duplicadas que el usuario unificó (MINGHONG/MIGHONG,
+    MOSHOZUKI/MISHOZUKI, FUGUIQUAN/FUGUIGUAN) ni las erratas del grupo
+    JINPENG (JINPEING/JIMPEG/JINPEN/JIMPENG).
+    """
+    prohibidos = [
+        "PANEL", "SOLAR", "EXTENSOR", "FOTOVOLTAICO",       # aditamentos
+        "MZ PRODUCTS",                                      # marca repetida
+        "MINGHONG", "MOSHOZUKI", "FUGUIQUAN",               # grafía duplicada
+        "JIMPEG", "JIMPENG", "JINPEING", "JEINPEING",       # erratas JINPENG
+        "TRICICLO",                                         # genérico
+    ]
+    errata_jinpen = re.compile(r"(?<![A-Z])JINPEN(?![A-Z])")
+    for v in CANON["por_url"].values():
+        for o in (v.get("opciones") or [v]):
+            modelo = str(o.get("modelo") or "").upper()
+            for p in prohibidos:
+                assert p not in modelo, f"{modelo!r} contiene {p}"
+            assert not errata_jinpen.search(modelo), f"errata en {modelo!r}"
+            for t in re.split(r"[^A-Z0-9\-/]+", modelo):
+                assert t not in UNIDADES, f"{modelo!r} deja la unidad {t!r}"
+            assert not re.search(r"\d+ ?(?:AH|AMP|WATTS?|W|V|CC|KG|KM)$", modelo), \
+                f"{modelo!r} termina en Numero+unidad"
+            if "E-CARGO" not in modelo:
+                assert "CARGA" not in modelo, f"{modelo!r} contiene CARGA"
+
+    modelos = set(_modelos_canonicos())
+    # Grafías canónicas presentes: misma marca/modelo, decoración fuera.
+    assert "MIGHONG" in modelos
+    assert "MISHOZUKI ULTRA" in modelos
+    assert "FUGUIGUAN" in modelos
+    # El grupo JINPENG unificado (2026-10-31): la marca/modelo JINPENG
+    # aparece en la tabla; sus erratas no.
+    assert "JINPENG" in modelos
+
+    # El mismo criterio debe sostener el dataset publicado: si el scraper
+    # reintrodujese un descriptor o una spec, el JSONL ya nacería con él.
+    for path in sorted((ROOT / "Data").rglob("*.jsonl")):
+        df = pd.read_json(path, lines=True)
+        if "modelo" not in df.columns:
+            continue
+        nombres = df["modelo"].dropna().astype(str).str.upper()
+        for p in prohibidos:
+            assert not nombres.str.contains(p, na=False).any(), \
+                f"{path}: {p} dentro de {sorted(set(nombres[nombres.str.contains(p)]))}"
+        if not len(nombres):
+            continue
+        con_carga = nombres[
+            (nombres.str.contains("CARGA", na=False))
+            & (~nombres.str.contains("E-CARGO", na=False))
+        ]
+        assert con_carga.empty, \
+            f"{path}: CARGA dentro de {sorted(set(con_carga))}"
+        con_spec = nombres[
+            nombres.str.contains(r"\d+ ?(?:AH|AMP|WATTS?|W|V|CC|KG|KM)$",
+                                 regex=True, na=False)
+        ]
+        assert con_spec.empty, \
+            f"{path}: specs en el nombre {sorted(set(con_spec))}"
+
+
+def test_grupo_jinpeng_esta_unificado():
+    """Decisión del usuario (2026-10-31): JIMPEG y JINPEN son JINPENG.
+
+    Al nivel marca, las cuatro grafías erratas (`JINPEING`, `JIMPEG`,
+    `JINPEN`, `JIMPENG`) normalizan a JINPENG. Al nivel producto, los tres
+    híbridos del grupo comparten la identidad JINPENG (3 anuncios) y el
+    eléctrico queda separado por propulsión. La evolución de la decisión
+    está en `opencode/auditoria_jinpen.md`.
     """
     from codes.norm_modelo import normalizar_marca
 
-    assert normalizar_marca("JINPEN") == "JINPENG"
-    assert normalizar_marca("JINPENG") == "JINPENG"
-    assert {"JINPEN", "JINPENG"} <= set(SCORE["modelo_norm"])
+    for grafia in ("JINPEING", "JEINPEING", "JIMPEG", "JIMPENG", "JINPEN"):
+        assert normalizar_marca(grafia) == "JINPENG", grafia
+    jinpeng = SCORE[SCORE["modelo_norm"] == "JINPENG"]
+    hibrido = jinpeng[jinpeng["propulsion"] == "hibrido"]
+    assert len(hibrido) == 1
+    assert int(hibrido.iloc[0]["n_anuncios_total"]) == 3
+    nombres = set(SCORE["modelo_norm"].astype(str).str.upper())
+    assert "JINPEN" not in nombres and "JIMPEG" not in nombres
     assert (ROOT / "opencode" / "auditoria_jinpen.md").exists()
 
 

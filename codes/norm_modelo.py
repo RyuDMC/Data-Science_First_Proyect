@@ -26,13 +26,19 @@ Regla (curada por el usuario el 2026-10-19, tras revisar los datos)
     1500W, LITHIUM, LIFEPO4, MOTOR, BATERÍA),
   - y si tras eso NO queda nombre de modelo, `modelo` queda en null y la
     identidad pasa a la `marca` (que es lo que el usuario hizo: CHILWEE,
-    CYT, KIVITOVA, MAF, LAITUNG, STAR, JINPEN, Hercules, Tiger...).
+    CYT, KIVITOVA, MAF, LAITUNG, STAR, Hercules, Tiger...).
 
-Dos productos con el mismo nombre pero specs distintas NO se fusionan: se
-separan con un sufijo de variante (RALLY / RALLY CARGA, E-CARGO 80AH / 60AH /
-100AH, VEDCA C800B / VEDCA C800B FOTOVOLTAICO). Cada uno se cuenta por
-separado. Los descriptores de uso ("PASAJE", "PASAJEROS") no son nombre de
-modelo y se eliminan.
+Los datos técnicos no forman parte del nombre (decisión del usuario,
+2026-10-31, 2ª pasada): viven en sus campos (`motor_w`, `bateria_v`,
+`bateria_ah`, `carga_kg`, `autonomia_km`). Se quitan las combinaciones
+número+unidad (1800W, 72V 65AH, 200CC, 250 CC, 400 KG, 80 KM, 4T) y las
+unidades sueltas que una combinación mal separada podría dejar (AH, AMP,
+W, V, CC, KG, KM). Las fichas del mismo modelo con specs distintas siguen
+siendo fichas separadas; el ranking las agrega por (nombre, propulsión)
+y toma la mediana de las specs. Los descriptores de uso ("PASAJE",
+"PASAJEROS", "CARGA"), los aditamentos ("PANEL SOLAR", "EXTENSOR",
+"FOTOVOLTAICO") y la marca repetida en el nombre tampoco son parte del
+modelo y se eliminan (decisión del usuario, 2026-10-31).
 
 Cómo se aplica
 --------------
@@ -70,6 +76,12 @@ GENERICOS = {
     "LOS", "LAS", "CON", "PARA", "CUBA", "EN", "Y", "A", "POR", "TIPO",
     "CERRADA", "CERRADO", "TRASERO", "TRASERA", "MARCA", "MOTOR", "BATERIA",
     "DEL", "UNA", "UN", "ES", "SU", "AL",
+    # Unidades de specs (decisión del usuario, 2026-10-31): el número ya lo
+    # quita SPEC_RE; una unidad suelta (p. ej. "250 CC" -> token "CC") no
+    # forma parte del nombre.
+    "W", "V", "AH", "AMP", "AMPERIOS", "WATT", "WATTS", "VOLT", "VOLTIOS",
+    "CC", "KG", "KGS", "KILOS", "KM", "KMH", "4T",
+    "POTENCIA", "CAPACIDAD", "AUTONOMIA",
 }
 
 # Marketing o estado: no identifican un producto.
@@ -271,16 +283,27 @@ def url_excluido(url, canon=None):
 #
 # NO fusionar (decisión del usuario):
 #   - STAR: el eléctrico de Facebook y el híbrido de elyerromenu.
-#   - RALLY / RALLY CARGA: pasajeros y carga son productos distintos.
-#   - JINPENG (eléctrico), JINPEN (híbrido), TY150UK (Jimpeng): tres productos.
-#     OJO: "JINPEING" NO es un producto aparte: es una errata de JINPENG.
 #   - DDS-OD: marca KIVITOVA, pero modelo distinto de KIVITOVA.
+#   - Los códigos de modelo (BBX-S600, FM-151, C800B, SH001, TY150UK) y el
+#     sufijo de química en eléctricos (GELPB vs LIFEPO4) distinguen
+#     productos: no se tocan.
+# 2ª pasada (2026-10-31): specs fuera del nombre (RALLY 800 → RALLY,
+#   CYT 100 KM → CYT, MIGHONG 600 KG → MIGHONG...): la spec vive en los
+#   campos y el ranking agrega por (nombre, propulsión). Y el grupo
+#   JINPENG se unifica: JINPEING/JIMPEG/JINPEN/JIMPENG son erratas de la
+#   misma marca y "JINPEN HIBRIDO" es el JINPENG híbrido (ver OVERRIDES
+#   por URL en la tabla canónica).
 ALIAS_MODELOS = {
     # Cubancargos titula "JINPEING" (errata confirmada por el usuario,
     # 2026-10-31). La tabla canónica ya lo corrige por URL; este alias
     # protege cualquier registro que llegue sin pasar por ella.
     "JINPEING": "JINPENG",
     "JEINPEING": "JINPENG",
+    # Mismo grupo (decisión del usuario, 2026-10-31, 2ª pasada): JIMPEG y
+    # JINPEN son erratas de JINPENG; "JINPEN HIBRIDO" es el JINPENG híbrido.
+    "JIMPEG PANTER 2026": "JINPENG PANTER 2026",
+    "JINPEN HIBRIDO": "JINPENG",
+    "JINPEN": "JINPENG",
     # Facebook "BRIDERK" / "TOPMAQ" + elyerromenu "TOPMAQ BRIDERK 2026"
     "BRIDERK": "TOPMAQ BRIDERK 2026 GELPB",
     "BRIDERK GELPB": "TOPMAQ BRIDERK 2026 GELPB",
@@ -314,18 +337,26 @@ def aplicar_alias(x):
 # ==================== ALIAS DE MARCA (nivel marca, no nivel modelo) ====================
 # Grafías de la MISMA marca entre las fuentes (hoja de campo y anuncios).
 # Es un eje distinto de ALIAS_MODELOS: aquí no se afirma nada sobre el modelo.
-# Decisiones del usuario (2026-10-31): VELGA es VEDCA mal escrito, y JINPEN /
-# JIMPENG son la misma marca que JINPENG. Fusionar la MARCA no fusiona los
-# productos: la identidad de producto sigue distinguiendo JINPENG eléctrico de
-# JINPEN híbrido (la propulsión forma parte de la clave).
+# Decisiones del usuario (2026-10-31): VELGA es VEDCA mal escrito, y
+# JINPEING / JIMPEG / JINPEN / JIMPENG son erratas de la marca JINPENG. La
+# tabla canónica corrige también los NOMBRES por URL (JINPEN HIBRIDO y
+# JIMPEG PANTER 2026 son JINPENG); estos alias protegen cualquier registro
+# que no atraviese la tabla.
 MARCA_ALIAS = {
     "ONEBOOT": "ONEBOT",        # hoja de campo
     "KVITOVA": "KIVITOVA",      # hoja de campo
     "MAGICBIKE": "MAGIC BIKE",  # hoja de campo
     "VELGA": "VEDCA",           # hoja de campo: errata confirmada
     "JINPEING": "JINPENG",      # errata en el título de cubancargos
-    "JINPEN": "JINPENG",        # anuncio elyerromenu (híbrido)
+    "JEINPEING": "JINPENG",     # variante de la misma errata (URL y título)
+    "JINPEN": "JINPENG",        # anuncios elyerromenu (grupo híbrido)
     "JIMPENG": "JINPENG",       # anuncio Facebook (producto TY150UK)
+    "JIMPEG": "JINPENG",        # anuncio Facebook ("JIMPEG PANTER 2026")
+    # Grafías duplicadas unificadas (decisión del usuario, 2026-10-31): la
+    # tabla canónica usa la grafía que la mayoría de las fuentes declara.
+    "MINGHONG": "MIGHONG",      # CompraMasonline/MundoEnvío titulan Minghong
+    "MOSHOZUKI": "MISHOZUKI",   # única ficha con "Moshozuki" (KikiHabana)
+    "FUGUIQUAN": "FUGUIGUAN",   # única ficha con "Fuguiquan" (CompraMasonline)
 }
 
 

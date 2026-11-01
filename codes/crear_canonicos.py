@@ -3,16 +3,15 @@
 Genera `Data/modelos_canonicos.json`: la tabla de nombres de modelo CURADA.
 
 La tabla se construye a partir de `Data/clean_data/` (los nombres que el
-usuario revisó a mano el 2026-10-19) más las separaciones de variante que
-decidió ese mismo día, y se versiona en el repo: es la fuente de verdad de
+usuario revisó a mano el 2026-10-19) más las correcciones de identidad que
+decidió el usuario (última pasada: 2026-10-31, nombres sin aditamentos,
+descriptores ni specs), y se versiona en el repo: es la fuente de verdad de
 la identidad de cada producto.
 
 Reglas aplicadas al construir la tabla:
   - clave = URL del producto (estable entre corridas; un producto = una URL);
   - `por_url`: {modelo, marca} canónicos;
-  - `excluidos`: URL + motivo (productos que el usuario decidió dejar fuera);
-  - `variantes`: separaciones explícitas de productos que comparten nombre
-    pero NO son el mismo (specs distintas) -> se cuentan por separado.
+  - `excluidos`: URL + motivo (productos que el usuario decidió dejar fuera).
 
 Uso:
     python3 codes/crear_canonicos.py            # escribe Data/modelos_canonicos.json
@@ -28,16 +27,13 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "Data"
 CLEAN_DIR = DATA_DIR / "clean_data"
 OUT_PATH = DATA_DIR / "modelos_canonicos.json"
 
-# ---- Variantes con el MISMO nombre y specs distintas ----
-# Decisión del usuario (2026-10-31, revisada): el nombre del modelo no lleva
-# aditamentos ni descriptores de uso/propulsión. Si dos fichas del mismo
-# modelo declaran specs distintas, se conservan como fichas separadas y el
-# sufijo usa solo el dato que las diferencia (p. ej. RALLY 800, CYT 80 KM,
-# MIGHONG 400 KG).
-#
-# Las antiguas separaciones "RALLY CARGA" y "VEDCA C800B FOTOVOLTAICO" ya no
-# se usan: CARGA y FOTOVOLTAICO no son parte del nombre. Sus URLs se resuelven
-# en OVERRIDES con el nombre limpio.
+# ---- Separaciones de variantes con el MISMO nombre ----
+# Vacío desde la 2ª pasada del 2026-10-31: el usuario decidió que las specs
+# (número + unidad, p. ej. "RALLY 800", "CYT 100 KM", "MIGHONG 600 KG") no
+# forman parte del nombre del modelo. La spec distingue la ficha en sus
+# campos (carga_kg, autonomia_km, bateria_ah), no en el nombre, y el
+# ranking agrega las fichas por (nombre, propulsión). Las URLs afectadas
+# viven en OVERRIDES con el nombre limpio.
 VARIANTES = {}
 
 # ---- Nombres fijados a mano (2026-10-19) ----
@@ -50,11 +46,26 @@ OVERRIDES = {
         ("FLY RACING 2027", "RACING"),
     # Cubancargos escribe "JINPEING" en el título y la URL; es una errata de
     # la marca JINPENG (confirmado por el usuario, 2026-10-31). Se corrige el
-    # nombre canónico en el origen, no el JSONL a mano. El producto sigue
-    # siendo un híbrido distinto del JINPENG eléctrico (la propulsión y las
-    # specs no se tocan).
+    # nombre canónico en el origen, no el JSONL a mano. El eléctrico de
+    # elyerromenu (JINPENG GELPB) queda separado por propulsión.
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-jeinpeing":
         ("JINPENG", "JINPENG"),
+    # Grupo JINPENG unificado (decisión del usuario, 2026-10-31, 2ª pasada):
+    # JIMPEG, JINPEN y JIMPENG son erratas de la misma marca, y "JINPEN
+    # HIBRIDO" es el JINPENG híbrido. Los tres híbridos del grupo
+    # (Cubancargos + elyerromenu ×2) comparten la identidad JINPENG; el
+    # eléctrico queda separado por propulsión. Cada ficha conserva sus specs.
+    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jinpen-hibrido":
+        ("JINPENG", "JINPENG"),
+    "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jimpeng-hibrido-2026":
+        (None, "JINPENG"),
+    # Facebook: "JIMPEG PANTER 2026" es la errata de JINPENG.
+    "https://www.facebook.com/groups/644647424572616/permalink/1155238560180164/":
+        ("JINPENG PANTER 2026", "JINPENG"),
+    # Mismo grupo: el título trae "JIMPENG" como marca. El modelo sigue el
+    # código declarado (TY150UK); solo se corrige la grafía de la marca.
+    "https://www.facebook.com/share/p/19rdffanLu/":
+        ("TY150UK", "JINPENG"),
     # "PASAJE"/"PASAJEROS" son descriptores de uso, no nombres de modelo
     # (decisión del usuario, 2026-10-31): se eliminan del nombre canónico.
     # OIM: el anuncio "de pasaje" queda en la identidad OIM (misma batería y
@@ -71,37 +82,37 @@ OVERRIDES = {
     # RALLY con extensor de rango de CompraMasonline: el título de la tienda
     # trae el accesorio ('... + EXTENSOR DE RANGO'). El extensor queda
     # documentado en el campo `notas` del registro; no forma parte del nombre.
-    #
-    # Variantes RALLY/CYT/MIGHONG/IZUKI: si dos fichas del mismo modelo declaran
-    # specs distintas, se conservan separadas y el sufijo usa solo el dato que
-    # las diferencia (p. ej. RALLY 800). No se usan descriptores de uso.
+    # Spec fuera del nombre (decisión del usuario, 2026-10-31, 2ª pasada):
+    # "RALLY CARGA 800" / "RALLY HIBRIDO" son RALLY; la capacidad (800 kg)
+    # vive en el campo `carga_kg` de la ficha.
     "https://compramasonline.com/tienda/triciclo-de-carga-rally/":
         ("RALLY", "RALLY"),
-    # KikiHabana: mismas variantes que los catálogos nuevos (CYT 80 km,
-    # IZUKI 120 Ah, MIGHONG 400 kg). Así cada identidad conserva su spec.
+    # KikiHabana: mismas fichas que los catálogos nuevos (CYT, IZUKI,
+    # MIGHONG). La spec del título (80 km, 120 Ah, 400 kg) no forma parte
+    # del nombre: vive en los campos de la ficha.
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/":
-        ("CYT 80 KM", "CYT"),
+        ("CYT", "CYT"),
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-2/":
-        ("IZUKI 120 AH", "IZUKI"),
+        ("IZUKI", "IZUKI"),
     "https://kikihabana.com/producto/mighong-panel-solar/":
-        ("MIGHONG 400 KG", "MIGHONG"),
+        ("MIGHONG", "MIGHONG"),
     # ---- Catálogos añadidos el 2026-10-31 ----
-    # Se conserva el nombre declarado (sin quitar specs que forman parte del
-    # modelo, p. ej. '250 CC') y se separan las variantes que, tras la
-    # limpieza heurística, quedarían con el mismo nombre.
+    # Nombres canónicos sin número+unidad ni aditamentos (decisión del
+    # usuario, 2026-10-31, 2ª pasada): la spec del título queda en los
+    # campos de la ficha (motor_w, bateria_v/ah, carga_kg, autonomia_km).
     # MundoEnvío
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-2/":
         ("BOSN BBX-S600", "BOSN"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/":
-        ("CYT 80 KM", "CYT"),
+        ("CYT", "CYT"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/":
-        ("RALLY 800", "RALLY"),
+        ("RALLY", "RALLY"),
     "https://mundoenvio.com/tienda/envio-a-cuba-de-triciclo-electrico/":
         ("FUGUIGUAN", "FUGUIGUAN"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-3/":
         ("JOBANG ZUIMI", "JOBANG"),
     "https://mundoenvio.com/tienda/triciclo-electrico-mighong-con-panel-solar/":
-        ("MIGHONG 600 KG", "MIGHONG"),
+        ("MIGHONG", "MIGHONG"),
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-4/":
         ("ONEBOT", "ONEBOT"),
     "https://mundoenvio.com/tienda/triciclo-electrico-de-carga/":
@@ -112,15 +123,15 @@ OVERRIDES = {
         ("SOTEK", "SOTEK"),
     # Patuisla (mismos productos que MundoEnvío cuando comparten nombre)
     "https://patuisla.com/producto/triciclo-panel-solar/":
-        ("CYT 100 KM", "CYT"),
+        ("CYT", "CYT"),
     "https://patuisla.com/producto/triciclo-electrico-para-cuba/":
         ("HUAIHAI", "HUAIHAI"),
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-3/":
-        ("IZUKI 127 AH", "IZUKI"),
+        ("IZUKI", "IZUKI"),
     "https://patuisla.com/producto/triciclos-electricos-para-cuba/":
         ("JOBANG ZUIMI", "JOBANG"),
     "https://patuisla.com/producto/triciclo-panel-solar-para-cuba/":
-        ("MIGHONG 400 KG", "MIGHONG"),
+        ("MIGHONG", "MIGHONG"),
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-4/":
         ("MISHOZUKI ULTRA", "MISHOZUKI"),
     "https://patuisla.com/producto/triciclos-electricos-para-cuba-2/":
@@ -134,28 +145,31 @@ OVERRIDES = {
     "https://patuisla.com/producto/vedca-c800/":
         ("VEDCA C800", "VEDCA"),
     # Francis Motors
+    # Francis Motors: los sufijos del título (1000W, 72V 85AH, 200CC,
+    # 72V 65AH, 2000W, 250CC 4T, 250 CC) son specs, no parte del nombre;
+    # viven en los campos de la ficha (decisión del usuario, 2026-10-31).
     "https://francismotors.org/triciclos/blue-carga-1000w/":
-        ("BLUE 1000W", None),
+        ("BLUE", None),
     "https://francismotors.org/triciclos/bravo-250-cc/":
-        ("BRAVO 250 CC", None),
+        ("BRAVO", None),
     "https://francismotors.org/triciclos/dg-blue-72v/":
-        ("DG BLUE 72V", None),
+        ("DG BLUE", None),
     "https://francismotors.org/triciclos/fenix-hibrido/":
         ("FENIX", None),
     "https://francismotors.org/triciclos/hercules-pro/":
-        ("HERCULES PRO 72V 85AH", "HERCULES"),
+        ("HERCULES PRO", "HERCULES"),
     "https://francismotors.org/triciclos/phantom-200cc/":
-        ("PHANTOM 200CC", None),
+        ("PHANTOM", None),
     "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/":
-        ("TIGER 1800W 72V 65AH", "TIGER"),
+        ("TIGER", "TIGER"),
     "https://francismotors.org/triciclos/tiger-hibrido/":
         ("TIGER", "TIGER"),
     "https://francismotors.org/triciclos/topmaq-2000w/":
-        ("TOPMAQ 2000W", "TOPMAQ"),
+        ("TOPMAQ", "TOPMAQ"),
     "https://francismotors.org/triciclos/trion-fm-151/":
         ("TRION FM-151", None),
     "https://francismotors.org/triciclos/white-trek-250cc-4t/":
-        ("WHITE TREK 250CC 4T", None),
+        ("WHITE TREK", None),
     # Bluewave Logistics: el catálogo no declara marca ni modelo propio; se
     # conserva el nombre tal como lo publica la tienda. Los títulos que solo
     # dicen "TRICICLO ..." y no declaran marca no identifican un modelo y se
@@ -166,7 +180,7 @@ OVERRIDES = {
     "https://zonalibreonline.com/product/triciclo-electrico-abl-con-panel-solar/":
         ("ABL", "ABL MOTORS"),
     "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/":
-        ("MISHOZUKI E-CARGO 8000W", "MISHOZUKI"),
+        ("MISHOZUKI E-CARGO", "MISHOZUKI"),
     # ---- Limpieza de descriptores y grafías (decisión del usuario, 2026-10-31) ----
     # MINGHONG/MIGHONG es la misma marca y el mismo modelo; se unifica en la
     # grafía mayoritaria de las fuentes (MIGHONG, 4 fichas frente a 2). La
@@ -213,7 +227,7 @@ EXCLUIDOS = {
     # con distinto precio ($2.500 vs $2.580). Se excluye el genérico y se
     # conserva el que sí se puede nombrar (decisión del usuario, 2026-10-31).
     "https://compramasonline.com/tienda/triciclo-electrico-de-carga/":
-        "Sin modelo propio; duplica la identidad de MINGHONG con otro precio; "
+        "Sin modelo propio; duplica la identidad de MIGHONG con otro precio; "
         "excluido por decisión del usuario (2026-10-31).",
     # MundoEnvío: el 'Mini triciclo eléctrico 4 ruedas' es un cuatriciclo.
     "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/":

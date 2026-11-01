@@ -6,46 +6,43 @@ KIVITOVA,electrico,5,0,5
 STAR,electrico,0,4,4
 KIVITOVA GELPB,electrico,0,4,4
 VEDCA C400 GELPB,electrico,0,4,4
-ONEBOT CLASIC 2026,electrico,0,3,3
-TOPMAQ,electrico,3,0,3
+JINPENG,hibrido,0,3,3
 VEDCA C600 LIFEPO4,electrico,0,3,3
-MVP POWER GELPB,electrico,0,2,2
-TRAKTION 2026,electrico,0,2,2
+TOPMAQ,electrico,3,0,3
+ONEBOT CLASIC 2026,electrico,0,3,3
 VEDCA C400 LIFEPO4,electrico,0,2,2
-STAR,hibrido,1,1,2
 VEDCA C400A GELPB,electrico,0,2,2
+OIM,electrico,2,0,2
+TRAKTION 2026,electrico,0,2,2
+STAR,hibrido,1,1,2
+VEDCA C800B LIFEPO4,electrico,0,2,2
 PANTHER,electrico,1,1,2
 DC,electrico,2,0,2
 OIM GELPB,electrico,0,2,2
-OIM,electrico,2,0,2
 VIENTO RAPIDO,electrico,0,2,2
+DDS-OD,electrico,0,2,2
 MINERVA,electrico,2,0,2
 MAGIC BIKE,electrico,1,1,2
-DDS-OD,electrico,0,2,2
 MAF LIFEPO4,electrico,0,2,2
-MOTO FORM,electrico,1,0,1
-TY150UK,electrico,0,1,1
-VEDCA SH001 LIFEPO4,electrico,0,1,1
-VEDCA C800B LIFEPO4,electrico,0,1,1
-VEDCA C800B FOTOVOLTAICO LIFEPO4,electrico,0,1,1
-VEDCA C600 GELPB,electrico,0,1,1
-FURIKAZAN,hibrido,0,1,1
-VEDCA C400 LIFEPO4MN,electrico,0,1,1
-JIMPEG PANTER 2026,electrico,0,1,1
-JINPEN,hibrido,0,1,1
-VEDCA C300 LIFEPO4,electrico,0,1,1
+MVP POWER GELPB,electrico,0,2,2
+NIPPON SE,electrico,0,1,1
 VEDCA,electrico,1,0,1
-JINPENG,hibrido,0,1,1
-JINPEN HIBRIDO,hibrido,0,1,1
-MISHOZUKI 2026,electrico,0,1,1
+VEDCA SH001 LIFEPO4,electrico,0,1,1
+FURIKAZAN,hibrido,0,1,1
+VEDCA C600 GELPB,electrico,0,1,1
 JINPENG GELPB,electrico,0,1,1
+VEDCA C400 LIFEPO4MN,electrico,0,1,1
+JINPENG PANTER 2026,electrico,0,1,1
 KN-KO13,electrico,0,1,1
+VEDCA C300 LIFEPO4,electrico,0,1,1
 LAITUNG,hibrido,0,1,1
+TY150UK,electrico,0,1,1
+MAGIC BIKE M004,gasolina,0,1,1
+MAGIC BIKE M005,gasolina,0,1,1
 SK-2101,electrico,0,1,1
 PORTO BELLO,hibrido,0,1,1
 ONEBOT TANK LIFEPO4,electrico,0,1,1
 ONEBOT JINCHENG 2026 CAPATAZ LIFEPO4,electrico,0,1,1
-MAGIC BIKE M004,gasolina,0,1,1
-MAGIC BIKE M005,gasolina,0,1,1
-NIPPON SE,electrico,0,1,1
+MISHOZUKI 2026,electrico,0,1,1
+MOTO FORM,electrico,1,0,1
 CHILWEE,electrico,0,1,1

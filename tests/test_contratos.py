@@ -17,8 +17,8 @@ EMPRESAS = list((ROOT / "Data" / "empresas").glob("*.jsonl"))
 
 
 def test_ranking_tiene_las_filas_y_nombres_esperados():
-    assert len(SCORE) == 41
-    assert SCORE["modelo_norm"].nunique() == 40
+    assert len(SCORE) == 38
+    assert SCORE["modelo_norm"].nunique() == 37
     assert SCORE["score"].between(0, 1).all()
     assert (SCORE["n_anuncios_total"] > 0).all()
     assert not SCORE["modelo_norm"].str.contains("SIN IDENTIFICAR", na=False).any()
@@ -33,7 +33,7 @@ def test_ranking_tiene_rango_explicito_por_propulsion():
 
 
 def test_conteos_del_dataset():
-    assert int(SCORE["repuestos_proxy"].fillna(0).sum()) == 9
+    assert int(SCORE["repuestos_proxy"].fillna(0).sum()) == 10
     assert len(EMPRESAS) == 10
     assert len(pd.concat([pd.read_json(p, lines=True) for p in EMPRESAS],
                          ignore_index=True)) == 64
@@ -64,8 +64,11 @@ def test_top_por_score_no_depende_del_orden():
 
     fila = top_por_score(SCORE)
     assert fila is not None
-    assert fila["modelo_norm"] == "TOPMAQ BRIDERK 2026 GELPB"
-    assert abs(float(fila["score"]) - 0.785540) < 1e-6
+    # Desde la unificación del grupo JINPENG (2026-10-31), el híbrido agrega
+    # 3 anuncios y es el mejor puntuado en conjunto; el eléctrico sigue
+    # liderado por TOPMAQ BRIDERK.
+    assert fila["modelo_norm"] == "JINPENG"
+    assert abs(float(fila["score"]) - 0.883473) < 1e-6
 
 
 def test_top_por_propulsion_es_estable_y_no_mezcla_grupos():

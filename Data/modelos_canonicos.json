@@ -4,7 +4,7 @@
     "https://bluewavecuba.com/triciclos/triciclo-hibrido-litio": "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. Excluido por decisión del usuario (2026-10-31).",
     "https://bluewavecuba.com/triciclos/triciclo-hibrido-solar": "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. Excluido por decisión del usuario (2026-10-31).",
     "https://bluewavecuba.com/triciclos/triciclo-jmd-hibrido": "Nombre genérico ('TRICICLO ...') sin marca; no identifica un modelo. Excluido por decisión del usuario (2026-10-31).",
-    "https://compramasonline.com/tienda/triciclo-electrico-de-carga/": "Sin modelo propio; duplica la identidad de MINGHONG con otro precio; excluido por decisión del usuario (2026-10-31).",
+    "https://compramasonline.com/tienda/triciclo-electrico-de-carga/": "Sin modelo propio; duplica la identidad de MIGHONG con otro precio; excluido por decisión del usuario (2026-10-31).",
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-hibridos-el-mejor-precio-de": "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; excluido por decisión del usuario (2026-10-19).",
     "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/": "Cuatriciclo ('4 ruedas'), fuera del alcance de triciclos."
   },
@@ -101,14 +101,14 @@
       "origen": "curado"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jimpeng-hibrido-2026": {
-      "marca": "JINPEN",
+      "marca": "JINPENG",
       "modelo": null,
-      "origen": "curado"
+      "origen": "manual"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jinpen-hibrido": {
-      "marca": "JINPEN",
-      "modelo": "JINPEN HIBRIDO",
-      "origen": "curado"
+      "marca": "JINPENG",
+      "modelo": "JINPENG",
+      "origen": "manual"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-marca-jinpeng": {
       "marca": "JINPENG",
@@ -152,17 +152,17 @@
     },
     "https://francismotors.org/triciclos/blue-carga-1000w/": {
       "marca": null,
-      "modelo": "BLUE 1000W",
+      "modelo": "BLUE",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/bravo-250-cc/": {
       "marca": null,
-      "modelo": "BRAVO 250 CC",
+      "modelo": "BRAVO",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/dg-blue-72v/": {
       "marca": null,
-      "modelo": "DG BLUE 72V",
+      "modelo": "DG BLUE",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/fenix-hibrido/": {
@@ -172,17 +172,17 @@
     },
     "https://francismotors.org/triciclos/hercules-pro/": {
       "marca": "HERCULES",
-      "modelo": "HERCULES PRO 72V 85AH",
+      "modelo": "HERCULES PRO",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/phantom-200cc/": {
       "marca": null,
-      "modelo": "PHANTOM 200CC",
+      "modelo": "PHANTOM",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/tiger-1800w-hibrido-72v-65ah/": {
       "marca": "TIGER",
-      "modelo": "TIGER 1800W 72V 65AH",
+      "modelo": "TIGER",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/tiger-hibrido/": {
@@ -192,7 +192,7 @@
     },
     "https://francismotors.org/triciclos/topmaq-2000w/": {
       "marca": "TOPMAQ",
-      "modelo": "TOPMAQ 2000W",
+      "modelo": "TOPMAQ",
       "origen": "manual"
     },
     "https://francismotors.org/triciclos/trion-fm-151/": {
@@ -202,7 +202,7 @@
     },
     "https://francismotors.org/triciclos/white-trek-250cc-4t/": {
       "marca": null,
-      "modelo": "WHITE TREK 250CC 4T",
+      "modelo": "WHITE TREK",
       "origen": "manual"
     },
     "https://habana.casalindashop.com/triciclo-combustion-de-carga-200cc-enfriamiento-por-aire-m-magic-bike-modelo-m004.html": {
@@ -282,12 +282,12 @@
     },
     "https://kikihabana.com/producto/mighong-panel-solar/": {
       "marca": "MIGHONG",
-      "modelo": "MIGHONG 400 KG",
+      "modelo": "MIGHONG",
       "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-2/": {
       "marca": "IZUKI",
-      "modelo": "IZUKI 120 AH",
+      "modelo": "IZUKI",
       "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclo-electrico-para-cuba-3/": {
@@ -302,7 +302,7 @@
     },
     "https://kikihabana.com/producto/triciclo-panel-solar-para-cuba/": {
       "marca": "CYT",
-      "modelo": "CYT 80 KM",
+      "modelo": "CYT",
       "origen": "manual"
     },
     "https://kikihabana.com/producto/triciclos-electricos-para-cuba-2/": {
@@ -350,7 +350,7 @@
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-mighong-con-panel-solar/": {
       "marca": "MIGHONG",
-      "modelo": "MIGHONG 600 KG",
+      "modelo": "MIGHONG",
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-2/": {
@@ -370,12 +370,12 @@
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba-5/": {
       "marca": "RALLY",
-      "modelo": "RALLY 800",
+      "modelo": "RALLY",
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-electrico-para-cuba/": {
       "marca": "CYT",
-      "modelo": "CYT 80 KM",
+      "modelo": "CYT",
       "origen": "manual"
     },
     "https://mundoenvio.com/tienda/triciclo-marca-sotek/": {
@@ -400,7 +400,7 @@
     },
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-3/": {
       "marca": "IZUKI",
-      "modelo": "IZUKI 127 AH",
+      "modelo": "IZUKI",
       "origen": "manual"
     },
     "https://patuisla.com/producto/triciclo-electrico-para-cuba-4/": {
@@ -415,12 +415,12 @@
     },
     "https://patuisla.com/producto/triciclo-panel-solar-para-cuba/": {
       "marca": "MIGHONG",
-      "modelo": "MIGHONG 400 KG",
+      "modelo": "MIGHONG",
       "origen": "manual"
     },
     "https://patuisla.com/producto/triciclo-panel-solar/": {
       "marca": "CYT",
-      "modelo": "CYT 100 KM",
+      "modelo": "CYT",
       "origen": "manual"
     },
     "https://patuisla.com/producto/triciclos-electricos-para-cuba-2/": {
@@ -514,9 +514,9 @@
       "origen": "curado"
     },
     "https://www.facebook.com/groups/644647424572616/permalink/1155238560180164/": {
-      "marca": "JIMPEG",
-      "modelo": "JIMPEG PANTER 2026",
-      "origen": "curado"
+      "marca": "JINPENG",
+      "modelo": "JINPENG PANTER 2026",
+      "origen": "manual"
     },
     "https://www.facebook.com/groups/644647424572616/permalink/1155252360178784/": {
       "marca": "TRAKTION",
@@ -584,9 +584,9 @@
       "origen": "curado"
     },
     "https://www.facebook.com/share/p/19rdffanLu/": {
-      "marca": "JIMPENG",
+      "marca": "JINPENG",
       "modelo": "TY150UK",
-      "origen": "curado"
+      "origen": "manual"
     },
     "https://www.facebook.com/share/p/1Bjixj7nec/": {
       "marca": "PANTHER",
@@ -685,7 +685,7 @@
     },
     "https://zonalibreonline.com/product/triciclo-electrico-mishozuki-e-cargo/": {
       "marca": "MISHOZUKI",
-      "modelo": "MISHOZUKI E-CARGO 8000W",
+      "modelo": "MISHOZUKI E-CARGO",
       "origen": "manual"
     }
   },

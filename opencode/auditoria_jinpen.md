@@ -4,6 +4,11 @@ Fecha: 2026-10-31. Datos: `Data/clean_data/anuncios_triciclos.jsonl`,
 `Data/modelos_canonicos.json`, `Data/clean_data/score_modelos.csv`.
 No se modificó ningún dato: esta auditoría solo documenta la decisión.
 
+> **Estado final (mismo día):** el usuario revocó la separación — JIMPEG y
+> JINPEN son erratas de JINPENG y el híbrido es JINPENG. Ver la sección
+> "Decisión" y "Resultado" más abajo; las secciones iniciales quedan como
+> registro del análisis que condujo a la pregunta.
+
 ## Los cuatro registros
 
 | Identidad actual | Modelo declarado | Marca | Propulsión | Specs declaradas | Precio | Fuente / URL |
@@ -27,7 +32,12 @@ Las páginas de origen usan cuatro grafías: **JINPENG**, **Jinpen**,
 - `JINPEING` está en `ALIAS_MODELOS` y en `OVERRIDES` por URL; no queda ninguna
   fila con esa grafía en el ranking.
 
-## Por qué no se fusiona `JINPEN` con `JINPENG`
+## Por qué no se fusiona `JINPEN` con `JINPENG` (histórico — la postura cambió)
+
+> Cambio de postura el mismo día: el usuario decidió fusionar. Los motivos en
+> favor de la separación (specs distintas) quedaron resueltos compartiendo
+> **identidad** pero no **fichas**: las URLs siguen separadas con sus specs y
+> el score agrega con la mediana.
 
 No son el mismo producto: cambian motor, batería, autonomía, carga y precio.
 Fusionarlos por marca colapsaría dos fichas híbridas con specs distintas
@@ -37,20 +47,44 @@ basta para distinguirlos: hay dos híbridos.
 
 ## Decisión
 
-**No fusionar a nivel producto.** Mantener:
+**Fusionar a nivel producto (decisión final del usuario, 2026-10-31).**
+"JIMPEG es errata de JINPENG y JINPEN híbrido también — ahí debe ir
+JINPENG." Aplicado en el origen, no por alias automático:
 
-- marca normalizada: `JINPEN`, `JIMPENG`, `JINPEING` → `JINPENG`;
-- identidad de producto: `JINPENG GELPB`, `JINPENG`, `JINPEN HIBRIDO` y
-  `JINPEN`, cada una con sus specs y su URL.
+- marca normalizada (`MARCA_ALIAS`): `JINPEING`, `JEINPEING`, `JIMPEG`,
+  `JIMPENG`, `JINPEN` → `JINPENG`;
+- nombres por URL (`OVERRIDES` en `codes/crear_canonicos.py`):
+  - `triciclo-jinpen-hibrido` → modelo `JINPENG`, marca `JINPENG`;
+  - `triciclo-jimpeng-hibrido-2026` → modelo sin nombre (como estaba) con
+    marca `JINPENG`;
+  - Facebook `permalink/1155238560180164` → modelo `JINPENG PANTER 2026`
+    (antes "JIMPEG PANTER 2026");
+  - Facebook `share/p/19rdffanLu` → modelo `TY150UK` intacto, marca
+    `JINPENG` (antes "JIMPENG");
+- `codes/parse_fb.py` (capa protectora): `jimpeg`/`jimpeng` → `JINPENG` y
+  "jimpeg panter 2026" → JINPENG PANTER 2026;
+- followed by `norm_modelo.py --migrar`, `analisis.py` y suite.
 
-Si el usuario confirma que `JINPEN` es solo una errata de marca y que los dos
-híbridos son el mismo producto, el cambio debe hacerse en
-`Data/modelos_canonicos.json` con un `OVERRIDE` explícito por URL, seguido de
-`norm_modelo.py --migrar` y `analisis.py`. No se hace por alias automático.
+## Resultado (2026-10-31)
+
+| Identidad | Propulsión | n anuncios | Especs agregadas (mediana) | Precio |
+|---|---|---|---|---|
+| `JINPENG GELPB` | eléctrico | 1 | 60 V · 45 Ah; 70 km; 600 kg | $3.300 |
+| `JINPENG` | híbrido | 3 | 1100 W + extensor; 100 km; 850 kg | $4.300 |
+
+- El híbrido comparte identidad (no specs): las fichas siguen separadas por
+  URL con Motor 1000/1100/1500 W y baterías 32/58/89 Ah.
+- Con el agregado, `JINPENG` híbrido (n=3, 5 criterios) pasa a ser el
+  **mejor puntuado global** (score 0.883); el eléctrico sigue liderado por
+  TOPMAQ BRIDERK 2026 GELPB (0.786). Ranking: 40 → 38 filas, 39 → 37 nombres;
+  `repuestos_proxy` 9 → 10 (el híbrido ahora se anuncia en 2 fuentes).
+- Guarda: `tests/test_identidad.py::test_grupo_jinpeng_esta_unificado` y el
+  escáner de erratas en `test_no_quedan_erratas_en_el_ranking`.
 
 ## Verificación
 
-- `tests/test_identidad.py` comprueba que `normalizar_marca("JINPEN") ==
-  "JINPENG"`, que las dos identidades de producto siguen existiendo y que
-  `JINPEING` no vuelve.
-- `crear_canonicos.py --check` y `norm_modelo.py --check` siguen pasando.
+- `tests/test_identidad.py` comprueba que las cinco grafías erratas
+  normalizan a `JINPENG`, que la identidad híbrida agrega 3 anuncios y que
+  `JINPEN`/`JIMPEG` no quedan ni en el ranking ni en la tabla canónica.
+- `crear_canonicos.py --check`, `norm_modelo.py --check` y la suite 36/36
+  pasan tras la migración.
