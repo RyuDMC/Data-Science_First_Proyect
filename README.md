@@ -18,3 +18,11 @@
   - 🛠️ **[`requirements-dev.txt`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/requirements-dev.txt)** — Dependencias de desarrollo y tests.
   - 🚫 **[`.gitignore`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/.gitignore)** — Entorno y datos personales excluidos.
   - 📖 **[`README.md`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/README.md)** — Este documento.
+
+## ▶️ Montar la página
+
+Desde la raíz del proyecto:
+
+```bash
+streamlit run reporte/app.py
+```
