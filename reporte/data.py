@@ -171,14 +171,59 @@ def top_por_anuncios(df_scores: pd.DataFrame):
     ).iloc[0]
 
 
-def top_por_score(df_scores: pd.DataFrame):
-    """Fila con mejor score (desempate: anuncios y nombre)."""
+def top_por_score(df_scores: pd.DataFrame, propulsion: str):
+    """Fila con mejor score DENTRO de una propulsión.
+
+    El score se normaliza min-max dentro de cada grupo, así que NO es
+    comparable entre propulsiones. `propulsion` es obligatoria a propósito:
+    evita que una página vuelva a mostrar un "mejor global" que mezcle un
+    híbrido con un eléctrico.
+    """
     if df_scores.empty or "score" not in df_scores.columns:
         return None
-    return df_scores.sort_values(
+    sub = filter_by_propulsion(df_scores, propulsion)
+    if sub.empty:
+        return None
+    return sub.sort_values(
         ["score", "n_anuncios_total", "modelo_norm"],
         ascending=[False, False, True], kind="mergesort",
     ).iloc[0]
+
+
+def frontera_pareto(df: pd.DataFrame, x_col: str, y_col: str) -> pd.DataFrame:
+    """Filas no dominadas en el plano (x, y), ordenadas por x.
+
+    Un punto está dominado si otro es al menos igual de bueno en ambos ejes y
+    estrictamente mejor en uno. La dirección se decide por el nombre de la
+    columna: `precio_usd` es "menor = mejor"; autonomía y carga son
+    "mayor = mejor". La implementación anterior recorría los puntos ordenados
+    por X y solo comparaba Y, lo que devolvía puntos dominados cuando X no era
+    el precio (p. ej. autonomía vs carga).
+    """
+    if df.empty or x_col not in df.columns or y_col not in df.columns:
+        return df.head(0)
+    sub = df.dropna(subset=[x_col, y_col]).copy()
+    if sub.empty:
+        return sub
+
+    x = pd.to_numeric(sub[x_col], errors="coerce").to_numpy(dtype=float)
+    y = pd.to_numeric(sub[y_col], errors="coerce").to_numpy(dtype=float)
+    # Orientar los dos ejes para que "mayor" sea siempre mejor.
+    tx = -x if x_col == "precio_usd" else x
+    ty = -y if y_col == "precio_usd" else y
+
+    no_dominados = []
+    for i in range(len(sub)):
+        dominado = any(
+            j != i
+            and tx[j] >= tx[i] and ty[j] >= ty[i]
+            and (tx[j] > tx[i] or ty[j] > ty[i])
+            for j in range(len(sub))
+        )
+        if not dominado:
+            no_dominados.append(i)
+
+    return sub.iloc[no_dominados].sort_values(x_col, kind="mergesort")
 
 
 def top_por_propulsion(df_scores: pd.DataFrame, prop: str, n: int = 3) -> pd.DataFrame:
@@ -218,15 +263,16 @@ def texto_sensibilidad_electrico(df_sens: pd.DataFrame,
     if not requeridas_pesos <= set(df_sens.columns):
         return fallback
 
-    top3 = df_sens_res[df_sens_res["propulsion"] == "electrico"].nsmallest(3, "rank_base")
+    prop = "electrico"
+    top3 = df_sens_res[df_sens_res["propulsion"] == prop].nsmallest(3, "rank_base")
     if len(top3) != 3:
         return fallback
 
     pcts = top3["top3_pct"].tolist()
     nombres = top3["modelo_norm"].tolist()
-    cambios = (df_sens[(df_sens["propulsion"] == "electrico")
-                       & (df_sens["rank"] == 1)
-                       & (df_sens["escenario"] != "base")]
+    sens_prop = df_sens[df_sens["propulsion"] == prop]
+    cambios = (sens_prop[(sens_prop["rank"] == 1)
+                         & (sens_prop["escenario"] != "base")]
                .set_index("escenario")["modelo_norm"])
     otros = cambios[cambios != nombres[0]]
     nombres_esc = {
@@ -242,12 +288,30 @@ def texto_sensibilidad_electrico(df_sens: pd.DataFrame,
          if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
         for e, m in otros.items()
     )
+
+    # ¿Cuántos escenarios cambian el trío completo, no solo el 1º?
+    base_top3 = set(nombres)
+    cambia_top3 = [
+        esc for esc, sub in sens_prop[sens_prop["escenario"] != "base"]
+        .groupby("escenario", sort=True)
+        if set(sub.nsmallest(3, "rank")["modelo_norm"]) != base_top3
+    ]
+    n_esc = len(cambios)
+    if len(otros):
+        txt_1 = (f"el 1º cambia en {len(otros)} de {n_esc} escenarios de "
+                 f"omisión ({detalle})")
+    else:
+        txt_1 = f"el 1º se mantiene en los {n_esc} escenarios de omisión"
+    if cambia_top3:
+        txt_3 = f"el trío del podio cambia en {len(cambia_top3)} de {n_esc}"
+    else:
+        txt_3 = f"el trío del podio se mantiene en los {n_esc}"
+
     return (
-        f"Con 2.000 perturbaciones de ±0.05 en los pesos, el top-3 eléctrico se "
-        f"mantiene en {pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de los casos; "
-        f"el 1º cambia en {len(otros)} de {len(cambios)} escenarios de omisión"
-        + (f" ({detalle})" if detalle else "")
-        + ". El orden exacto depende de los pesos; el podio, no."
+        f"Con perturbaciones de ±0.05 en los pesos, cada modelo del top-3 "
+        f"eléctrico cae en el top-3 en {pcts[0]:.0f}%, {pcts[1]:.0f}% y "
+        f"{pcts[2]:.0f}% de los casos; {txt_1}, {txt_3}. "
+        "El orden exacto —y a veces el podio— depende de los pesos."
     )
 
 

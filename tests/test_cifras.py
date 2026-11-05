@@ -63,6 +63,12 @@ def test_metadata_es_determinista_por_defecto():
     assert "procedencia" not in META
 
 
+def test_corte_declarado_no_se_confunde_con_la_ultima_captura():
+    """El corte de anuncios es una decisión; la captura real es otro campo."""
+    assert "anuncios_captura" in META["cortes"]
+    assert META["cortes"]["anuncios_captura"] <= META["cortes"]["anuncios"]
+
+
 def test_score_legado_archivado():
     """La tabla de la raíz era un legado de 35 filas; solo queda el archivo."""
     assert not (ROOT / "Data" / "score_modelos.csv").exists()

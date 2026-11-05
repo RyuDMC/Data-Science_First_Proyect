@@ -1,28 +1,45 @@
 """Reglas de privacidad del proyecto, convertidas en tests.
 
 El trabajo de campo se captura con nombre y carné de identidad. El repo es
-público, así que la regla es simple: ni un CI en archivos versionados y el
-archivo crudo siempre ignorado.
+público, así que la regla es simple: ni un CI ni un teléfono en archivos
+versionados, y el archivo crudo siempre ignorado.
+
+Además de los CI de 11 dígitos se buscan teléfonos cubanos: móviles de 8
+dígitos que empiezan por 5 o 6, prefijo internacional +53 y números pegados a
+la palabra "WhatsApp". El caso real que motivó esto: un **CI mal escrito de 8
+dígitos** (no un teléfono) aparecía en el campo `legalizacion` de tres
+anuncios; el patrón de 8 dígitos lo detecta igual porque un CI truncado y un
+móvil son indistinguibles por longitud.
 """
 
 import subprocess
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 
+PATRONES = {
+    "carné de identidad (11 dígitos)": r"\b[0-9]{11}\b",
+    "8 dígitos tipo móvil o CI incompleto (5/6)": r"\b[56][0-9]{7}\b",
+    "prefijo internacional +53": r"\+53[ -]?[0-9]{7,8}",
+    "número tras WhatsApp": r"[Ww]hats[Aa]pp[^0-9]{0,25}[0-9]{7,}",
+}
 
-def test_sin_numeros_de_11_digitos_en_archivos_versionados():
-    """Ningún archivo versionado puede contener un número de 11 dígitos.
+
+@pytest.mark.parametrize("descripcion,patron", PATRONES.items())
+def test_sin_pii_en_archivos_versionados(descripcion, patron):
+    """Ningún archivo versionado puede contener PII.
 
     `git grep` solo mira lo versionado, así que `data_personas.txt` (ignorado)
     queda fuera a propósito: es la fuente con PII, no el deliverable.
     """
     r = subprocess.run(
-        ["git", "grep", "-nIE", r"\b[0-9]{11}\b"],
+        ["git", "grep", "-nIE", patron],
         cwd=ROOT, capture_output=True, text=True,
     )
     assert r.returncode == 1, (
-        "Posible PII (número de 11 dígitos) en archivos versionados:\n"
+        f"Posible PII ({descripcion}) en archivos versionados:\n"
         f"{r.stdout}{r.stderr}"
     )
 

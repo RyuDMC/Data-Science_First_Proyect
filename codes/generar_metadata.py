@@ -4,11 +4,11 @@ Metadatos del dataset: conteos y cortes en un solo sitio.
 
 Por qué existe
 --------------
-Las cifras del proyecto (70 anuncios, 41 modelos, 68 fichas, 30 observaciones,
-9/41 con repuestos…) se escribían a mano en la portada, el README, Método y
-Limitaciones. Ya habían divergido dos veces (42 vs 41; 30 vs 68). Este script
-las calcula desde los datos y escribe `Data/metadata.json`; el reporte y los
-tests leen de ahí.
+Las cifras del proyecto (70 anuncios, 38 filas de ranking, 64 fichas, 30
+observaciones, 10/38 con repuestos…) se escribían a mano en la portada, el
+README, Método y Limitaciones. Ya habían divergido dos veces (42 vs 41; 30 vs
+68). Este script las calcula desde los datos y escribe `Data/metadata.json`; el
+reporte y los tests leen de ahí.
 
 Qué se calcula y qué se declara
 -------------------------------
@@ -152,7 +152,11 @@ def calcular() -> dict:
         "marcas_campo": int(campo["marca"].nunique()),
     }
     cortes = {
+        # `anuncios` es la fecha de congelación declarada (decisión de
+        # proyecto), no la última captura. Se publican ambas para que el
+        # reporte no sugiera que hay datos hasta la fecha de congelación.
         "anuncios": CORTE_ANUNCIOS,
+        "anuncios_captura": _fecha_max(anuncios["fecha_captura"]),
         "catalogos": _fecha_max(empresas["fecha_captura"]),
         "campo": _fecha_max(campo["fecha"]),
     }
@@ -209,7 +213,8 @@ def main():
           f"({c['productos_excluidos']} excluidos) · "
           f"{c['observaciones_campo']} observaciones de campo "
           f"({c['municipios_campo']} municipios, {c['marcas_campo']} marcas)")
-    print(f"   Cortes: anuncios {meta['cortes']['anuncios']} · "
+    print(f"   Cortes: anuncios {meta['cortes']['anuncios']} "
+          f"(captura hasta {meta['cortes']['anuncios_captura']}) · "
           f"catálogos {meta['cortes']['catalogos']} · campo {meta['cortes']['campo']}")
     top_e = meta["resultados"]["top_por_propulsion"].get("electrico", [])
     if top_e:

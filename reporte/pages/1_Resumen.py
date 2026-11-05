@@ -15,7 +15,7 @@ import streamlit as st
 import pandas as pd
 from reporte.data import (load_anuncios, load_empresas, load_campo, load_scores,
                           load_sensibilidad, load_sensibilidad_resumen,
-                          get_kpis, top_por_anuncios, top_por_score,
+                          get_kpis, top_por_anuncios,
                           top_por_propulsion, texto_sensibilidad_electrico)
 from reporte.theme import color_for_prop, label_for_prop, apply_style
 
@@ -78,21 +78,34 @@ with col_t1:
         st.info("Sin datos de scoring")
 
 with col_t2:
-    st.markdown("### 2️⃣ Por qué el mejor valorado")
+    st.markdown("### 2️⃣ El mejor eléctrico (no hay «mejor global»)")
     st.markdown("""
-    - **Mejor equilibrio precio/autonomía/carga** dentro de su grupo de propulsión
-    - **Oferta viva** en múltiples fuentes (repuestos_proxy)
-    - **Legalidad mencionada** en anuncios/fichas
-    - **Volumen de anuncios** > 1 (demanda visible)
+    - **Mejor equilibrio precio/autonomía/carga** dentro de su grupo
+    - **Oferta viva** en más de una fuente (`repuestos_proxy`)
+    - **Legalidad mencionada** en el anuncio
+    - Los scores se normalizan **dentro de cada propulsión**: no se comparan
+      eléctricos con híbridos ni con gasolina.
     """)
-    top_score = top_por_score(df_scores)
-    if top_score is not None:
+    _elec = top_por_propulsion(df_scores, "electrico", 2)
+    if not _elec.empty:
+        _top = _elec.iloc[0]
         st.caption(
-            f"**{top_score['modelo_norm']}** ({label_for_prop(top_score['propulsion'])}) · "
-            f"Precio: ${top_score['precio_usd']:,.0f} | "
-            f"Autonomía: {top_score['autonomia_km']:.0f} km | "
-            f"Carga: {top_score['carga_kg']:.0f} kg"
+            f"**{_top['modelo_norm']}** · "
+            f"Precio: {f'${_top.precio_usd:,.0f}' if pd.notna(_top.precio_usd) else '—'} | "
+            f"Autonomía: {f'{_top.autonomia_km:.0f} km' if pd.notna(_top.autonomia_km) else '—'} | "
+            f"Carga: {f'{_top.carga_kg:.0f} kg' if pd.notna(_top.carga_kg) else '—'}"
         )
+        if len(_elec) >= 2:
+            _brecha = float(_elec.iloc[0]["score"] - _elec.iloc[1]["score"])
+            _n_elec = df_scores[df_scores["propulsion"] == "electrico"]
+            _n_un = int((_n_elec["n_anuncios_total"] == 1).sum())
+            st.caption(
+                f"Brecha con el 2º: **{_brecha:.3f}**. "
+                f"{_n_un} de {len(_n_elec)} eléctricos tienen un solo anuncio: "
+                "con esta muestra el orden no es concluyente."
+            )
+    else:
+        st.info("Sin datos eléctricos")
 
 with col_t3:
     st.markdown("### 3️⃣ La mejor opción (según escenario)")

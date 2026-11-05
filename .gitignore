@@ -33,3 +33,6 @@ Thumbs.db
 Data/raw_data/data_personas.txt
 # Variantes del mismo archivo (p. ej. data_personas_v2.txt) también se ignoran.
 Data/raw_data/*personas*
+
+# Salida de `norm_modelo.py --migrar` (no sobrescribe raw_data/).
+Data/raw_data_migrado/

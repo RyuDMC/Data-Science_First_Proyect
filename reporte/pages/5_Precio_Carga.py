@@ -15,7 +15,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, filter_by_propulsion
+from reporte.data import load_scores, filter_by_propulsion, frontera_pareto
 from reporte.theme import apply_style, fig_ax, scatter_bubble, color_for_prop, label_for_prop, ACCENT_GREEN, MUTED, GRID_COLOR, TEXT_COLOR
 
 
@@ -76,40 +76,13 @@ props = df["propulsion"].values
 
 fig, ax = fig_ax(figsize=(10, 7))
 
-# Frontera eficiente (Pareto)
-pareto_x, pareto_y, pareto_labels = [], [], []
+# Frontera eficiente (Pareto): puntos no dominados en los dos ejes elegidos.
+pareto_df = pd.DataFrame()
 if show_frontera and len(df) > 1:
-    # Determinar dirección según métricas
-    x_is_price = x_metric == "precio_usd"
-    y_is_price = y_metric == "precio_usd"
-    
-    # Ordenar por X
-    idx = np.argsort(x_vals)
-    x_s, y_s = x_vals[idx], y_vals[idx]
-    labels_s = labels[idx]
-    
-    # Calcular frontera
-    best_y = -np.inf
-    
-    for xi, yi, li in zip(x_s, y_s, labels_s):
-        is_better = False
-        if y_is_price:
-            # Y es precio: menor es mejor
-            if yi < best_y or best_y == -np.inf:
-                is_better = True
-        else:
-            # Y es autonomía/carga: mayor es mejor
-            if yi > best_y:
-                is_better = True
-        
-        if is_better:
-            pareto_x.append(xi)
-            pareto_y.append(yi)
-            pareto_labels.append(li)
-            best_y = yi
-    
-    if len(pareto_x) > 1:
-        ax.plot(pareto_x, pareto_y, color=ACCENT_GREEN, linestyle="--", linewidth=2.5,
+    pareto_df = frontera_pareto(df, x_metric, y_metric)
+    if len(pareto_df) > 1:
+        ax.plot(pareto_df[x_metric], pareto_df[y_metric], color=ACCENT_GREEN,
+                linestyle="--", linewidth=2.5,
                 label="Frontera eficiente (Pareto)", zorder=4, alpha=0.8)
 
 # Scatter
@@ -140,7 +113,7 @@ for p in props:
         handles.append(Patch(color=color_for_prop(p), label=label_for_prop(p)))
         seen.add(p)
 if handles:
-    ax.legend(handles=handles + ([Patch(color=ACCENT_GREEN, linestyle="--", label="Frontera eficiente")] if show_frontera and len(pareto_x) > 1 else []), 
+    ax.legend(handles=handles + ([Patch(color=ACCENT_GREEN, linestyle="--", label="Frontera eficiente")] if show_frontera and len(pareto_df) > 1 else []), 
               loc="best", fontsize=9)
 
 st.pyplot(fig)
@@ -167,18 +140,19 @@ with col2:
     **Frontera eficiente (línea verde):**
     Modelos que **no están dominados** — no hay otro modelo que sea mejor en ambos ejes simultáneamente.
     
-    - Si X=Precio: frontera = **menor precio para cada nivel de Y** (o mayor Y para cada precio)
+    - En **precio**, menor es mejor; en **autonomía** y **carga**, mayor es mejor.
+    - La frontera se recalcula para el par de ejes que elijas (no asume que X sea precio).
     - Modelos **sobre la línea** = mejores compromisos
-    - Modelos **debajo/arriba** = dominados (hay alternativa mejor en ambos criterios)
+    - Modelos **fuera de la línea** = dominados (hay alternativa mejor en ambos criterios)
     """)
 
 # ======= TABLA DE FRENTERA =======
-if show_frontera and len(pareto_x) > 1:
+if show_frontera and not pareto_df.empty:
     st.subheader("Modelos en la frontera eficiente")
-    frontera_df = pd.DataFrame({
-        "Modelo": pareto_labels,
-        x_labels[x_metric]: pareto_x,
-        y_labels[y_metric]: pareto_y,
+    frontera_df = pareto_df[["modelo_norm", x_metric, y_metric]].rename(columns={
+        "modelo_norm": "Modelo",
+        x_metric: x_labels[x_metric],
+        y_metric: y_labels[y_metric],
     })
     st.dataframe(frontera_df, width="stretch", hide_index=True)
 

@@ -56,7 +56,8 @@ with st.sidebar:
     )
     st.markdown("---")
     st.caption(
-        f"Corte de datos: anuncios {_cortes.get('anuncios', '—')} · "
+        f"Corte declarado: anuncios {_cortes.get('anuncios', '—')} · "
+        f"captura hasta {_cortes.get('anuncios_captura', '—')} · "
         f"catálogos {_cortes.get('catalogos', '—')}"
     )
     st.caption("Stack: Streamlit + Matplotlib + Pandas")

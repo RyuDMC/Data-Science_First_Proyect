@@ -80,15 +80,13 @@ def _pesos_base() -> np.ndarray:
 def _ordenar_por_grupo(df: pd.DataFrame, col_score: str) -> pd.DataFrame:
     """Ranking 1..n DENTRO de cada propulsión, con desempate determinista.
 
-    Ordena por score descendente y, en empate, por nombre. El orden de
-    `analisis.py` es estable sobre el mismo criterio, así que `rank_base`
-    coincide con la tabla que ve el usuario.
+    Ordena por score descendente con un sort estable. En empate se conserva el
+    orden del CSV, que es el mismo que usa `rank(method="first")` en
+    `analisis.py`; así `rank_base` coincide con `rank_propulsion`.
     """
     partes = []
     for _, sub in df.groupby("propulsion", sort=True):
-        sub = (sub.sort_values("modelo_norm", kind="mergesort")
-                  .sort_values(col_score, ascending=False, kind="mergesort")
-                  .copy())
+        sub = sub.sort_values(col_score, ascending=False, kind="mergesort").copy()
         sub["rank"] = np.arange(1, len(sub) + 1)
         partes.append(sub)
     return pd.concat(partes, ignore_index=True)
@@ -97,6 +95,10 @@ def _ordenar_por_grupo(df: pd.DataFrame, col_score: str) -> pd.DataFrame:
 def _escenarios(df: pd.DataFrame, w: np.ndarray):
     """Genera (nombre, score) para cada escenario determinista."""
     M = df[COLS_NORM].to_numpy(dtype=float)
+    # Misma imputación que `analisis.py::score_modelos`: un criterio ausente
+    # vale 0.5. Sin esto, `M @ w` propaga NaN y el escenario base no reproduce
+    # el score oficial (era el bug: 15/38 scores NaN y 26/38 rangos distintos).
+    M = np.where(np.isnan(M), 0.5, M)
     raw = df[COLS_RAW].to_numpy(dtype=float)
 
     # 1. Base: imputación 0.5 (la decisión oficial).
@@ -122,6 +124,7 @@ def _perturbar(df: pd.DataFrame, w: np.ndarray, n: int, delta: float):
     los negativos se recortan a 0.
     """
     M = df[COLS_NORM].to_numpy(dtype=float)
+    M = np.where(np.isnan(M), 0.5, M)  # misma imputación que el score oficial
     nombres = df["modelo_norm"].to_numpy()
     props = df["propulsion"].to_numpy()
     grupos = {p: np.where(props == p)[0] for p in np.unique(props)}
@@ -163,9 +166,17 @@ def calcular(n_perturbaciones: int, delta: float):
     w = _pesos_base()
 
     # Guardia: el CSV debe ser el que produce analisis.py. Si no, la
-    # sensibilidad estaría midiendo otra cosa.
-    score_base = df[COLS_NORM].to_numpy(dtype=float) @ w
-    dif = np.abs(score_base - df["score"].to_numpy(dtype=float)).max()
+    # sensibilidad estaría midiendo otra cosa. Se comprueba antes de operar
+    # para que un NaN no pase inadvertido: `nan > 1e-6` es False y el check
+    # anterior daba OK con 15/38 scores rotos.
+    score_base = df[COLS_NORM].to_numpy(dtype=float)
+    score_base = np.where(np.isnan(score_base), 0.5, score_base) @ w
+    score_oficial = df["score"].to_numpy(dtype=float)
+    if not np.isfinite(score_base).all() or not np.isfinite(score_oficial).all():
+        malos = int((~np.isfinite(score_base)).sum() + (~np.isfinite(score_oficial)).sum())
+        sys.exit(f"Hay {malos} valores no finitos en el score del CSV o en su "
+                 "reconstrucción. Re-ejecuta python3 codes/analisis.py.")
+    dif = np.abs(score_base - score_oficial).max()
     if dif > 1e-6:
         sys.exit(f"El score del CSV no se reproduce (diferencia máx {dif:.2e}). "
                  "Re-ejecuta python3 codes/analisis.py antes de la sensibilidad.")
@@ -181,6 +192,17 @@ def calcular(n_perturbaciones: int, delta: float):
     largo = pd.concat(filas, ignore_index=True)
     largo = largo.sort_values(["propulsion", "escenario", "rank"],
                               kind="mergesort").reset_index(drop=True)
+
+    # El escenario base debe ser el ranking oficial, no solo un score parecido.
+    base = (largo[largo["escenario"] == "base"]
+            .set_index(["propulsion", "modelo_norm"])["rank"])
+    if "rank_propulsion" in df.columns:
+        oficial = df.set_index(["propulsion", "modelo_norm"])["rank_propulsion"]
+        if not base.reindex(oficial.index).eq(oficial).all():
+            sys.exit("El ranking base de sensibilidad no coincide con "
+                     "`rank_propulsion` del CSV oficial.")
+    if largo["score"].isna().any():
+        sys.exit("La sensibilidad produjo scores NaN; revisa la imputación 0.5.")
 
     # ---- Resumen: estabilidad de cada modelo ----
     piv = largo.pivot(index=["propulsion", "modelo_norm"],

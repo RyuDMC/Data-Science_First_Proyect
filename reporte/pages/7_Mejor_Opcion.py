@@ -116,30 +116,39 @@ for esc in escenarios:
             sub = df[df["propulsion"].isin(["hibrido", "gasolina"])]
         else:
             sub = df
-        
-        sub = sub.sort_values(esc['orden'], ascending=False).head(3)
-        
+
         if sub.empty:
             st.warning("No hay modelos que cumplan el criterio.")
             continue
-        
-        # Mostrar top 3
-        for i, (_, row) in enumerate(sub.iterrows()):
-            medal = ["🥇", "🥈", "🥉"][i]
-            col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-            col1.markdown(f"{medal} **{row['modelo_norm']}** ({label_for_prop(row['propulsion'])})")
-            col2.metric("Score", f"{row['score']:.3f}")
-            col3.metric("$", f"{row['precio_usd']:,.0f}" if pd.notna(row['precio_usd']) else "—")
-            col4.metric("km", f"{row['autonomia_km']:.0f}" if pd.notna(row['autonomia_km']) else "—")
-            col5.metric("kg", f"{row['carga_kg']:.0f}" if pd.notna(row['carga_kg']) else "—")
+
+        # Los scores NO son comparables entre propulsiones: se muestra el top 3
+        # dentro de cada grupo, nunca un podio mezclado.
+        for prop in ["electrico", "hibrido", "gasolina"]:
+            grupo = sub[sub["propulsion"] == prop]
+            if grupo.empty:
+                continue
+            grupo = grupo.sort_values("score", ascending=False).head(3)
+            st.markdown(f"**{label_for_prop(prop)}**")
+            for i, (_, row) in enumerate(grupo.iterrows()):
+                medal = ["🥇", "🥈", "🥉"][i]
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                col1.markdown(f"{medal} **{row['modelo_norm']}**")
+                col2.metric("Score", f"{row['score']:.3f}")
+                col3.metric("$", f"{row['precio_usd']:,.0f}" if pd.notna(row['precio_usd']) else "—")
+                col4.metric("km", f"{row['autonomia_km']:.0f}" if pd.notna(row['autonomia_km']) else "—")
+                col5.metric("kg", f"{row['carga_kg']:.0f}" if pd.notna(row['carga_kg']) else "—")
 
 st.markdown("---")
 
 # ======= MATRIZ DE DECISIÓN =======
 st.subheader("📊 Matriz de decisión rápida")
 
-# Crear matriz: filas = modelos top, columnas = escenarios
-top_overall = df.sort_values("score", ascending=False).head(10)
+# Top 5 por grupo: nunca un top global que mezcle escalas.
+top_overall = pd.concat([
+    df[df["propulsion"] == prop].sort_values("score", ascending=False).head(5)
+    for prop in ["electrico", "hibrido", "gasolina"]
+    if not df[df["propulsion"] == prop].empty
+], ignore_index=True) if not df.empty else df.head(0)
 
 matriz_data = []
 for _, row in top_overall.iterrows():
@@ -169,38 +178,39 @@ st.caption("✅ = cumple criterio | ❌ = no cumple | Score ya pondera todos los
 st.markdown("---")
 
 # ======= GRÁFICO RESUMEN =======
-st.subheader("📈 Score vs Precio (top 10 global)")
+st.subheader("📈 Score vs Precio (top 10 de un grupo)")
 
-fig, ax = fig_ax(figsize=(10, 6))
+prop_graf = st.selectbox(
+    "Propulsión para el gráfico",
+    ["electrico", "hibrido", "gasolina"],
+    format_func=label_for_prop,
+)
+top10 = df[df["propulsion"] == prop_graf].sort_values("score", ascending=False).head(10)
 
-top10 = df.sort_values("score", ascending=False).head(10)
-colors = [color_for_prop(p) for p in top10["propulsion"]]
+if top10.empty:
+    st.info(f"No hay ofertas vivas de {label_for_prop(prop_graf)} para graficar.")
+else:
+    fig, ax = fig_ax(figsize=(10, 6))
+    color = color_for_prop(prop_graf)
 
-# Scatter score vs precio
-for i, (_, row) in enumerate(top10.iterrows()):
-    ax.scatter(row['precio_usd'], row['score'], s=200, c=colors[i], alpha=0.8, 
-               edgecolors="white", linewidth=1, zorder=3)
-    ax.annotate(row['modelo_norm'], (row['precio_usd'], row['score']),
-                fontsize=8, ha="center", va="bottom", xytext=(0, 5), textcoords="offset points")
+    # Scatter score vs precio (un solo grupo: escalas comparables)
+    for _, row in top10.iterrows():
+        if pd.isna(row["precio_usd"]):
+            continue
+        ax.scatter(row['precio_usd'], row['score'], s=200, c=color, alpha=0.8,
+                   edgecolors="white", linewidth=1, zorder=3)
+        ax.annotate(row['modelo_norm'], (row['precio_usd'], row['score']),
+                    fontsize=8, ha="center", va="bottom", xytext=(0, 5), textcoords="offset points")
 
-ax.set_xlabel("Precio (USD)")
-ax.set_ylabel("Score (0-1)")
-ax.set_title("Top 10 global: Score vs Precio — ¿Vale la pena pagar más?", pad=12)
-
-# Leyenda
-from matplotlib.patches import Patch
-seen = set()
-handles = []
-for p in top10["propulsion"]:
-    if p not in seen:
-        handles.append(Patch(color=color_for_prop(p), label=label_for_prop(p)))
-        seen.add(p)
-ax.legend(handles=handles, loc="best", fontsize=9)
-
-st.pyplot(fig)
+    ax.set_xlabel("Precio (USD)")
+    ax.set_ylabel("Score (0-1)")
+    ax.set_title(f"Top 10 {label_for_prop(prop_graf)}: Score vs Precio", pad=12)
+    st.pyplot(fig)
 
 st.markdown("""
-**Lectura:** Modelos **arriba a la izquierda** = alto score, bajo precio (mejor valor).
-Modelos **arriba a la derecha** = alto score, alto precio (premium).
-La pendiente implícita te dice cuánto score "compras" por cada $1000 extra.
+**Lectura (dentro de un mismo grupo):** modelos **arriba a la izquierda** = alto
+score, bajo precio (mejor valor). Modelos **arriba a la derecha** = alto score,
+alto precio (premium). La pendiente implícita te dice cuánto score "compras" por
+cada $1000 extra. **No compares este gráfico entre propulsiones**: cada grupo se
+normaliza por separado.
 """)

@@ -87,7 +87,7 @@ pesos = pd.DataFrame({
     "Criterio": ["Precio (USD)", "Autonomía (km)", "Carga (kg)", "Legalidad (binario)", "Repuestos (proxy)"],
     "Peso": [0.40, 0.25, 0.20, 0.10, 0.05],
     "Dirección": ["Menor = mejor", "Mayor = mejor", "Mayor = mejor", "1 = menciona legalidad", "1 = >1 fuente"],
-    "Fuente": ["Anuncios/Empresas", "Anuncios/Empresas", "Anuncios/Empresas", "Anuncios/Empresas", "Anuncios"]
+    "Fuente": ["Anuncios", "Anuncios", "Anuncios", "Anuncios", "Anuncios + catálogos (solo conteo de fuentes)"]
 })
 st.dataframe(pesos, width="stretch", hide_index=True)
 
@@ -99,6 +99,8 @@ score = Σ (criterio_norm × peso)
 - Cada criterio se normaliza **min-max 0-1 dentro de su grupo de propulsión** (eléctricos vs eléctricos, etc.)
 - **Ausentes → 0.5 neutro** (no castiga ni beneficia) + se reporta `n_criterios` (cobertura real)
 - **No se comparan scores entre propulsiones** (normalización intra-grupo)
+- **Legalidad** = el anuncio **menciona** papeles. No verifica el trámite y en los datos no hay casos "no/sin": mide mención, no legalidad comprobada.
+- **Precios en EUR**: las 9 fichas de islagrande no tienen `precio_usd`; en precio se imputan a 0.5 (no se inventa un tipo de cambio).
 """)
 
 st.subheader("Reglas de decisión clave")

@@ -38,15 +38,19 @@ selected_prop = st.sidebar.selectbox("Propulsión", prop_options, index=0)
 top_n = st.sidebar.slider("Top N por grupo", 3, 15, 5)
 
 if selected_prop != "Todos":
-    df = df_scores[df_scores["propulsion"] == selected_prop].head(top_n)
+    df = get_top_models(df_scores, selected_prop, top_n)
 else:
-    # Top N por cada propulsión
-    dfs = []
-    for prop in ["electrico", "hibrido", "gasolina"]:
-        sub = df_scores[df_scores["propulsion"] == prop].head(top_n)
-        if not sub.empty:
-            dfs.append(sub)
+    # Top N por cada propulsión, usando `rank_propulsion` (no el orden del CSV).
+    dfs = [get_top_models(df_scores, prop, top_n)
+           for prop in ["electrico", "hibrido", "gasolina"]]
+    dfs = [sub for sub in dfs if not sub.empty]
     df = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+
+df = df.reset_index(drop=True)
+# Clave única visible: "STAR" existe como eléctrico y como híbrido; usar solo
+# `modelo_norm` haría que `.loc["STAR"]` devolviera un DataFrame y rompiera el radar.
+df["_clave"] = (df["modelo_norm"].astype(str) + " · "
+                + df["propulsion"].map(label_for_prop))
 
 st.caption(f"Modelos mostrados: {len(df)}")
 
@@ -88,8 +92,8 @@ st.markdown("---")
 # ======= RADAR CHART =======
 st.subheader("📡 Radar comparativo (criterios normalizados 0-1)")
 
-# Selector de modelos para radar
-available_models = df["modelo_norm"].tolist()
+# Selector de modelos para radar (clave única: modelo + propulsión)
+available_models = df["_clave"].tolist()
 selected_models = st.multiselect(
     "Selecciona modelos para comparar (máx 5):",
     available_models,
@@ -97,7 +101,7 @@ selected_models = st.multiselect(
 )
 
 if len(selected_models) >= 2:
-    radar_df = df[df["modelo_norm"].isin(selected_models)].set_index("modelo_norm")
+    radar_df = df[df["_clave"].isin(selected_models)].set_index("_clave")
     
     norm_cols = ["precio_usd_norm", "autonomia_km_norm", "carga_kg_norm", "legalidad_norm", "repuestos_norm"]
     avail_n = [c for c in norm_cols if c in radar_df.columns]
@@ -120,13 +124,14 @@ if len(selected_models) >= 2:
         ax.set_yticklabels(["0.2", "0.4", "0.6", "0.8"], fontsize=7)
         ax.grid(color=GRID_COLOR, linewidth=0.8)
         
-        for model in selected_models:
-            row = radar_df.loc[model]
+        for clave in selected_models:
+            row = radar_df.loc[clave]
             prop = row.get("propulsion", "indeterminado")
             color = color_for_prop(prop)
             vals = [row[c] for c in avail_n]
             vals_closed = vals + vals[:1]
-            ax.plot(angles, vals_closed, color=color, linewidth=2, label=f"{model} ({label_for_prop(prop)})", zorder=3)
+            ax.plot(angles, vals_closed, color=color, linewidth=2,
+                    label=f"{clave}", zorder=3)
             ax.fill(angles, vals_closed, color=color, alpha=0.1)
         
         ax.set_title("Radar de criterios normalizados (0-1)", pad=20, fontsize=12)

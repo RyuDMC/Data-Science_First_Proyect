@@ -47,6 +47,10 @@ if selected_prop != "Todos":
 df = df[df["n_criterios"] >= min_criteria]
 if only_viva:
     df = df[df["oferta_viva"] == True]
+# El orden del CSV no es contrato: ordenar por rango dentro de cada grupo
+# antes de cortar el Top N.
+if "rank_propulsion" in df.columns:
+    df = df.sort_values(["propulsion", "rank_propulsion"], kind="mergesort")
 df = df.head(top_n).reset_index(drop=True)
 
 st.caption(f"Mostrando {len(df)} de {len(df_scores)} modelos | Filtro: {selected_prop} | n_criterios ≥ {min_criteria} | Oferta viva: {only_viva}")
@@ -174,7 +178,7 @@ else:
     st.caption(
         "El score usa pesos fijos (precio 0.40, autonomía 0.25, carga 0.20, "
         "legalidad 0.10, repuestos 0.05) e imputación neutra 0.5. Aquí se prueba "
-        "cuánto aguanta el orden: **2.000 perturbaciones** uniformes de ±0.05 en "
+        "cuánto aguanta el orden: **perturbaciones** uniformes de ±0.05 en "
         "los pesos (semilla fija), **omisión de cada criterio** con "
         "re-normalización y **re-ponderación** solo con los criterios presentes "
         "(en vez de imputar 0.5). El ranking oficial no cambia."
@@ -199,16 +203,21 @@ else:
     res = df_sens_res.merge(
         df[["modelo_norm", "propulsion"]], on=["modelo_norm", "propulsion"], how="inner",
     )
-    stab = df[["modelo_norm", "propulsion", "score", "n_criterios", "n_anuncios"]].merge(
+    cols_df = ["modelo_norm", "propulsion", "score", "n_criterios", "n_anuncios"]
+    if "rank_propulsion" in df.columns:
+        cols_df.append("rank_propulsion")
+    stab = df[cols_df].merge(
         res[["modelo_norm", "propulsion", "rank_base", "top3_pct", "rank_min",
              "rank_max", "n_escenarios_top3", "escenario_peor"]],
         on=["modelo_norm", "propulsion"], how="left",
     )
+    rank_oficial = (stab["rank_propulsion"] if "rank_propulsion" in stab.columns
+                    else stab["rank_base"])
     stab_show = pd.DataFrame({
         "Modelo": stab["modelo_norm"],
         "Prop.": stab["propulsion"].map(label_for_prop),
         "Score": stab["score"].map(lambda v: f"{v:.3f}"),
-        "Rank": stab["rank_base"].astype("Int64"),
+        "Rank": rank_oficial.astype("Int64"),
         "Top-3 (±0.05)": stab["top3_pct"].map(lambda v: f"{v:.0f}%" if pd.notna(v) else "—"),
         "Rank en escenarios (min–max)": stab.apply(
             lambda r: f"{int(r['rank_min'])}–{int(r['rank_max'])}" if pd.notna(r["rank_min"]) else "—",
@@ -220,6 +229,12 @@ else:
         "Anuncios": stab["n_anuncios"].astype("Int64"),
     })
     st.dataframe(stab_show, hide_index=True, width="stretch")
+    if ("rank_propulsion" in stab.columns
+            and (stab["rank_base"] != stab["rank_propulsion"]).any()):
+        st.warning(
+            "La sensibilidad no coincide con el ranking oficial. "
+            "Re-ejecuta `python3 codes/sensibilidad.py`: los CSV están desactualizados."
+        )
 
     # --- Lectura automática del resultado (sin números escritos a mano) ---
     prop_txt = selected_prop if selected_prop != "Todos" else "electrico"
@@ -237,12 +252,23 @@ else:
              if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
             for e, m in otros.items()
         )
+        base_top3 = set(nombres)
+        cambia_top3 = [
+            esc for esc, sub in df_sens[(df_sens["propulsion"] == prop_txt)
+                                        & (df_sens["escenario"] != "base")]
+            .groupby("escenario", sort=True)
+            if set(sub.nsmallest(3, "rank")["modelo_norm"]) != base_top3
+        ]
+        txt_podio = (f"el trío del podio cambia en {len(cambia_top3)} de "
+                     f"{len(cambios)} escenarios" if cambia_top3 else
+                     f"el trío del podio se mantiene en los {len(cambios)} escenarios")
         st.markdown(
             f"**{label_for_prop(prop_txt)}:** el top-3 se mantiene en "
             f"{pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de las perturbaciones. "
             f"El 1º puesto aguanta {len(cambios) - len(otros)} de {len(cambios)} "
             f"escenarios de omisión"
-            + (f"; cambia {detalle}." if len(otros) else ".")
+            + (f"; cambia {detalle}" if len(otros) else "")
+            + f". Además, {txt_podio}."
         )
     else:
         st.caption("Con menos de 3 modelos en el grupo, el orden no es informativo.")

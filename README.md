@@ -36,7 +36,7 @@ Desde la raíz del proyecto, paso a paso:
 
    ```bash
    python3 -m venv .venv
-   source report/.venv/bin/activate        # Windows: .venv\Scripts\activate
+   source .venv/bin/activate               # Windows: .venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
@@ -73,3 +73,63 @@ Desde la raíz del proyecto, paso a paso:
 > Al terminar, verifica la coherencia con `python3 codes/generar_metadata.py --check`
 > y, si instalaste `requirements-dev.txt`, ejecuta la suite con
 > `python3 -m pytest -q tests/`.
+>
+> **Nota de reproducibilidad:** `codes/parse_campo.py` necesita
+> `Data/raw_data/data_personas.txt`, que está ignorado por contener datos
+> personales. Un clon público **no puede regenerar** el trabajo de campo desde
+> cero; sí puede usar el `Data/registro_ubicaciones.csv` ya anonimizado.
+> `codes/norm_modelo.py --migrar` escribe a `Data/raw_data_migrado/` y no toca
+> `raw_data/`; el modo destructivo requiere `--en-sitio`.
+
+## 🧭 Qué responde y cómo se calcula
+
+El reporte responde *¿qué triciclo comprar en La Habana y por qué?* con tres
+fuentes separadas: **anuncios online** (oferta y precios), **catálogos de
+empresas** (oferta formal) y **trabajo de campo** (circulación observada, que
+no entra al score).
+
+El score es una suma ponderada: precio 0.40, autonomía 0.25, carga 0.20,
+legalidad 0.10, repuestos 0.05. Cada criterio se normaliza **min-max dentro de
+su propulsión** y los ausentes se imputan a **0.5 neutro**. Por eso:
+
+- **Los scores no son comparables entre propulsiones.** El reporte muestra el
+  top de cada grupo, no un "mejor global".
+- **El orden depende de la muestra.** 23 de 38 modelos tienen un solo anuncio;
+  el análisis de sensibilidad (`codes/sensibilidad.py`) mide cuánto aguanta.
+- **No es una medida absoluta de calidad.** Añadir o quitar un anuncio mueve la
+  escala de todo el grupo.
+
+## ⚠️ Limitaciones principales
+
+- **Oferta ≠ circulación.** Un modelo muy anunciado no es necesariamente el más
+  usado en la calle.
+- **Muestra de campo cerrada:** 30 observaciones en 5 de 15 municipios, de
+  conveniencia y sin denominador. Describe la muestra; no se extrapola a La
+  Habana. Los IC de Wilson suponen muestreo aleatorio y aquí hay conglomerados.
+- **Precios EUR:** las 9 fichas de islagrande no tienen `precio_usd`; en el
+  criterio de precio se imputan a 0.5 (no se inventa tipo de cambio).
+- **Legalidad** = el anuncio menciona papeles; no verifica el trámite. No hay
+  casos "no/sin" en los datos.
+- **Repuestos** = proxy de presencia en más de una fuente, no stock de piezas.
+- **Sensibilidad:** el top 1 y el podio cambian en varios escenarios de omisión
+  (ver la página de Ranking y `Data/clean_data/sensibilidad_resumen.csv`).
+
+## 🔐 Privacidad y ética
+
+- No se publican carnés ni teléfonos. El test `tests/test_privacidad.py` busca
+  CI de 11 dígitos, números de 8 dígitos tipo móvil o CI incompleto, `+53` y
+  números tras "WhatsApp". En `legalizacion` apareció un CI mal escrito de 8
+  dígitos: se sustituyó por `[DATO PERSONAL REDACTADO]`.
+- El archivo crudo del campo (`Data/raw_data/data_personas.txt`) está ignorado
+  y nunca debe commitearse.
+- Los anuncios de Facebook se capturan con un User-Agent de navegador. Antes de
+  reutilizar el scraper, revisa los términos de la plataforma y `robots.txt`.
+- **Historial de git:** si algún dato personal estuvo en un commit anterior,
+  borrarlo del HEAD no lo borra del historial. En ese caso hay que reescribir
+  la historia (`git filter-repo`) o mantener el repo privado.
+
+## 📜 Licencia
+
+Pendiente de decisión del autor. Sin una licencia explícita, el repositorio
+queda bajo "todos los derechos reservados" y no puede reutilizarse legalmente.
+

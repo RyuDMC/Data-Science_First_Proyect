@@ -15,7 +15,7 @@ Reglas aplicadas al construir la tabla:
 
 Uso:
     python3 codes/crear_canonicos.py            # escribe Data/modelos_canonicos.json
-    python3 codes/crear_canonicos.py --check     # solo muestra el resumen
+    python3 codes/crear_canonicos.py --check     # falla si la tabla cambió
 """
 
 import json
@@ -416,11 +416,31 @@ def main():
         "sin_curar": pendientes,
     }
 
-    if not check:
-        with open(OUT_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
-            f.write("\n")
-        print(f"-> Escrito: {OUT_PATH}")
+    if check:
+        if not OUT_PATH.exists():
+            print(f"[check] FALTA {OUT_PATH.relative_to(DATA_DIR.parent)}. "
+                  "Ejecuta python3 codes/crear_canonicos.py")
+            return 1
+        actual = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+        estables = ("version", "nota", "por_url", "excluidos", "sin_curar")
+        difieren = [k for k in estables if actual.get(k) != data[k]]
+        if difieren:
+            print("[check] DESACTUALIZADO: cambian " + ", ".join(difieren))
+            antes = set(actual.get("por_url", {}))
+            ahora = set(data["por_url"])
+            for etiqueta, urls in [("nuevas", ahora - antes),
+                                   ("eliminadas", antes - ahora)]:
+                for u in sorted(urls)[:10]:
+                    print(f"  URL {etiqueta}: {u}")
+            return 1
+        print(f"[check] OK: {OUT_PATH.relative_to(DATA_DIR.parent)} coincide con "
+              f"{len(por_url)} productos y {len(EXCLUIDOS)} excluidos")
+        return 0
+
+    with open(OUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
+        f.write("\n")
+    print(f"-> Escrito: {OUT_PATH}")
 
     n_mod = sum(1 for v in por_url.values() if v.get("modelo"))
     n_sin = sum(1 for v in por_url.values() if not v.get("modelo"))

@@ -97,9 +97,11 @@ else:
             primera = top.iloc[0]
             st.caption(
                 f"**{primera['marca_norm']}** es la más vista ({int(primera['n_campo'])} "
-                f"de {int(top['n_campo'].sum())}), pero su IC va de "
-                f"{primera['ic95_bajo']:.0f}% a {primera['ic95_alto']:.0f}%: con n=30 "
-                "no se distingue estadísticamente de las que le siguen."
+                f"de {int(top['n_campo'].sum())}), con IC 95% de "
+                f"{primera['ic95_bajo']:.0f}% a {primera['ic95_alto']:.0f}%. "
+                "Con n=30, muestreo de conveniencia y solo 5 municipios, los "
+                "intervalos se solapan y el diseño no es probabilístico: no se "
+                "puede afirmar que la diferencia con las siguientes sea real."
             )
         else:
             st.info("Sin resumen por marca. Ejecuta `python3 codes/analisis_campo.py`.")
@@ -297,10 +299,15 @@ st.subheader("📊 Esquema de registro")
 schema = pd.DataFrame({
     "Campo": ["fecha", "municipio", "tipo", "uso", "propulsion", "modelo", "marca", "motor", "estado", "observador", "notas"],
     "Tipo": ["date", "categoría", "categoría", "categoría", "categoría", "texto", "texto", "texto", "categoría", "texto", "texto"],
-    "Ejemplo": ["2026-10-15", "Boyeros", "triciclo", "carga", "electrico", "KIVITOVA 2026", "KIVITOVA", "1200W", "bueno", "Juan P.", "Carga 600kg visible"],
-    "Obligatorio": ["Sí", "Sí", "Sí", "Sí", "Sí", "No", "No", "No", "No", "Sí", "No"]
+    "Ejemplo": ["2026-10-15", "Boyeros", "triciclo", "carga", "electrico", "KIVITOVA 2026", "KIVITOVA", "1200W", "bueno", "—", "Carga 600kg visible"],
+    "Obligatorio": ["Sí", "Sí", "Sí", "Sí", "Sí", "No", "No", "No", "No", "No", "No"]
 })
 st.dataframe(schema, width="stretch", hide_index=True)
+st.caption(
+    "`observador` se captura en la hoja original para trazabilidad, pero se "
+    "descarta al anonimizar: en el CSV publicado queda vacío a propósito. "
+    "Por eso no es obligatorio."
+)
 
 st.markdown("""
 **Valores permitidos:**

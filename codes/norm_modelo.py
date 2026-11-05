@@ -54,7 +54,8 @@ Cómo se aplica
    no depende de editar el JSONL a mano después.
 
 Uso:
-    python3 codes/norm_modelo.py --migrar     # normaliza raw_data/ y empresas/
+    python3 codes/norm_modelo.py --migrar     # normaliza a raw_data_migrado/ y clean_data/
+    python3 codes/norm_modelo.py --migrar --en-sitio  # reescribe raw_data/ (irreversible)
     python3 codes/norm_modelo.py --check      # muestra qué queda por revisar
 """
 
@@ -479,11 +480,15 @@ def _procesar(path_in, path_out, canon, dry_run=False):
 def _main(argv):
     canon = cargar_canonicos()
     dry = "--check" in argv and "--migrar" not in argv
+    # `raw_data` es inmutable por regla del proyecto. Por defecto la migración
+    # escribe a `Data/raw_data_migrado/` y solo copia a clean_data/. El modo
+    # destructivo queda detrás de un flag explícito.
+    en_sitio = "--en-sitio" in argv
+    migrado_dir = DATA_DIR / "raw_data_migrado"
 
     # Los datos de empresas viven en Data/empresas/ y se copian a clean_data.
-    # La migración normaliza EL CRUDO en el sitio (para que raw_data y
-    # empresas/ queden con los nombres ya normalizados, igual que hará la
-    # próxima corrida del scraper) y luego copia a clean_data/.
+    # La migración normaliza el crudo (a un directorio aparte salvo
+    # `--en-sitio`) y luego copia a clean_data/.
     tareas = [
         (DATA_DIR / "raw_data" / "anuncios_triciclos.jsonl",
          DATA_DIR / "clean_data" / "anuncios_triciclos.jsonl"),
@@ -496,20 +501,31 @@ def _main(argv):
         if not src.exists():
             print(f"[skip] {src} no existe")
             continue
-        # 1) Normalizar el crudo en el sitio.
-        res = _procesar(src, None if dry else src, canon, dry_run=dry)
-        # 2) Copiar a clean_data/.
+        if dry:
+            destino_crudo = None
+        elif en_sitio:
+            destino_crudo = src
+        else:
+            destino_crudo = migrado_dir / src.relative_to(DATA_DIR)
+        # 1) Normalizar el crudo (en el sitio solo con --en-sitio).
+        res = _procesar(src, destino_crudo, canon, dry_run=dry)
+        # 2) Copiar la versión normalizada a clean_data/.
         if not dry:
-            shutil.copyfile(src, dst)
+            shutil.copyfile(destino_crudo, dst)
         print(f"{res['archivo']}: {res['total']} registros | "
               f"canónicos {res['canonico']} | heurísticos {res['heuristico']} | "
               f"revisar {res['revisar']} | excluidos {res['excluidos']}")
+        if not dry and destino_crudo != src:
+            print(f"    -> crudo normalizado: {destino_crudo}")
         if dry:
             for c in res["cambios"]:
                 print(f"    - {c.get('accion', 'cambio')}: "
                       f"{c.get('modelo_antes')!r}/{c.get('marca_antes')!r} -> "
                       f"{c.get('modelo_despues')!r}/{c.get('marca_despues')!r} "
                       f"[{c.get('estado','')}] {c.get('motivo','')}")
+    if en_sitio and not dry:
+        print("[aviso] --en-sitio reescribió raw_data/ y empresas/: "
+              "el cambio es irreversible sin git.")
     return 0
 
 
