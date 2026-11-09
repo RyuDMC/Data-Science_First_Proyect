@@ -4,7 +4,7 @@ Scraper de triciclos para fuentes cubanas VERIFICADAS (2026-10-07).
 
 Estructura del repo (decisión del usuario, ajuste 2026-10-11):
   codes/ -> scripts    Data/ -> datos procesados y de campo
-  Data/raw_data/ -> datos crudos (salida del scraper)
+  Data/clean_data/ -> captura del scraper (nace normalizada; única copia)
 
 Fuentes activas:
   ✅ casalinda   — habana.casalindashop.com  (Magento; 2 combustión + 3 eléctricos, con precio)
@@ -56,7 +56,7 @@ así que se usa la página de categoría = catálogo vivo. Hay 7 fichas de trici
 categorizar (archivadas, una marcada "Agotado") que quedan fuera.
 
 Uso:
-    python3 codes/scrape_triciclos.py      # escribe Data/raw_data/anuncios_triciclos.jsonl
+    python3 codes/scrape_triciclos.py      # escribe Data/clean_data/anuncios_triciclos.jsonl (única copia)
 """
 
 import json
@@ -71,16 +71,20 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-# Convención de carpetas (ajustada 2026-10-11):
-#   codes/ -> scripts, Data/ -> datos procesados/campo, Data/raw_data/ -> crudos
+# Convención de carpetas (unificada 2026-11-06, Opción A: sin duplicados):
+#   codes/ -> scripts; Data/ -> datos; el JSONL del scraper vive UNA vez en
+#   Data/clean_data/ (la captura nace ya normalizada, ver nota de abajo).
+#   Data/raw_data/ queda para capturas genuinas: data_from_FB y la hoja de
+#   campo (privada, ignorada por git).
 DATA_DIR = Path(__file__).resolve().parent.parent / "Data"
-RAW_DIR = DATA_DIR / "raw_data"
+CLEAN_DIR = DATA_DIR / "clean_data"
 
 # Normalización de nombres de modelo (decisión del usuario, 2026-10-19):
 # la identidad del producto sale de Data/modelos_canonicos.json (curada) y,
 # para lo que no esté en la tabla, de la regla de codes/norm_modelo.py.
-# Se aplica ANTES de escribir el JSONL, de modo que raw_data nace con los
-# nombres ya normalizados (no hay que editar el JSONL a mano después).
+# Se aplica ANTES de escribir el JSONL: la captura nace con los nombres ya
+# normalizados, así que NO hay copia "cruda" separada (la versión previa solo
+# existe en el historial de git).
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from norm_modelo import (  # noqa: E402
@@ -142,7 +146,7 @@ SOURCES = {
     },
 }
 
-OUTPUT_FILE = RAW_DIR / "anuncios_triciclos.jsonl"
+OUTPUT_FILE = CLEAN_DIR / "anuncios_triciclos.jsonl"
 REQUEST_DELAY = 2
 TIMEOUT = 30
 
@@ -306,7 +310,7 @@ def normalize_modelo(text):
         if k in u:
             return k
     # "JINPEING"/"JEINPEING" son erratas de JINPENG (confirmado por el usuario,
-    # 2026-10-31): se corrigen aquí para que raw_data nazca ya normalizado.
+    # 2026-10-31): se corrigen aquí para que la captura nazca ya normalizada.
     if "JINPEING" in u or "JEINPEING" in u:
         return "JINPENG"
 

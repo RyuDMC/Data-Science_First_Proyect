@@ -50,12 +50,14 @@ Cómo se aplica
    módulo y el registro se marca como `heuristico` (o `revisar` si el
    resultado es dudoso: sin nombre, o se le quitó un rasgo de variante).
 3. Los scrapers llaman a `canonizar_registro()` ANTES de escribir el JSONL,
-   de modo que `raw_data` nace con los nombres ya normalizados: la limpieza
-   no depende de editar el JSONL a mano después.
+   de modo que la captura nace con los nombres ya normalizados: la limpieza
+   no depende de editar el JSONL a mano después. Desde la unificación de
+   2026-11-06 hay UNA copia por fuente (clean_data para anuncios web,
+   Data/empresas/ para catálogos); raw_data solo guarda capturas genuinas.
 
 Uso:
-    python3 codes/norm_modelo.py --migrar     # normaliza a raw_data_migrado/ y clean_data/
-    python3 codes/norm_modelo.py --migrar --en-sitio  # reescribe raw_data/ (irreversible)
+    python3 codes/norm_modelo.py --migrar     # normaliza a raw_data_migrado/ y pisa la copia única
+    python3 codes/norm_modelo.py --migrar --en-sitio  # escribe en la propia fuente (irreversible)
     python3 codes/norm_modelo.py --check      # muestra qué queda por revisar
 """
 
@@ -480,23 +482,24 @@ def _procesar(path_in, path_out, canon, dry_run=False):
 def _main(argv):
     canon = cargar_canonicos()
     dry = "--check" in argv and "--migrar" not in argv
-    # `raw_data` es inmutable por regla del proyecto. Por defecto la migración
-    # escribe a `Data/raw_data_migrado/` y solo copia a clean_data/. El modo
-    # destructivo queda detrás de un flag explícito.
+    # `raw_data` está reservado a las capturas genuinas (FB y campo), que no
+    # entran en la migración. La migración opera sobre las ÚNICAS copias de
+    # trabajo: clean_data/ para anuncios web y Data/empresas/ para catálogos.
+    # Por defecto normaliza a `Data/raw_data_migrado/` y pisa la copia única
+    # solo si hay cambios; `--en-sitio` escribe directamente en la fuente.
     en_sitio = "--en-sitio" in argv
     migrado_dir = DATA_DIR / "raw_data_migrado"
 
-    # Los datos de empresas viven en Data/empresas/ y se copian a clean_data.
-    # La migración normaliza el crudo (a un directorio aparte salvo
-    # `--en-sitio`) y luego copia a clean_data/.
+    # Cada tarea es (destino, fuente): destino == fuente, porque tras la
+    # unificación de 2026-11-06 no hay copia secundaria que alimentar.
     tareas = [
-        (DATA_DIR / "raw_data" / "anuncios_triciclos.jsonl",
+        (DATA_DIR / "clean_data" / "anuncios_triciclos.jsonl",
          DATA_DIR / "clean_data" / "anuncios_triciclos.jsonl"),
     ]
     # Todas las fichas de empresa: un JSONL por catálogo. Se listan desde el
     # disco para que añadir una fuente nueva no obligue a editar este archivo.
     for src in sorted((DATA_DIR / "empresas").glob("*.jsonl")):
-        tareas.append((src, DATA_DIR / "clean_data" / src.name))
+        tareas.append((src, src))
     for src, dst in tareas:
         if not src.exists():
             print(f"[skip] {src} no existe")
@@ -509,8 +512,9 @@ def _main(argv):
             destino_crudo = migrado_dir / src.relative_to(DATA_DIR)
         # 1) Normalizar el crudo (en el sitio solo con --en-sitio).
         res = _procesar(src, destino_crudo, canon, dry_run=dry)
-        # 2) Copiar la versión normalizada a clean_data/.
-        if not dry:
+        # 2) Pisa la copia única con lo normalizado. Con dst == src el paso 1
+        # ya escribió in situ y copiarse a sí mismo lanzaría SameFileError.
+        if not dry and destino_crudo != dst:
             shutil.copyfile(destino_crudo, dst)
         print(f"{res['archivo']}: {res['total']} registros | "
               f"canónicos {res['canonico']} | heurísticos {res['heuristico']} | "
@@ -524,7 +528,7 @@ def _main(argv):
                       f"{c.get('modelo_despues')!r}/{c.get('marca_despues')!r} "
                       f"[{c.get('estado','')}] {c.get('motivo','')}")
     if en_sitio and not dry:
-        print("[aviso] --en-sitio reescribió raw_data/ y empresas/: "
+        print("[aviso] --en-sitio reescribió clean_data/ y empresas/ en sitio: "
               "el cambio es irreversible sin git.")
     return 0
 

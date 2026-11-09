@@ -25,7 +25,8 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data - raw_data is committed, clean_data is generated
+# Data - una copia por fuente (unificado 2026-11-06): raw_data guarda capturas
+# genuinas (FB + campo); el JSONL del scraper vive en clean_data/
 # Data/clean_data/   # uncoment if you don't want generated data in repo
 
 # Datos personales del trabajo de campo (nombre + carné de identidad).
