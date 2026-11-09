@@ -93,9 +93,13 @@ Trabajo sobre un clon limpio del remoto (`353a1f2`) en `~/Projects/Data-Science_
   `generar_metadata --check`, `sensibilidad --check`, `compileall` OK;
   AppTest sin servidor **11/11 páginas sin excepciones** (incluidas las que
   fallaban antes del fix del Pareto en page-5).
-- **Sin commitear:** toda la sesión (código + datos + docs + tests). El
-  usuario revisa las diffs y decide los commits; no commitear ni pushear sin
-  su instrucción.
+- **Commiteado localmente (2026-11-08):** la sesión quedó en 7 bloques
+  (`6cedcbd` unificación raw/clean → `0555333` docs+licencia MIT) más el
+  cierre de esta sección. **Sin pushear:** el usuario revisa las diffs y
+  hace el push; los commits no tocan `.github/workflows/`, así que el PAT
+  sin scope `workflow` no debería bloquear (ese scope solo se exige al
+  pushear archivos de workflow modificados).
+- **Historial:** sin reescribir; commits regulares sobre `59d3472 update`.
 - **Licencia:** resuelta el 2026-11-08 — **MIT único** (`LICENSE`, cubre
   código + datos con la nota de terceros; actualizado README §Licencia y
   `docs/etica_y_legal.md` §5).
