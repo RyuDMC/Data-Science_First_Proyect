@@ -6,10 +6,10 @@ versionados, y el archivo crudo siempre ignorado.
 
 Además de los CI de 11 dígitos se buscan teléfonos cubanos: móviles de 8
 dígitos que empiezan por 5 o 6, prefijo internacional +53 y números pegados a
-la palabra "WhatsApp". El caso real que motivó esto: un **CI mal escrito de 8
-dígitos** (no un teléfono) aparecía en el campo `legalizacion` de tres
-anuncios; el patrón de 8 dígitos lo detecta igual porque un CI truncado y un
-móvil son indistinguibles por longitud.
+la palabra "WhatsApp". El caso real que motivó esto: un **número de 8 dígitos
+sin identificar** aparecía en el campo `legalizacion` de tres anuncios, tras
+`WhatsApp:`. No se sabe si era un teléfono o un CI incompleto; se redacta por
+precaución y el patrón de 8 dígitos lo detecta igual.
 """
 
 import subprocess

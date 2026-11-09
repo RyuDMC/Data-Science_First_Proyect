@@ -18,11 +18,65 @@ EMPRESAS = list((ROOT / "Data" / "empresas").glob("*.jsonl"))
 
 
 def test_ranking_tiene_las_filas_y_nombres_esperados():
-    assert len(SCORE) == 38
-    assert SCORE["modelo_norm"].nunique() == 37
+    # 40 filas desde el split JINPENG (decisión del usuario, 2026-11-06):
+    # los 3 híbridos JINPENG son 3 filas (una por URL) y desaparece la fila
+    # agregada n=3. Los únicos nombres repetidos siguen siendo los productos
+    # anunciados con el mismo nombre en dos propulsiones (STAR).
+    assert len(SCORE) == 40
+    assert SCORE["modelo_norm"].nunique() == 39
+    assert SCORE["score"].notna().all()
     assert SCORE["score"].between(0, 1).all()
     assert (SCORE["n_anuncios_total"] > 0).all()
     assert not SCORE["modelo_norm"].str.contains("SIN IDENTIFICAR", na=False).any()
+
+
+def test_score_es_reponderado_y_conserva_el_imputado():
+    """El score oficial usa solo criterios presentes; 0.5 queda como referencia."""
+    assert "score_imputado" in SCORE.columns
+    assert "precio_comparable" in SCORE.columns
+
+    # 33 modelos con precio USD (el split JINPENG añade 2: 3 anuncios →
+    # 3 filas con precio propio); 7 del catálogo VEDCA quedan fuera.
+    assert int(SCORE["precio_comparable"].sum()) == 33
+    assert int((~SCORE["precio_comparable"]).sum()) == 7
+    assert SCORE.loc[~SCORE["precio_comparable"], "precio_usd"].isna().all()
+    assert SCORE.loc[SCORE["precio_comparable"], "precio_usd"].notna().all()
+
+    # El score imputado no puede ser idéntico al re-ponderado en todos los casos:
+    # si lo fuera, la nueva regla no estaría haciendo nada.
+    assert not np.allclose(SCORE["score"], SCORE["score_imputado"])
+
+    # Reproducción independiente del score re-ponderado y del imputado.
+    cols = ["precio_usd_norm", "autonomia_km_norm", "carga_kg_norm",
+            "legalidad_norm", "repuestos_norm"]
+    pesos = np.array([0.40, 0.25, 0.20, 0.10, 0.05])
+    M = SCORE[cols].to_numpy(dtype=float)
+    presente = ~np.isnan(M)
+    den = (presente * pesos).sum(axis=1)
+    esperado = np.nansum(M * pesos, axis=1) / den
+    assert np.allclose(SCORE["score"], esperado, atol=1e-9)
+    imputado = np.where(np.isnan(M), 0.5, M) @ pesos
+    assert np.allclose(SCORE["score_imputado"], imputado, atol=1e-9)
+
+
+def test_ranking_principal_excluye_modelos_sin_precio():
+    """Los rankings de precio nunca deben incluir modelos con `precio_usd` NaN."""
+    from reporte.data import top_por_propulsion, top_por_score
+
+    for prop in SCORE["propulsion"].unique():
+        top = top_por_propulsion(SCORE, prop, 10)
+        assert top["precio_comparable"].all(), f"{prop} incluye un modelo sin precio"
+        assert top["precio_usd"].notna().all()
+
+    # El top general del grupo tampoco puede ser un modelo sin precio.
+    for prop in SCORE["propulsion"].unique():
+        fila = top_por_score(SCORE, prop)
+        assert fila is not None
+        assert bool(fila["precio_comparable"]) is True
+
+    # Y con `solo_precio=False` sí aparecen, para poder mostrarlos aparte.
+    todos = top_por_propulsion(SCORE, "electrico", 100, solo_precio=False)
+    assert (~todos["precio_comparable"]).any()
 
 
 def test_ranking_tiene_rango_explicito_por_propulsion():
@@ -34,7 +88,11 @@ def test_ranking_tiene_rango_explicito_por_propulsion():
 
 
 def test_conteos_del_dataset():
-    assert int(SCORE["repuestos_proxy"].fillna(0).sum()) == 10
+    # 9 (antes 10): con la fila agregada JINPENG, `repuestos_proxy` acreditaba
+    # "más de una fuente" a tres productos distintos que el grupo fusionaba;
+    # desde el split (2026-11-06) cada híbrido es un producto de UNA fuente
+    # (proxy = aparece en ≥2 fuentes con la misma identidad).
+    assert int(SCORE["repuestos_proxy"].fillna(0).sum()) == 9
     assert len(EMPRESAS) == 10
     assert len(pd.concat([pd.read_json(p, lines=True) for p in EMPRESAS],
                          ignore_index=True)) == 64
@@ -77,7 +135,10 @@ def test_top_por_score_es_por_propulsion_y_no_global():
         electrico["modelo_norm"]
 
     hibrido = top_por_score(SCORE, "hibrido")
-    assert hibrido["modelo_norm"] == "JINPENG"
+    # Desde el split JINPENG (2026-11-06) el mejor híbrido es el 1000W:
+    # solo tiene 3 criterios presentes (precio, legalidad, motor) y el score
+    # re-ponderado no imputa; el 1500W (5 criterios) queda en 0.707.
+    assert hibrido["modelo_norm"] == "JINPENG HIBRIDO 1000W"
     # El híbrido no debe aparecer al pedir eléctricos.
     assert hibrido["propulsion"] == "hibrido"
 
@@ -89,7 +150,7 @@ def test_top_por_propulsion_es_estable_y_no_mezcla_grupos():
     assert electricos["modelo_norm"].tolist() == [
         "TOPMAQ BRIDERK 2026 GELPB",
         "ONEBOT CLASIC 2026",
-        "KIVITOVA GELPB",
+        "CHILWEE",
     ]
     assert (electricos["propulsion"] == "electrico").all()
 
@@ -144,6 +205,13 @@ def test_sensibilidad_reproduce_el_ranking_oficial():
     assert np.allclose(m["score"], m["score_sens"], atol=1e-6)
     assert (m["rank_propulsion"] == m["rank"]).all()
 
+    # El escenario `imputado_05` reconstruye el método anterior y debe coincidir
+    # con la columna histórica `score_imputado`.
+    viejo = sens[sens["escenario"] == "imputado_05"]
+    mv = SCORE.merge(viejo, on=["propulsion", "modelo_norm"], suffixes=("", "_viejo"))
+    assert len(mv) == len(SCORE)
+    assert np.allclose(mv["score_imputado"], mv["score_viejo"], atol=1e-6)
+
     res = pd.read_csv(ROOT / "Data" / "clean_data" / "sensibilidad_resumen.csv")
     assert res["rank_base"].notna().all()
     m2 = SCORE.merge(res, on=["propulsion", "modelo_norm"], suffixes=("", "_res"))
@@ -196,4 +264,30 @@ def test_paginas_no_mezclan_grupos_en_el_podio():
     pagina6 = (ROOT / "reporte" / "pages" / "6_Contendientes.py").read_text(encoding="utf-8")
     assert "get_top_models" in pagina6
     assert ".head(top_n)" not in pagina6
+
+
+def test_documentacion_cubre_las_fuentes():
+    """Cada dominio presente en los datos debe estar en docs/etica_y_legal.md.
+
+    Es el test que sostiene la revisión de robots.txt/ToS del 2026-11-06: si se
+    añade una fuente nueva veya se cambian las rutas, la tabla §2a deja de
+    cubrir y el test obliga a re-hacer la comprobación antes de pushes.
+    """
+    fuente = (ROOT / "docs" / "etica_y_legal.md").read_text(encoding="utf-8")
+    # La revisión debe estar fechada y no puede seguir marcada como pendiente.
+    assert "2026-11-06" in fuente
+
+    from urllib.parse import urlparse
+
+    urls = []
+    for ruta in ["Data/clean_data/anuncios_triciclos.jsonl",
+                 "Data/clean_data/anuncios_facebook.jsonl"]:
+        urls += pd.read_json(ROOT / ruta, lines=True)["url"].dropna().astype(str).tolist()
+    for p in ROOT.glob("Data/empresas/*.jsonl"):
+        urls += pd.read_json(p, lines=True)["url"].dropna().astype(str).tolist()
+
+    dominios = sorted({urlparse(u).netloc for u in urls if u})
+    assert dominios, "no se encontraron URLs en los datos"
+    for dom in dominios:
+        assert dom in fuente, f"El dominio {dom} no está documentado en etica_y_legal.md §2a"
 

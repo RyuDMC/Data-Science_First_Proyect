@@ -43,11 +43,23 @@ def test_metadata_coincide_con_los_datos():
     assert C["municipios_campo"] == campo["municipio"].nunique()
     assert C["marcas_campo"] == campo["marca"].nunique()
 
-    top_e = score[score["propulsion"] == "electrico"].sort_values(
+    # El podio excluye los modelos sin precio USD: su score no incluye el
+    # criterio de precio y no es comparable con el resto.
+    comparables = score[score["precio_comparable"].fillna(False).astype(bool)]
+    top_e = comparables[comparables["propulsion"] == "electrico"].sort_values(
         ["score", "modelo_norm"], ascending=[False, True], kind="mergesort",
     ).head(3)
     assert [r["modelo"] for r in R["top_por_propulsion"]["electrico"]] == \
         top_e["modelo_norm"].tolist()
+
+    sin_precio = score[~score["precio_comparable"].fillna(False).astype(bool)]
+    assert [r["modelo"] for r in R["modelos_sin_precio"]] == \
+        sin_precio.sort_values(
+            ["propulsion", "score", "modelo_norm"],
+            ascending=[True, False, True], kind="mergesort",
+        )["modelo_norm"].tolist()
+    assert all(r["modelo"] not in top_e["modelo_norm"].tolist()
+               for r in R["modelos_sin_precio"])
 
     campo_res = pd.read_csv(ROOT / "Data" / "clean_data" / "campo_resumen.csv")
     top_campo = campo_res.sort_values(

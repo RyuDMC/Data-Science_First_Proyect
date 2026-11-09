@@ -60,6 +60,18 @@ def test_rally_sin_especificacion_en_el_nombre():
 UNIDADES = {"AH", "AMP", "AMPERIOS", "W", "WATT", "WATTS", "V", "CC", "KG",
             "KGS", "KM", "KM/H", "4T", "VOLT", "VOLTIOS"}
 
+# Excepción acordada (decisión del usuario, 2026-11-06): los tres híbridos
+# JINPENG se separan en 3 filas por URL y se distinguen por la spec real de
+# cada ficha (motor 1000/1100/1500 W / batería 32/58/89 Ah). Nada honesto los
+# distingue como NOMBRE: Cubancargos titula "JINPEING" (errata bloqueada) y
+# las otras dos fichas se llaman "jinpen/jimpeng híbrido" (erratas también).
+# La lista es cerrada y solo acepta estas tres cadenas exactas.
+SPEC_EN_NOMBRE_PERMITIDAS = {
+    "JINPENG HIBRIDO 1000W",
+    "JINPENG HIBRIDO 1100W",
+    "JINPENG HIBRIDO 1500W",
+}
+
 
 def test_nombres_sin_descriptores_ni_grafias_duplicadas():
     """Los aditamentos, el uso, la propulsión y las specs no son parte del
@@ -85,8 +97,9 @@ def test_nombres_sin_descriptores_ni_grafias_duplicadas():
             assert not errata_jinpen.search(modelo), f"errata en {modelo!r}"
             for t in re.split(r"[^A-Z0-9\-/]+", modelo):
                 assert t not in UNIDADES, f"{modelo!r} deja la unidad {t!r}"
-            assert not re.search(r"\d+ ?(?:AH|AMP|WATTS?|W|V|CC|KG|KM)$", modelo), \
-                f"{modelo!r} termina en Numero+unidad"
+            if modelo not in SPEC_EN_NOMBRE_PERMITIDAS:
+                assert not re.search(r"\d+ ?(?:AH|AMP|WATTS?|W|V|CC|KG|KM)$", modelo), \
+                    f"{modelo!r} termina en Numero+unidad"
             if "E-CARGO" not in modelo:
                 assert "CARGA" not in modelo, f"{modelo!r} contiene CARGA"
 
@@ -120,30 +133,51 @@ def test_nombres_sin_descriptores_ni_grafias_duplicadas():
         con_spec = nombres[
             nombres.str.contains(r"\d+ ?(?:AH|AMP|WATTS?|W|V|CC|KG|KM)$",
                                  regex=True, na=False)
+            & ~nombres.isin(SPEC_EN_NOMBRE_PERMITIDAS)
         ]
         assert con_spec.empty, \
             f"{path}: specs en el nombre {sorted(set(con_spec))}"
 
 
-def test_grupo_jinpeng_esta_unificado():
-    """Decisión del usuario (2026-10-31): JIMPEG y JINPEN son JINPENG.
+def test_grupo_jinpeng_hibrido_son_3_filas():
+    """Decisión del usuario (2026-11-06): el híbrido n=3 pasa a 3 filas.
 
-    Al nivel marca, las cuatro grafías erratas (`JINPEING`, `JIMPEG`,
-    `JINPEN`, `JIMPENG`) normalizan a JINPENG. Al nivel producto, los tres
-    híbridos del grupo comparten la identidad JINPENG (3 anuncios) y el
-    eléctrico queda separado por propulsión. La evolución de la decisión
-    está en `opencode/auditoria_jinpen.md`.
+    Evolución completa en `opencode/auditoria_jinpen.md`:
+    - 2026-10-31: JINPEING/JIMPEG/JINPEN/JIMPENG se unifican como MARCA
+      JINPENG y los 3 híbridos comparten identidad (1 fila, n=3).
+    - 2026-11-06: esa fila agregada mentía las specs (motor 1000/1100/1500 W,
+      batería 32/58/89 Ah), así que se separa en 3 filas por URL, cada una
+      con n=1 y el nombre distingue la ficha por su motor.
+
+    La unificación de marca se mantiene: las erratas siguen prohibidas.
     """
     from codes.norm_modelo import normalizar_marca
 
     for grafia in ("JINPEING", "JEINPEING", "JIMPEG", "JIMPENG", "JINPEN"):
         assert normalizar_marca(grafia) == "JINPENG", grafia
-    jinpeng = SCORE[SCORE["modelo_norm"] == "JINPENG"]
-    hibrido = jinpeng[jinpeng["propulsion"] == "hibrido"]
-    assert len(hibrido) == 1
-    assert int(hibrido.iloc[0]["n_anuncios_total"]) == 3
+
+    hibridos = SCORE[(SCORE["modelo_norm"].str.startswith("JINPENG HIBRIDO", na=False))
+                     & (SCORE["propulsion"] == "hibrido")]
+    esperados = {
+        "JINPENG HIBRIDO 1000W": "$3800, motor 1000 W / 60 V 32 Ah (elyerromenu)",
+        "JINPENG HIBRIDO 1100W": "$4751, motor 1100 W / 72 V 89 Ah (cubancargos)",
+        "JINPENG HIBRIDO 1500W": "$4300, motor 1500 W / 72 V 58 Ah, 100 km (elyerromenu)",
+    }
+    assert set(hibridos["modelo_norm"]) == set(esperados), sorted(hibridos["modelo_norm"])
+    for nombre in esperados:
+        fila = hibridos[hibridos["modelo_norm"] == nombre].iloc[0]
+        assert int(fila["n_anuncios_total"]) == 1, nombre
+        assert fila["marcas"].startswith("['JINPENG']"), nombre
+
+    # Que las 3 filas no pierdan el precio: el trío es parte de los 33 con
+    # precio comparable (los 7 de VEDCA siguen siendo los únicos sin precio).
+    assert hibridos["precio_usd"].notna().all()
+
+    # La errata del título sigue fuera, y el eléctrico del grupo mantiene su
+    # identidad propia (JINPENG GELPB, con la química como variante).
     nombres = set(SCORE["modelo_norm"].astype(str).str.upper())
-    assert "JINPEN" not in nombres and "JIMPEG" not in nombres
+    assert not any(e in nombres for e in ("JINPEN", "JIMPEG", "JINPEING", "JIMPENG"))
+    assert "JINPENG GELPB" in nombres
     assert (ROOT / "opencode" / "auditoria_jinpen.md").exists()
 
 
