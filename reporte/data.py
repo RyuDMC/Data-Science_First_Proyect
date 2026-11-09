@@ -76,13 +76,14 @@ def load_anuncios() -> pd.DataFrame:
 def load_empresas() -> pd.DataFrame:
     """Carga y unifica TODOS los JSONL de catálogos de empresas.
 
-    La lista de empresas sale de `Data/empresas/` (lo que escribe
+    La fuente única es `Data/empresas/` (lo que escribe
     `codes/scrape_empresas.py`), así que añadir un catálogo nuevo no obliga a
-    tocar el reporte. El JSONL limpio vive en `Data/clean_data/`.
+    tocar el reporte. No hay copia duplicada en `clean_data/` (unificada el
+    2026-11-06: antes había dos copias idénticas de cada fichero).
     """
     nombres = (sorted(p.stem for p in EMPRESAS_DIR.glob("*.jsonl"))
                if EMPRESAS_DIR.exists() else [])
-    files = [CLEAN_DIR / f"{n}.jsonl" for n in nombres]
+    files = [EMPRESAS_DIR / f"{n}.jsonl" for n in nombres]
     dfs = []
     for f in files:
         if f.exists():
@@ -171,17 +172,41 @@ def top_por_anuncios(df_scores: pd.DataFrame):
     ).iloc[0]
 
 
-def top_por_score(df_scores: pd.DataFrame, propulsion: str):
+def solo_precio_comparable(df: pd.DataFrame) -> pd.DataFrame:
+    """Quita los modelos sin `precio_usd` (catálogo en EUR).
+
+    Su score se calcula sin precio, así que no se pueden comparar con los que
+    sí tienen precio USD. El reporte los muestra aparte.
+    """
+    if df.empty or "precio_comparable" not in df.columns:
+        return df
+    return df[df["precio_comparable"].fillna(False).astype(bool)]
+
+
+def sin_precio_comparable(df: pd.DataFrame) -> pd.DataFrame:
+    """Devuelve solo los modelos sin `precio_usd` (para mostrarlos aparte)."""
+    if df.empty or "precio_comparable" not in df.columns:
+        return df.head(0)
+    return df[~df["precio_comparable"].fillna(False).astype(bool)]
+
+
+def top_por_score(df_scores: pd.DataFrame, propulsion: str,
+                  solo_precio: bool = True):
     """Fila con mejor score DENTRO de una propulsión.
 
     El score se normaliza min-max dentro de cada grupo, así que NO es
     comparable entre propulsiones. `propulsion` es obligatoria a propósito:
     evita que una página vuelva a mostrar un "mejor global" que mezcle un
     híbrido con un eléctrico.
+
+    Por defecto excluye los modelos sin `precio_usd`: su score no incluye el
+    criterio de precio (peso 0.40) y no es comparable con el resto.
     """
     if df_scores.empty or "score" not in df_scores.columns:
         return None
     sub = filter_by_propulsion(df_scores, propulsion)
+    if solo_precio:
+        sub = solo_precio_comparable(sub)
     if sub.empty:
         return None
     return sub.sort_values(
@@ -226,14 +251,18 @@ def frontera_pareto(df: pd.DataFrame, x_col: str, y_col: str) -> pd.DataFrame:
     return sub.iloc[no_dominados].sort_values(x_col, kind="mergesort")
 
 
-def top_por_propulsion(df_scores: pd.DataFrame, prop: str, n: int = 3) -> pd.DataFrame:
+def top_por_propulsion(df_scores: pd.DataFrame, prop: str, n: int = 3,
+                       solo_precio: bool = True) -> pd.DataFrame:
     """Top N de una propulsión, por `rank_propulsion` (o score si falta).
 
     Es explícito: no depende de que `analisis.py` haya dejado el CSV ordenado.
+    Con `solo_precio=True` (default) excluye los modelos sin precio USD.
     """
     if df_scores.empty or "propulsion" not in df_scores.columns:
         return df_scores.head(0)
     sub = df_scores[df_scores["propulsion"] == prop]
+    if solo_precio:
+        sub = solo_precio_comparable(sub)
     if sub.empty:
         return sub
     if "rank_propulsion" in sub.columns:
@@ -271,12 +300,12 @@ def texto_sensibilidad_electrico(df_sens: pd.DataFrame,
     pcts = top3["top3_pct"].tolist()
     nombres = top3["modelo_norm"].tolist()
     sens_prop = df_sens[df_sens["propulsion"] == prop]
-    cambios = (sens_prop[(sens_prop["rank"] == 1)
-                         & (sens_prop["escenario"] != "base")]
-               .set_index("escenario")["modelo_norm"])
-    otros = cambios[cambios != nombres[0]]
+    alt = sens_prop[sens_prop["escenario"] != "base"]
+    cambios = alt[alt["rank"] == 1].set_index("escenario")["modelo_norm"]
+    omision = cambios[cambios.index.str.startswith("sin_")]
+    imputado = cambios.get("imputado_05")
+    otros = omision[omision != nombres[0]]
     nombres_esc = {
-        "reponderado": "re-ponderado",
         "sin_precio_usd": "sin precio",
         "sin_autonomia_km": "sin autonomía",
         "sin_carga_kg": "sin carga",
@@ -284,34 +313,43 @@ def texto_sensibilidad_electrico(df_sens: pd.DataFrame,
         "sin_repuestos": "sin repuestos",
     }
     detalle = "; ".join(
-        (f"al quitar {nombres_esc.get(e, e).replace('sin ', '')}"
-         if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
+        f"al quitar {nombres_esc.get(e, e).replace('sin ', '')} → {m}"
         for e, m in otros.items()
     )
 
     # ¿Cuántos escenarios cambian el trío completo, no solo el 1º?
     base_top3 = set(nombres)
     cambia_top3 = [
-        esc for esc, sub in sens_prop[sens_prop["escenario"] != "base"]
-        .groupby("escenario", sort=True)
+        esc for esc, sub in alt.groupby("escenario", sort=True)
         if set(sub.nsmallest(3, "rank")["modelo_norm"]) != base_top3
     ]
-    n_esc = len(cambios)
+    n_esc = len(omision)
     if len(otros):
         txt_1 = (f"el 1º cambia en {len(otros)} de {n_esc} escenarios de "
                  f"omisión ({detalle})")
     else:
         txt_1 = f"el 1º se mantiene en los {n_esc} escenarios de omisión"
-    if cambia_top3:
-        txt_3 = f"el trío del podio cambia en {len(cambia_top3)} de {n_esc}"
+
+    if imputado is None:
+        txt_imp = ""
+    elif imputado == nombres[0]:
+        txt_imp = " La imputación 0.5 no cambia el 1º."
     else:
-        txt_3 = f"el trío del podio se mantiene en los {n_esc}"
+        txt_imp = f" Con imputación 0.5 el 1º sería {imputado}."
+
+    if cambia_top3:
+        txt_3 = (f"el trío del podio cambia en {len(cambia_top3)} de "
+                 f"{len(alt)} escenarios alternativos")
+    else:
+        txt_3 = (f"el trío del podio se mantiene en los {len(alt)} "
+                 "escenarios alternativos")
 
     return (
         f"Con perturbaciones de ±0.05 en los pesos, cada modelo del top-3 "
         f"eléctrico cae en el top-3 en {pcts[0]:.0f}%, {pcts[1]:.0f}% y "
-        f"{pcts[2]:.0f}% de los casos; {txt_1}, {txt_3}. "
-        "El orden exacto —y a veces el podio— depende de los pesos."
+        f"{pcts[2]:.0f}% de los casos; {txt_1}.{txt_imp} "
+        f"Además, {txt_3}. El orden exacto —y a veces el podio— depende de "
+        "los pesos."
     )
 
 
@@ -374,10 +412,12 @@ def filter_by_propulsion(df: pd.DataFrame, prop: str) -> pd.DataFrame:
     return df[df["propulsion"].str.lower() == prop.lower()]
 
 
-def get_top_models(df_scores: pd.DataFrame, prop: str, n: int = 10) -> pd.DataFrame:
+def get_top_models(df_scores: pd.DataFrame, prop: str, n: int = 10,
+                   solo_precio: bool = True) -> pd.DataFrame:
     """Top N modelos por score para una propulsión.
 
     Usa `rank_propulsion` cuando existe; si no, ordena por score. No confía en
-    el orden en que venga el CSV.
+    el orden en que venga el CSV. Por defecto excluye los modelos sin precio
+    USD, que se muestran aparte.
     """
-    return top_por_propulsion(df_scores, prop, n)
+    return top_por_propulsion(df_scores, prop, n, solo_precio=solo_precio)

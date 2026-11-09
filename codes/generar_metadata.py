@@ -20,8 +20,10 @@ Qué se calcula y qué se declara
   campo: `fecha_captura` llega hasta 2026-10-11 y `fecha_anuncio` hasta
   2025-11-09, así que se declara en `CORTE_ANUNCIOS` y el test lo contrasta
   contra el README.
-- **Resultados**: top-3 por propulsión y marca más observada en calle, para que
-  el README no tenga que escribir scores ni porcentajes a mano.
+- **Resultados**: top-3 por propulsión (solo modelos con `precio_usd`), la
+  lista aparte de modelos sin precio (catálogo en EUR) y marca más observada
+  en calle, para que el README no tenga que escribir scores ni porcentajes a
+  mano.
 - **Procedencia**: opcional (`--procedencia`). Por defecto el archivo es
   determinista: dos corridas con los mismos datos producen el mismo JSON. La
   fecha y el commit se añaden solo cuando se piden y `--check` los ignora.
@@ -96,8 +98,16 @@ def _resultados(score: pd.DataFrame, campo_resumen: pd.DataFrame) -> dict:
     Son resultados, no conteos: cambian si cambia el scoring o el campo. El
     README los cita; este bloque es su fuente y el test los contrasta.
     """
+    # Los modelos sin `precio_usd` (catálogo en EUR) no entran al podio: su
+    # score se calcula sin el criterio de precio (peso 0.40) y no es
+    # comparable con los que sí lo tienen. Se declaran aparte en
+    # `modelos_sin_precio`.
+    con_precio = score
+    if "precio_comparable" in score.columns:
+        con_precio = score[score["precio_comparable"].fillna(False).astype(bool)]
+
     top_por_propulsion = {}
-    for prop, grupo in score.groupby("propulsion", sort=True):
+    for prop, grupo in con_precio.groupby("propulsion", sort=True):
         top = grupo.sort_values(
             ["score", "modelo_norm"], ascending=[False, True], kind="mergesort",
         ).head(3)
@@ -105,6 +115,18 @@ def _resultados(score: pd.DataFrame, campo_resumen: pd.DataFrame) -> dict:
             {"modelo": str(r.modelo_norm), "score": round(float(r.score), 6)}
             for r in top.itertuples()
         ]
+
+    sin_precio = score
+    if "precio_comparable" in score.columns:
+        sin_precio = score[~score["precio_comparable"].fillna(False).astype(bool)]
+    modelos_sin_precio = [
+        {"modelo": str(r.modelo_norm), "propulsion": str(r.propulsion),
+         "score": round(float(r.score), 6), "n_criterios": int(r.n_criterios)}
+        for r in sin_precio.sort_values(
+            ["propulsion", "score", "modelo_norm"],
+            ascending=[True, False, True], kind="mergesort",
+        ).itertuples()
+    ]
 
     if campo_resumen.empty or "n_campo" not in campo_resumen.columns:
         campo_top = None
@@ -122,6 +144,7 @@ def _resultados(score: pd.DataFrame, campo_resumen: pd.DataFrame) -> dict:
         }
     return {
         "top_por_propulsion": top_por_propulsion,
+        "modelos_sin_precio": modelos_sin_precio,
         "campo_marca_top": campo_top,
     }
 
@@ -220,6 +243,9 @@ def main():
     if top_e:
         print("   Top eléctrico: " + " > ".join(
             f"{r['modelo']} ({r['score']:.3f})" for r in top_e))
+    n_sin = len(meta["resultados"]["modelos_sin_precio"])
+    if n_sin:
+        print(f"   Sin precio USD (fuera del ranking): {n_sin} modelos")
     campo_top = meta["resultados"]["campo_marca_top"]
     if campo_top:
         print(f"   Campo: {campo_top['marca']} "

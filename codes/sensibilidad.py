@@ -4,23 +4,23 @@ Sensibilidad del ranking a los pesos y a los criterios ausentes.
 
 Por qué existe
 --------------
-El score es una suma ponderada con pesos decididos a mano (0.40 precio,
-0.25 autonomía, 0.20 carga, 0.10 legalidad, 0.05 repuestos) y con imputación
-neutra 0.5 para los criterios ausentes. Eso produce UN orden, pero no dice
-cuánto depende ese orden de las decisiones metodológicas.
+El score oficial es una suma ponderada con pesos decididos a mano (0.40
+precio, 0.25 autonomía, 0.20 carga, 0.10 legalidad, 0.05 repuestos). Los
+criterios ausentes NO se imputan: los pesos se re-normalizan sobre los
+criterios presentes (ver `analisis.py::score_modelos`). Eso produce UN orden,
+pero no dice cuánto depende de las decisiones metodológicas.
 
-Este script responde tres preguntas, sin tocar el score oficial:
+Este script responde tres preguntas:
 
-  1. ¿Y si se re-pondera en vez de imputar 0.5?  (la alternativa que el
-     comentario viejo de `analisis.py` describía pero no implementaba)
+  1. ¿Qué cambia si volvemos a la imputación neutra 0.5?  (método anterior)
   2. ¿Qué pasa si se quita un criterio entero?  (¿el podio aguanta?)
   3. ¿Cuánto se mueve cada modelo si los pesos varían ±delta?  (perturbación
      aleatoria con semilla fija, reproducible)
 
-Regla del proyecto: esto NO cambia `score_modelos.csv`. Es un análisis de
-robustez; el score que se reporta sigue siendo el aprobado (imputación 0.5).
-Si la sensibilidad contradice la conclusión, se dice en el reporte, no se
-esconde cambiando los pesos.
+El escenario `base` reproduce el score oficial (re-ponderado sin imputación);
+`imputado_05` reconstruye el método anterior para comparar. La sensibilidad no
+cambia `score_modelos.csv`: si contradice la conclusión, se dice en el
+reporte, no se esconde cambiando los pesos.
 
 Salidas
 -------
@@ -92,28 +92,40 @@ def _ordenar_por_grupo(df: pd.DataFrame, col_score: str) -> pd.DataFrame:
     return pd.concat(partes, ignore_index=True)
 
 
+def _score_reponderado(M: np.ndarray, w: np.ndarray) -> np.ndarray:
+    """Suma ponderada usando solo los criterios presentes (NaN = ausente).
+
+    Es la misma regla que `analisis.py::score_modelos`: no se imputa 0.5; se
+    renormalizan los pesos sobre lo observado. Si un modelo no tuviera ningún
+    criterio, devuelve NaN en vez de dividir por cero.
+    """
+    W = np.asarray(w, dtype=float)
+    presente = ~np.isnan(M)
+    denominador = (presente * W).sum(axis=1)
+    return np.divide(
+        np.nansum(M * W, axis=1),
+        denominador,
+        out=np.full(M.shape[0], np.nan),
+        where=denominador > 0,
+    )
+
+
 def _escenarios(df: pd.DataFrame, w: np.ndarray):
     """Genera (nombre, score) para cada escenario determinista."""
     M = df[COLS_NORM].to_numpy(dtype=float)
-    # Misma imputación que `analisis.py::score_modelos`: un criterio ausente
-    # vale 0.5. Sin esto, `M @ w` propaga NaN y el escenario base no reproduce
-    # el score oficial (era el bug: 15/38 scores NaN y 26/38 rangos distintos).
-    M = np.where(np.isnan(M), 0.5, M)
-    raw = df[COLS_RAW].to_numpy(dtype=float)
 
-    # 1. Base: imputación 0.5 (la decisión oficial).
-    yield "base", M @ w
+    # 1. Base: re-ponderar solo con los criterios presentes (score oficial).
+    yield "base", _score_reponderado(M, w)
 
-    # 2. Alternativa: ignorar el criterio ausente y re-ponderar los presentes.
-    #    (legalidad y repuestos nunca faltan, así que el denominador no es 0.)
-    w_eff = np.where(np.isnan(raw), 0.0, w)
-    yield "reponderado", (M * w_eff).sum(axis=1) / w_eff.sum(axis=1)
+    # 2. Método anterior: imputar 0.5 al criterio ausente. Sirve para medir
+    #    cuánto cambiaba la decisión, no para el ranking oficial.
+    yield "imputado_05", np.where(np.isnan(M), 0.5, M) @ w
 
-    # 3. Omisión de cada criterio: peso 0 y re-normalización.
+    # 3. Omisión de cada criterio: peso 0 y re-normalización sobre presentes.
     for i, (clave, _) in enumerate(CRITERIOS):
         w_sin = w.copy()
         w_sin[i] = 0.0
-        yield f"sin_{clave}", M @ (w_sin / w_sin.sum())
+        yield f"sin_{clave}", _score_reponderado(M, w_sin)
 
 
 def _perturbar(df: pd.DataFrame, w: np.ndarray, n: int, delta: float):
@@ -124,7 +136,6 @@ def _perturbar(df: pd.DataFrame, w: np.ndarray, n: int, delta: float):
     los negativos se recortan a 0.
     """
     M = df[COLS_NORM].to_numpy(dtype=float)
-    M = np.where(np.isnan(M), 0.5, M)  # misma imputación que el score oficial
     nombres = df["modelo_norm"].to_numpy()
     props = df["propulsion"].to_numpy()
     grupos = {p: np.where(props == p)[0] for p in np.unique(props)}
@@ -135,7 +146,7 @@ def _perturbar(df: pd.DataFrame, w: np.ndarray, n: int, delta: float):
     for d in range(n):
         w_d = np.clip(w + rng.uniform(-delta, delta, len(w)), 0.0, None)
         w_d = w_d / w_d.sum()
-        score = M @ w_d
+        score = _score_reponderado(M, w_d)
         for idx in grupos.values():
             # lexsort: última clave es la primaria → -score, luego nombre.
             orden = idx[np.lexsort((nombres[idx], -score[idx]))]
@@ -167,10 +178,9 @@ def calcular(n_perturbaciones: int, delta: float):
 
     # Guardia: el CSV debe ser el que produce analisis.py. Si no, la
     # sensibilidad estaría midiendo otra cosa. Se comprueba antes de operar
-    # para que un NaN no pase inadvertido: `nan > 1e-6` es False y el check
-    # anterior daba OK con 15/38 scores rotos.
-    score_base = df[COLS_NORM].to_numpy(dtype=float)
-    score_base = np.where(np.isnan(score_base), 0.5, score_base) @ w
+    # para que un NaN no pase inadvertido.
+    M = df[COLS_NORM].to_numpy(dtype=float)
+    score_base = _score_reponderado(M, w)
     score_oficial = df["score"].to_numpy(dtype=float)
     if not np.isfinite(score_base).all() or not np.isfinite(score_oficial).all():
         malos = int((~np.isfinite(score_base)).sum() + (~np.isfinite(score_oficial)).sum())
@@ -180,6 +190,13 @@ def calcular(n_perturbaciones: int, delta: float):
     if dif > 1e-6:
         sys.exit(f"El score del CSV no se reproduce (diferencia máx {dif:.2e}). "
                  "Re-ejecuta python3 codes/analisis.py antes de la sensibilidad.")
+    if "score_imputado" in df.columns:
+        score_viejo = np.where(np.isnan(M), 0.5, M) @ w
+        dif_viejo = np.abs(score_viejo - df["score_imputado"].to_numpy(dtype=float)).max()
+        if dif_viejo > 1e-6:
+            sys.exit(f"El score_imputado del CSV no se reproduce "
+                     f"(diferencia máx {dif_viejo:.2e}). Re-ejecuta "
+                     "python3 codes/analisis.py.")
 
     # ---- Largo: modelo × escenario ----
     filas = []
@@ -202,7 +219,8 @@ def calcular(n_perturbaciones: int, delta: float):
             sys.exit("El ranking base de sensibilidad no coincide con "
                      "`rank_propulsion` del CSV oficial.")
     if largo["score"].isna().any():
-        sys.exit("La sensibilidad produjo scores NaN; revisa la imputación 0.5.")
+        sys.exit("La sensibilidad produjo scores NaN; revisa la re-ponderación "
+                 "sobre criterios presentes.")
 
     # ---- Resumen: estabilidad de cada modelo ----
     piv = largo.pivot(index=["propulsion", "modelo_norm"],

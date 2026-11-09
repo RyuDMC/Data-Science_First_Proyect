@@ -6,7 +6,7 @@ Maneja triciclos eléctricos, híbridos y de combustión.
 
 Estructura del repo (decisión del usuario, ajuste 2026-10-11):
   codes/ -> scripts    Data/ -> datos procesados y de campo
-  Data/raw_data/ -> datos crudos (entrada del análisis)
+  Data/clean_data/ -> captura + resultados del análisis
 
 Regla de vigencia (decisión del usuario, 2026-10-11 — "oferta viva manda"):
   - Una oferta es VIGENTE si no tiene fecha de publicación (catálogo actual) o
@@ -63,9 +63,10 @@ from norm_modelo import ALIAS_MODELOS, aplicar_alias, identidad  # noqa: E402
 
 # ==================== PESOS APROBATOS ====================
 # Nota: "autonomia_km" solo se usa si viene en la fuente. NO se estima para
-# gasolina (regla del proyecto: no inventar datos). Los criterios ausentes se
-# imputan como 0.5 neutro (decisión del usuario, 2026-10-07) y la cobertura
-# real de cada score se reporta en la columna n_criterios.
+# gasolina (regla del proyecto: no inventar datos). Los criterios ausentes NO
+# se imputan: el score se re-pondera solo con los criterios presentes y la
+# cobertura real se reporta en n_criterios. El precio, cuando falta, tampoco
+# se inventa: esos modelos se separan del ranking principal de precio.
 
 PESOS = {
     "precio_usd": 0.40,        # menor es mejor (invertir)
@@ -79,10 +80,11 @@ PESOS = {
 # Las publicaciones con fecha anterior a esta se consideran históricas.
 VENTANA_VIGENCIA = "2026-01-01"
 
-# Convención de carpetas (ajustada 2026-10-14):
+# Convención de carpetas (unificada 2026-11-06: una copia por fuente):
 #   codes/ -> scripts
-#   Data/raw_data/ -> crudos inmutables
-#   Data/clean_data/ -> limpios listos para análisis (entrada de analisis.py)
+#   Data/raw_data/ -> capturas genuinas (FB y campo; esta última privada)
+#   Data/clean_data/ -> JSONL del scraper + salida del análisis
+#   Data/empresas/ -> catálogos (fuente única de fichas de empresa)
 DATA_DIR = Path(__file__).resolve().parent.parent / "Data"
 CLEAN_DIR = DATA_DIR / "clean_data"
 
@@ -343,37 +345,37 @@ def score_modelos(df_online: pd.DataFrame) -> pd.DataFrame:
     else:
         agg["oferta_viva"] = True
 
-    # Normalizar cada criterio a 0-1 (min-max) DENTRO de cada grupo de propulsión
-    # para comparar eléctricos con eléctricos y gasolina con gasolina
-    agg["precio_usd_norm"] = 0.5
-    agg["autonomia_km_norm"] = 0.5
-    agg["carga_kg_norm"] = 0.5
+    # Normalizar cada criterio a 0-1 (min-max) DENTRO de cada grupo de
+    # propulsión. Los valores ausentes quedan NaN: NO se imputan aquí.
+    for col in ["precio_usd", "autonomia_km", "carga_kg"]:
+        agg[f"{col}_norm"] = np.nan
 
     for prop in agg["propulsion"].unique():
         mask = agg["propulsion"] == prop
         sub = agg[mask]
         for col in ["precio_usd", "autonomia_km", "carga_kg"]:
-            if sub[col].notna().any():
-                mn, mx = sub[col].min(), sub[col].max()
-                if mx > mn:
-                    if col == "precio_usd":
-                        agg.loc[mask, f"{col}_norm"] = 1 - (sub[col] - mn) / (mx - mn)
-                    else:
-                        agg.loc[mask, f"{col}_norm"] = (sub[col] - mn) / (mx - mn)
+            valores = pd.to_numeric(sub[col], errors="coerce")
+            if not valores.notna().any():
+                continue  # toda la columna ausente en este grupo: queda NaN
+            mn, mx = valores.min(), valores.max()
+            if mx > mn:
+                if col == "precio_usd":
+                    norm = 1 - (valores - mn) / (mx - mn)
                 else:
-                    agg.loc[mask, f"{col}_norm"] = 0.5
+                    norm = (valores - mn) / (mx - mn)
+            else:
+                # Todos los valores presentes son iguales: el criterio no
+                # discrimina, pero el dato existe. 0.5 es neutro, no una
+                # imputación de ausencia.
+                norm = pd.Series(0.5, index=valores.index)
+            agg.loc[mask, f"{col}_norm"] = norm.to_numpy()
 
     agg["legalidad_norm"] = agg["legalidad_bin"]
     agg["repuestos_norm"] = agg["repuestos_proxy"]
 
-    # Score ponderado con imputación neutra 0.5 (decisión del usuario
-    # 2026-10-07, ver PESOS): un criterio ausente vale "medio", ni castiga ni
-    # beneficia, y todos los scores quedan comparables entre sí.
-    # La alternativa (re-ponderar solo con los criterios presentes) NO se
-    # aplica aquí: se evalúa como análisis de robustez en codes/sensibilidad.py.
-    # Cobertura real: con cuántos criterios SÍ tiene dato cada modelo.
-    # Se calcula sobre los datos CRUDOS, no sobre las normas (que ya van
-    # imputadas a 0.5 y ocultarían la ausencia).
+    # Cobertura real: con cuántos criterios SÍ tiene dato cada modelo. Se
+    # calcula sobre los datos CRUDOS, no sobre las normas (que ahora pueden
+    # ser NaN y ocultarían la diferencia entre ausente y neutro).
     raw_cols = ["precio_usd", "autonomia_km", "carga_kg", "legalidad_bin", "repuestos_proxy"]
     agg["n_criterios"] = agg[raw_cols].apply(pd.to_numeric, errors="coerce").notna().sum(axis=1)
 
@@ -385,11 +387,26 @@ def score_modelos(df_online: pd.DataFrame) -> pd.DataFrame:
     M = agg[cols].apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float)
     W = np.array(w, dtype=float)
 
-    # Imputación neutra 0.5 (decisión del usuario 2026-10-07): un criterio
-    # ausente vale "medio", ni castiga ni beneficia, y todos los scores quedan
-    # comparables entre sí. n_criterios expone la fiabilidad de cada score.
-    M = np.where(np.isnan(M), 0.5, M)
-    agg["score"] = M @ W
+    # Score oficial: re-ponderar SOLO con los criterios presentes. Un criterio
+    # ausente no vale 0.5 (eso inventaba un precio "medio" y sesgaba el peso
+    # 0.40); se renormalizan los pesos sobre lo observado. n_criterios expone
+    # la cobertura para que un score con 3 criterios no se lea como uno con 5.
+    presente = ~np.isnan(M)
+    denominador = (presente * W).sum(axis=1)
+    agg["score"] = np.divide(
+        np.nansum(M * W, axis=1),
+        denominador,
+        out=np.full(len(agg), np.nan),
+        where=denominador > 0,
+    )
+
+    # Referencia histórica: score con imputación neutra 0.5. No se usa para el
+    # ranking, pero permite medir cuánto cambiaba la decisión anterior.
+    agg["score_imputado"] = np.where(np.isnan(M), 0.5, M) @ W
+
+    # ¿El precio USD es comparable? Los catálogos en EUR no lo tienen; el
+    # reporte los muestra aparte en vez de inventarles un precio.
+    agg["precio_comparable"] = agg["precio_usd"].notna()
 
     agg = agg.sort_values(["propulsion", "score"], ascending=[True, False]).reset_index(drop=True)
     # Rango dentro de cada propulsión: el reporte selecciona por rango, no por
@@ -473,7 +490,7 @@ def main():
         for prop in df_score["propulsion"].unique():
             sub = df_score[df_score["propulsion"] == prop].head(10)
             print(f"\n--- {prop.upper()} ---")
-            cols = ["modelo_norm", "rank_propulsion", "score", "n_criterios", "precio_usd", "precio_valor", "monedas",
+            cols = ["modelo_norm", "rank_propulsion", "score", "score_imputado", "n_criterios", "precio_comparable", "precio_usd", "precio_valor", "monedas",
                     "autonomia_km", "carga_kg",
                     "legalidad_bin", "repuestos_proxy", "oferta_viva", "n_anuncios", "n_anuncios_total",
                     "motor_w_med", "motor_cc_med", "n_empresas", "precio_empresa_med",
