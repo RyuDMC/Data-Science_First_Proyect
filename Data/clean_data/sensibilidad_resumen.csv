@@ -1,39 +1,41 @@
 propulsion,modelo_norm,score_base,rank_base,top3_pct,top1_pct,rank_p05,rank_p95,rank_min,rank_max,n_escenarios_top3,escenario_mejor,escenario_peor,n_criterios,n_anuncios
-electrico,TOPMAQ BRIDERK 2026 GELPB,0.78554,1,100.0,82.55,1.0,2.0,1,5,5,reponderado,sin_carga_kg,5,9
-electrico,ONEBOT CLASIC 2026,0.774581,2,100.0,17.2,1.0,2.0,2,6,5,reponderado,sin_autonomia_km,5,3
-electrico,KIVITOVA GELPB,0.723364,3,81.3,0.0,3.0,4.0,1,6,1,sin_carga_kg,sin_precio_usd,5,4
-electrico,MVP POWER GELPB,0.707306,4,0.0,0.0,4.0,5.0,3,8,1,sin_carga_kg,sin_autonomia_km,5,2
-electrico,CHILWEE,0.683333,5,18.7,0.25,3.0,8.0,2,19,4,sin_autonomia_km,sin_precio_usd,4,1
-electrico,VEDCA C400 LIFEPO4,0.67481,6,0.0,0.0,5.0,9.0,3,11,1,sin_precio_usd,sin_autonomia_km,5,1
-electrico,JINPENG GELPB,0.650685,7,0.0,0.0,5.0,9.0,3,15,1,sin_autonomia_km,sin_precio_usd,5,1
-electrico,OIM GELPB,0.645358,8,0.0,0.0,7.0,11.0,4,14,0,sin_autonomia_km,sin_legalidad,4,2
-electrico,KN-KO13,0.628919,9,0.0,0.0,6.0,11.0,4,16,0,sin_legalidad,sin_carga_kg,5,1
-electrico,VIENTO RAPIDO,0.605784,10,0.0,0.0,7.0,14.0,7,24,0,sin_legalidad,sin_precio_usd,5,2
-electrico,TRAKTION 2026,0.596423,11,0.0,0.0,9.0,13.0,8,15,0,sin_legalidad,sin_carga_kg,5,2
-electrico,NIPPON SE,0.591288,12,0.0,0.0,9.0,16.0,9,19,0,sin_carga_kg,sin_legalidad,5,1
-electrico,STAR,0.579985,13,0.0,0.0,11.0,15.0,9,22,0,sin_legalidad,sin_autonomia_km,5,4
-electrico,DDS-OD,0.576104,14,0.0,0.0,12.0,15.0,10,20,0,sin_legalidad,sin_precio_usd,5,2
-electrico,MAF LIFEPO4,0.569102,15,0.0,0.0,10.0,17.0,8,17,0,sin_precio_usd,sin_repuestos,4,2
-electrico,MISHOZUKI 2026,0.541629,16,0.0,0.0,15.0,17.0,11,18,0,sin_precio_usd,sin_autonomia_km,5,1
-electrico,VEDCA C400 GELPB,0.537154,17,0.0,0.0,15.0,18.0,12,29,0,sin_carga_kg,sin_precio_usd,5,4
-electrico,SK-2101,0.509932,18,0.0,0.0,18.0,19.0,14,21,0,sin_autonomia_km,sin_precio_usd,3,1
-electrico,ONEBOT JINCHENG 2026 CAPATAZ LIFEPO4,0.495472,19,0.0,0.0,16.0,23.0,7,27,0,sin_precio_usd,sin_legalidad,4,1
-electrico,VEDCA SH001 LIFEPO4,0.494444,20,0.0,0.0,19.0,20.0,16,24,0,sin_precio_usd,sin_autonomia_km,3,1
-electrico,MAGIC BIKE,0.466096,21,0.0,0.0,20.0,23.0,20,23,0,sin_autonomia_km,reponderado,3,1
-electrico,PANTHER,0.464155,22,0.0,0.0,20.0,23.0,17,26,0,sin_precio_usd,sin_autonomia_km,5,1
-electrico,JINPENG PANTER 2026,0.449909,23,0.0,0.0,23.0,25.0,18,29,0,sin_precio_usd,sin_autonomia_km,5,1
-electrico,ONEBOT TANK LIFEPO4,0.425,24,0.0,0.0,21.0,29.0,5,30,0,sin_precio_usd,sin_carga_kg,4,1
-electrico,VEDCA C400A GELPB,0.422222,25,0.0,0.0,21.0,28.0,20,28,0,sin_carga_kg,sin_autonomia_km,4,2
-electrico,TY150UK,0.419178,26,0.0,0.0,24.0,27.0,23,27,0,sin_autonomia_km,sin_precio_usd,5,1
-electrico,VEDCA C600 GELPB,0.413889,27,0.0,0.0,25.0,28.0,25,27,0,sin_legalidad,reponderado,4,1
-electrico,VEDCA C800B LIFEPO4,0.4,28,0.0,0.0,26.0,29.0,19,28,0,sin_autonomia_km,reponderado,4,2
-electrico,VEDCA C600 LIFEPO4,0.394444,29,0.0,0.0,25.0,29.0,21,29,0,sin_autonomia_km,reponderado,4,3
-electrico,VEDCA C400 LIFEPO4MN,0.233333,30,0.0,0.0,30.0,31.0,30,31,0,reponderado,sin_carga_kg,4,1
-electrico,VEDCA C300 LIFEPO4,0.227778,31,0.0,0.0,30.0,31.0,29,31,0,sin_carga_kg,reponderado,4,1
-gasolina,MAGIC BIKE M004,0.625,1,100.0,100.0,1.0,1.0,1,1,6,reponderado,reponderado,3,1
-gasolina,MAGIC BIKE M005,0.225,2,100.0,0.0,2.0,2.0,2,2,6,reponderado,reponderado,3,1
-hibrido,JINPENG,0.883473,1,100.0,100.0,1.0,1.0,1,1,6,reponderado,reponderado,5,3
-hibrido,STAR,0.707487,2,100.0,0.0,2.0,2.0,2,3,6,reponderado,sin_precio_usd,5,1
-hibrido,FURIKAZAN,0.5,3,77.5,0.0,3.0,4.0,3,5,5,reponderado,sin_precio_usd,5,1
-hibrido,PORTO BELLO,0.464286,4,22.5,0.0,3.0,4.0,2,5,1,sin_precio_usd,sin_autonomia_km,5,1
-hibrido,LAITUNG,0.387476,5,0.0,0.0,5.0,5.0,4,5,0,sin_autonomia_km,reponderado,3,1
+electrico,TOPMAQ BRIDERK 2026 GELPB,0.78554,1,100.0,64.05,1.0,2.0,1,5,5,imputado_05,sin_carga_kg,5,9
+electrico,ONEBOT CLASIC 2026,0.774581,2,99.9,13.45,1.0,3.0,2,6,5,imputado_05,sin_autonomia_km,5,3
+electrico,CHILWEE,0.744444,3,63.1,22.5,1.0,6.0,1,19,3,sin_legalidad,sin_precio_usd,4,1
+electrico,KIVITOVA GELPB,0.723364,4,35.95,0.0,3.0,5.0,1,7,2,sin_carga_kg,sin_precio_usd,5,4
+electrico,MVP POWER GELPB,0.707306,5,0.0,0.0,4.0,6.0,3,8,1,sin_carga_kg,sin_autonomia_km,5,2
+electrico,OIM GELPB,0.681697,6,1.05,0.0,4.0,8.0,1,14,1,sin_autonomia_km,sin_legalidad,4,2
+electrico,VEDCA C400 LIFEPO4,0.67481,7,0.0,0.0,5.0,9.0,4,13,0,sin_carga_kg,sin_legalidad,5,1
+electrico,JINPENG GELPB,0.650685,8,0.0,0.0,7.0,11.0,4,16,0,sin_autonomia_km,sin_legalidad,5,1
+electrico,KN-KO13,0.628919,9,0.0,0.0,7.0,11.0,4,16,0,sin_legalidad,sin_carga_kg,5,1
+electrico,VIENTO RAPIDO,0.605784,10,0.0,0.0,8.0,15.0,7,21,0,sin_legalidad,sin_precio_usd,5,2
+electrico,TRAKTION 2026,0.596423,11,0.0,0.0,10.0,13.0,9,15,0,sin_legalidad,sin_carga_kg,5,2
+electrico,NIPPON SE,0.591288,12,0.0,0.0,9.0,16.0,10,19,0,sin_autonomia_km,sin_legalidad,5,1
+electrico,MAF LIFEPO4,0.586377,13,0.0,0.0,8.95,18.0,8,18,0,sin_legalidad,sin_repuestos,4,2
+electrico,STAR,0.579985,14,0.0,0.0,11.0,15.0,10,19,0,sin_precio_usd,sin_autonomia_km,5,4
+electrico,DDS-OD,0.576104,15,0.0,0.0,12.0,15.0,11,20,0,sin_carga_kg,sin_precio_usd,5,2
+electrico,MISHOZUKI 2026,0.541629,16,0.0,0.0,15.0,18.0,11,18,0,sin_precio_usd,sin_autonomia_km,5,1
+electrico,VEDCA C400 GELPB,0.537154,17,0.0,0.0,15.0,19.0,12,27,0,sin_carga_kg,sin_precio_usd,5,4
+electrico,SK-2101,0.518057,18,0.0,0.0,16.0,19.0,14,30,0,sin_autonomia_km,sin_precio_usd,3,1
+electrico,ONEBOT JINCHENG 2026 CAPATAZ LIFEPO4,0.493962,19,0.0,0.0,16.0,23.0,6,26,0,sin_precio_usd,sin_legalidad,4,1
+electrico,VEDCA SH001 LIFEPO4,0.486111,20,0.0,0.0,16.0,23.0,10,30,0,sin_legalidad,sin_autonomia_km,3,1
+electrico,PANTHER,0.464155,21,0.0,0.0,20.0,22.0,17,25,0,sin_precio_usd,sin_autonomia_km,5,1
+electrico,JINPENG PANTER 2026,0.449909,22,0.0,0.0,21.0,23.0,18,26,0,sin_precio_usd,sin_autonomia_km,5,1
+electrico,MAGIC BIKE,0.438356,23,0.0,0.0,20.0,25.0,20,31,0,sin_autonomia_km,sin_precio_usd,3,1
+electrico,TY150UK,0.419178,24,0.0,0.0,24.0,25.0,22,26,0,sin_autonomia_km,imputado_05,5,1
+electrico,ONEBOT TANK LIFEPO4,0.4,25,0.0,0.0,21.0,28.0,3,29,1,sin_precio_usd,sin_legalidad,4,1
+electrico,VEDCA C400A GELPB,0.37037,26,0.0,0.0,23.0,28.0,20,28,0,sin_carga_kg,sin_autonomia_km,4,2
+electrico,VEDCA C600 GELPB,0.356481,27,0.0,0.0,25.0,28.0,23,27,0,sin_precio_usd,imputado_05,4,1
+electrico,VEDCA C800B LIFEPO4,0.333333,28,0.0,0.0,26.0,29.0,21,29,0,sin_autonomia_km,sin_carga_kg,4,2
+electrico,VEDCA C600 LIFEPO4,0.324074,29,0.0,0.0,26.0,29.0,24,29,0,sin_autonomia_km,imputado_05,4,3
+electrico,VEDCA C400 LIFEPO4MN,0.055556,30,0.0,0.0,30.0,31.0,28,31,0,sin_precio_usd,sin_carga_kg,4,1
+electrico,VEDCA C300 LIFEPO4,0.046296,31,0.0,0.0,30.0,31.0,29,31,0,sin_precio_usd,imputado_05,4,1
+gasolina,MAGIC BIKE M004,0.727273,1,100.0,100.0,1.0,1.0,1,1,6,imputado_05,imputado_05,3,1
+gasolina,MAGIC BIKE M005,0.0,2,100.0,0.0,2.0,2.0,2,2,6,imputado_05,imputado_05,3,1
+hibrido,JINPENG HIBRIDO 1000W,0.909091,1,100.0,100.0,1.0,1.0,1,3,6,imputado_05,sin_precio_usd,3,1
+hibrido,JINPENG HIBRIDO 1500W,0.70731,2,100.0,0.0,2.0,2.0,2,3,6,imputado_05,sin_carga_kg,5,1
+hibrido,STAR,0.593693,3,100.0,0.0,3.0,3.0,2,5,5,sin_carga_kg,sin_precio_usd,5,1
+hibrido,PORTO BELLO,0.464286,4,0.0,0.0,4.0,5.0,1,6,1,sin_precio_usd,sin_autonomia_km,5,1
+hibrido,JINPENG HIBRIDO 1100W,0.454067,5,0.0,0.0,4.0,5.0,4,5,0,imputado_05,sin_autonomia_km,3,1
+hibrido,FURIKAZAN,0.372105,6,0.0,0.0,6.0,6.0,4,6,0,sin_autonomia_km,imputado_05,5,1
+hibrido,LAITUNG,0.200957,7,0.0,0.0,7.0,7.0,7,7,0,imputado_05,imputado_05,3,1

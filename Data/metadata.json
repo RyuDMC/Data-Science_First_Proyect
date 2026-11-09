@@ -5,9 +5,9 @@
     "anuncios_scraper": 41,
     "anuncios_facebook": 29,
     "fuentes_anuncios": 6,
-    "modelos_ranking": 38,
-    "nombres_modelo": 37,
-    "modelos_con_repuestos": 10,
+    "modelos_ranking": 40,
+    "nombres_modelo": 39,
+    "modelos_con_repuestos": 9,
     "fichas_empresa": 64,
     "empresas": 10,
     "productos_canonicos": 133,
@@ -34,35 +34,79 @@
           "score": 0.774581
         },
         {
-          "modelo": "KIVITOVA GELPB",
-          "score": 0.723364
+          "modelo": "CHILWEE",
+          "score": 0.744444
         }
       ],
       "gasolina": [
         {
           "modelo": "MAGIC BIKE M004",
-          "score": 0.625
+          "score": 0.727273
         },
         {
           "modelo": "MAGIC BIKE M005",
-          "score": 0.225
+          "score": 0.0
         }
       ],
       "hibrido": [
         {
-          "modelo": "JINPENG",
-          "score": 0.883473
+          "modelo": "JINPENG HIBRIDO 1000W",
+          "score": 0.909091
+        },
+        {
+          "modelo": "JINPENG HIBRIDO 1500W",
+          "score": 0.70731
         },
         {
           "modelo": "STAR",
-          "score": 0.707487
-        },
-        {
-          "modelo": "FURIKAZAN",
-          "score": 0.5
+          "score": 0.593693
         }
       ]
     },
+    "modelos_sin_precio": [
+      {
+        "modelo": "VEDCA SH001 LIFEPO4",
+        "propulsion": "electrico",
+        "score": 0.486111,
+        "n_criterios": 3
+      },
+      {
+        "modelo": "VEDCA C400A GELPB",
+        "propulsion": "electrico",
+        "score": 0.37037,
+        "n_criterios": 4
+      },
+      {
+        "modelo": "VEDCA C600 GELPB",
+        "propulsion": "electrico",
+        "score": 0.356481,
+        "n_criterios": 4
+      },
+      {
+        "modelo": "VEDCA C800B LIFEPO4",
+        "propulsion": "electrico",
+        "score": 0.333333,
+        "n_criterios": 4
+      },
+      {
+        "modelo": "VEDCA C600 LIFEPO4",
+        "propulsion": "electrico",
+        "score": 0.324074,
+        "n_criterios": 4
+      },
+      {
+        "modelo": "VEDCA C400 LIFEPO4MN",
+        "propulsion": "electrico",
+        "score": 0.055556,
+        "n_criterios": 4
+      },
+      {
+        "modelo": "VEDCA C300 LIFEPO4",
+        "propulsion": "electrico",
+        "score": 0.046296,
+        "n_criterios": 4
+      }
+    ],
     "campo_marca_top": {
       "marca": "JINPENG",
       "n": 6,
