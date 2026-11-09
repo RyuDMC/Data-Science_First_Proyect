@@ -8,7 +8,7 @@
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclos-hibridos-el-mejor-precio-de": "Nombre 100% publicitario ('MEJOR PRECIO'), sin modelo identificable; excluido por decisión del usuario (2026-10-19).",
     "https://mundoenvio.com/tienda/carrito-electrico-para-cuba/": "Cuatriciclo ('4 ruedas'), fuera del alcance de triciclos."
   },
-  "nota": "Tabla curada de identidad de producto (clave: URL). La usan codes/norm_modelo.py y los scrapers, de modo que raw_data nace con los nombres ya normalizados. Editar aquí, no a mano en los JSONL: la siguiente pasada del scraper sobrescribe lo editado a mano.",
+  "nota": "Tabla curada de identidad de producto (clave: URL). La usan codes/norm_modelo.py y los scrapers, de modo que la captura nace con los nombres ya normalizados. Editar aquí, no a mano en los JSONL: la siguiente pasada del scraper sobrescribe lo editado a mano.",
   "por_url": {
     "https://bluewavecuba.com/triciclos/tiger": {
       "marca": "TIGER",
@@ -62,7 +62,7 @@
     },
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-jeinpeing": {
       "marca": "JINPENG",
-      "modelo": "JINPENG",
+      "modelo": "JINPENG HIBRIDO 1100W",
       "origen": "manual"
     },
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-nippon-se": {
@@ -102,12 +102,12 @@
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jimpeng-hibrido-2026": {
       "marca": "JINPENG",
-      "modelo": null,
+      "modelo": "JINPENG HIBRIDO 1500W",
       "origen": "manual"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jinpen-hibrido": {
       "marca": "JINPENG",
-      "modelo": "JINPENG",
+      "modelo": "JINPENG HIBRIDO 1000W",
       "origen": "manual"
     },
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-marca-jinpeng": {

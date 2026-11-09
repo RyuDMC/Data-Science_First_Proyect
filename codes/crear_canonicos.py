@@ -48,17 +48,20 @@ OVERRIDES = {
     # la marca JINPENG (confirmado por el usuario, 2026-10-31). Se corrige el
     # nombre canónico en el origen, no el JSONL a mano. El eléctrico de
     # elyerromenu (JINPENG GELPB) queda separado por propulsión.
+    # Decisión del usuario (2026-11-06): los tres híbridos del grupo pasan de
+    # 1 fila agregada (n=3) a 3 filas por URL: comparten nombre de marca pero
+    # pueden NUNCA fusionarse sin mentir las specs, porque cada ficha trae
+    # motor distinto (del dato: cubancargos 1100 W / 72 V 89 Ah $4751,
+    # jinpen-hibrido 1000 W / 60 V 32 Ah $3800, jimpeng-hibrido-2026
+    # 1500 W / 72 V 58 Ah $4300). El sufijo del nombre cita esa spec real
+    # (una excepción acordada al contrato de nombres "sin specs": ver
+    # tests/test_identidad.py).
     "https://cubancargos.com/triciclos/electricos-cuba/triciclo-jeinpeing":
-        ("JINPENG", "JINPENG"),
-    # Grupo JINPENG unificado (decisión del usuario, 2026-10-31, 2ª pasada):
-    # JIMPEG, JINPEN y JIMPENG son erratas de la misma marca, y "JINPEN
-    # HIBRIDO" es el JINPENG híbrido. Los tres híbridos del grupo
-    # (Cubancargos + elyerromenu ×2) comparten la identidad JINPENG; el
-    # eléctrico queda separado por propulsión. Cada ficha conserva sus specs.
+        ("JINPENG HIBRIDO 1100W", "JINPENG"),
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jinpen-hibrido":
-        ("JINPENG", "JINPENG"),
+        ("JINPENG HIBRIDO 1000W", "JINPENG"),
     "https://elyerromenu.com/b/cuba-sobre-ruedas/product/triciclo-jimpeng-hibrido-2026":
-        (None, "JINPENG"),
+        ("JINPENG HIBRIDO 1500W", "JINPENG"),
     # Facebook: "JIMPEG PANTER 2026" es la errata de JINPENG.
     "https://www.facebook.com/groups/644647424572616/permalink/1155238560180164/":
         ("JINPENG PANTER 2026", "JINPENG"),
@@ -261,7 +264,7 @@ SIN_CURAR = set()
 # El fichero crudo conserva el nombre tal como venía de la web; sirve para
 # distinguir productos que comparten URL (mrcuba: una sola página de Wix).
 ORIGEN_CRUDE = {
-    "anuncios_triciclos.jsonl": "raw_data/anuncios_triciclos.jsonl",
+    "anuncios_triciclos.jsonl": "clean_data/anuncios_triciclos.jsonl",
     "kikihabana.jsonl": "empresas/kikihabana.jsonl",
     "mzproducts.jsonl": "empresas/mzproducts.jsonl",
     "mrcuba.jsonl": "empresas/mrcuba.jsonl",
@@ -325,7 +328,9 @@ def main():
     por_url = {}
     pendientes = {}
 
-    for f in sorted(CLEAN_DIR.glob("*.jsonl")):
+    ficheros = sorted(CLEAN_DIR.glob("anuncios_*.jsonl")) + \
+        sorted((DATA_DIR / "empresas").glob("*.jsonl"))
+    for f in ficheros:
         # Nombre original del mismo producto (fichero crudo): permite
         # desambiguar cuando una URL sirve a varios productos.
         crudo_por_url = {}
@@ -406,7 +411,7 @@ def main():
         "version": "2026-10-19",
         "nota": (
             "Tabla curada de identidad de producto (clave: URL). La usan "
-            "codes/norm_modelo.py y los scrapers, de modo que raw_data nace "
+            "codes/norm_modelo.py y los scrapers, de modo que la captura nace "
             "con los nombres ya normalizados. Editar aquí, no a mano en los "
             "JSONL: la siguiente pasada del scraper sobrescribe lo editado "
             "a mano."
