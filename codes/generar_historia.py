@@ -25,11 +25,15 @@ Qué se calcula y qué se declara
 - ventana legal: decisión documentada en fuentes_justificacion.md
   (Resolución 47/2026 del MINTRAN; licencias temporales hasta diciembre
   de 2026). Es texto documental del repo, no un dato derivado.
+- og.png (solo con --og): tarjeta social 1200×630 con matplotlib. Es
+  presentación, no dato: los conteos del pie salen del mismo dict y la
+  paleta es espejo de la del HTML.
 
 Uso
 ---
     python3 codes/generar_historia.py              # escribe historia/datos.{json,js}
     python3 codes/generar_historia.py --check      # falla si el disco no coincide
+    python3 codes/generar_historia.py --og         # además renderiza historia/og.png
 """
 
 import argparse
@@ -45,6 +49,7 @@ CLEAN = DATA / "clean_data"
 HISTORIA = ROOT / "historia"
 SALIDA_JSON = HISTORIA / "datos.json"
 SALIDA_JS = HISTORIA / "datos.js"
+SALIDA_OG = HISTORIA / "og.png"
 
 # La identidad del anuncio (regla del 2026-10-19: sin nombre de modelo, la
 # identidad es la marca) vive en codes/norm_modelo.py, igual que usa el
@@ -86,12 +91,30 @@ CITAS_PESOS = {
 
 # Texto documental (fuentes_justificacion.md): ventana del régimen
 # excepcional de licencias temporales para triciclos eléctricos sin matrícula.
+# La fecha de la Gaceta sale del mismo archivo (Gaceta Oficial, 4-ago-2026).
+# *_iso: versión máquina (mes-granularidad) para dibujar la cinta del
+# tiempo en el HTML; la fuente tampoco declara día para el cierre.
 VENTANA_LEGAL = {
     "ventana": "diciembre de 2026",
+    "gaceta": "4 de agosto de 2026",
+    "gaceta_iso": "2026-08",
+    "cierre_iso": "2026-12",
     "detalle": "Resolución 47/2026 del MINTRAN: régimen excepcional de "
                "licencias temporales para vehículos eléctricos sin "
                "matrícula (categoría A, alcance provincial en La Habana).",
     "fuente": "Data/fuentes_justificacion.md",
+}
+
+# Paleta de fuentes: espejo de FUENTE_COLOR en historia/index.html
+# (presentación, no dato). Evita los tonos semánticos de propulsión
+# (#1f77b4 eléctrico, #ff7f0e híbrido, #d62728 gasolina).
+OG_FUENTE_COLOR = {
+    "facebook": "#0e7490",
+    "elyerromenu": "#8b5cf6",
+    "islagrande": "#059669",
+    "vedca_telegram": "#d97706",
+    "casalindashop": "#ec4899",
+    "cubancargos": "#6b7280",
 }
 
 
@@ -100,6 +123,23 @@ def r(x, nd=4):
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return None
     return round(float(x), nd)
+
+
+def _num(x):
+    """Número o nulo: muchos anuncios no traen precio/motor/autonomía.
+
+    Se declara el vacío (null en JSON), nunca un 0 ni una imputación —
+    el popup del HTML muestra 'sin dato' y no un número inventado.
+    """
+    if x is None:
+        return None
+    try:
+        f = float(x)
+    except (TypeError, ValueError):
+        return None
+    if f != f:  # NaN
+        return None
+    return round(f, 2)
 
 
 def construir() -> dict:
@@ -114,9 +154,10 @@ def construir() -> dict:
             for c, w in PESOS.items()
         ],
         "pila": {"fichas": [], "fuentes": [], "por_propulsion": []},
-        "campo": {"marcas": [], "destaca": {}, "uso": {}},
+        "campo": {"marcas": [], "destaca": {}, "uso": {}, "usos": []},
         "conflicto_modelo": {},
         "ranking_electrico": [],
+        "ranking_hibrido": [],
         "top2_scores": [],
         "ranking": {"hist_n_anuncios": [], "sin_precio": {}},
         "sensibilidad": {"por_modelo": [], "escena_lider": [],
@@ -139,10 +180,15 @@ def construir() -> dict:
         if "propulsion" in df.columns:
             df["propulsion"] = df["propulsion"].fillna("indeterminado").str.lower()
         df["modelo_norm"] = identidad(df)
+        # Cobertura real por anuncio (54/70 con precio, 60/70 autonomía,
+        # 50/70 motor_w — lo que trae cada JSONL; nulo = sin dato público).
         orden = df.sort_values(["modelo_norm", "fuente"])
         fichas = [
             {"modelo": fila["modelo_norm"], "fuente": fila["fuente"],
-             "propulsion": fila["propulsion"]}
+             "propulsion": fila["propulsion"],
+             "precio": _num(fila.get("precio_usd")),
+             "autonomia": _num(fila.get("autonomia_km")),
+             "motor": _num(fila.get("motor_w"))}
             for _, fila in orden.iterrows()
         ]
         fc = df["fuente"].value_counts()
@@ -176,6 +222,18 @@ def construir() -> dict:
     ]
     datos["top2_scores"] = [r(s) for s in
                             elec_top3["score"].head(2).tolist()]
+
+    # Podio híbrido: se muestra DENTRO de su propulsión y jamás se compara
+    # con el eléctrico (los scores no son comparables entre grupos).
+    # n_criterios declara la cobertura: sin dato, el score re-pondera.
+    hib_top3 = (sc[sc["propulsion"] == "hibrido"]
+                .nsmallest(3, "rank_propulsion"))
+    datos["ranking_hibrido"] = [
+        {"rank": int(fila["rank_propulsion"]), "modelo": fila["modelo_norm"],
+         "score": r(fila["score"]),
+         "n_criterios": int(fila["n_criterios"])}
+        for _, fila in hib_top3.iterrows()
+    ]
 
     # --- Modelo más anunciado y su fantasma en calle ---
     top_ad = sc.sort_values(
@@ -212,8 +270,17 @@ def construir() -> dict:
                 "min_delta": filas[min_d]["marca"],
             }
     if CAMPO_USO.exists():
-        uso = pd.read_csv(CAMPO_USO).sort_values(
-            "n", ascending=False, kind="mergesort").iloc[0]
+        usos_df = pd.read_csv(CAMPO_USO).sort_values(
+            "n", ascending=False, kind="mergesort")
+        # Arreglo completo para el waffle del HTML (todas las filas del
+        # CSV con su IC95; el campo describe la muestra, no La Habana).
+        datos["campo"]["usos"] = [
+            {"uso": u["uso"], "n": int(u["n"]), "pct": r(u["pct"], 2),
+             "ic95_bajo": r(u["ic95_bajo"], 2), "ic95_alto": r(u["ic95_alto"], 2)}
+            for _, u in usos_df.iterrows()
+        ]
+        # Uso dominante (métrica selección: el HTML lo cita en el Acto 3).
+        uso = usos_df.iloc[0]
         datos["campo"]["uso"] = {
             "uso": uso["uso"], "pct": r(uso["pct"], 2),
             "ic95_bajo": r(uso["ic95_bajo"], 2),
@@ -275,6 +342,70 @@ def escribir(datos: dict) -> None:
         encoding="utf-8")
 
 
+def generar_og(datos: dict) -> None:
+    """Renderiza historia/og.png (1200×630): tarjeta para redes sociales.
+
+    Es la capa de PRESENTACIÓN, no de datos: los conteos del pie y las
+    fichas del mosaico salen del mismo dict generado, y la paleta es el
+    espejo OG_FUENTE_COLOR (la misma que el HTML). Con Agg no toca red ni
+    ventana gráfica; se ejecuta solo con --og y --check no la mira.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch
+
+    conteos = datos.get("conteos", {})
+    fichas = datos.get("pila", {}).get("fichas", [])
+
+    fig = plt.figure(figsize=(12, 6.3), dpi=100)
+    fig.patch.set_facecolor("#f7f4ef")
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 1200)
+    ax.set_ylim(630, 0)  # origen arriba-izquierda, como el HTML
+    ax.axis("off")
+    ax.set_facecolor("#f7f4ef")
+
+    ax.text(64, 66, "LA HISTORIA · TRICICLOS EN LA HABANA",
+            fontsize=14, fontweight="bold", color="#0e7490", va="top")
+    ax.text(60, 102, "¿Qué triciclo comprar", fontsize=54,
+            fontweight="bold", color="#22222a", va="top",
+            family="DejaVu Serif")
+    ax.text(60, 176, "en La Habana?", fontsize=54,
+            fontweight="bold", color="#22222a", va="top",
+            family="DejaVu Serif")
+    ax.text(64, 260, "Seis actos con lo que se anuncia, lo que ofrecen los "
+            "catálogos y lo que circula:", fontsize=15, color="#3f3f49",
+            va="top")
+    ax.text(64, 284, "los datos del proyecto, sin ninguna cifra escrita a "
+            "mano.", fontsize=15, color="#3f3f49", va="top")
+
+    # Mosaico de fichas (14×5): el mismo artefacto que abre la página.
+    n_cols, tile, gap = 14, 34, 6
+    x0, y0 = 64, 330
+    for i, f in enumerate(fichas):
+        fila_i, col_i = divmod(i, n_cols)
+        ax.add_patch(FancyBboxPatch(
+            (x0 + col_i * (tile + gap), y0 + fila_i * (tile + gap)),
+            tile, tile, boxstyle="round,pad=0,rounding_size=6",
+            facecolor=OG_FUENTE_COLOR.get(f["fuente"], "#b0b0b0"),
+            edgecolor="#f7f4ef", linewidth=1.5))
+
+    pie = " · ".join([
+        f"{conteos.get('anuncios', 0)} anuncios",
+        f"{conteos.get('fichas_empresa', 0)} fichas de catálogo",
+        f"{conteos.get('observaciones_campo', 0)} observaciones de calle",
+    ])
+    ax.text(64, 556, pie, fontsize=20, fontweight="bold", color="#22222a",
+            va="top")
+    ax.text(64, 592, "todos los conteos salen de Data/ · se regeneran con "
+            "codes/generar_historia.py", fontsize=12, color="#6b6b74",
+            va="top")
+
+    fig.savefig(SALIDA_OG, dpi=100)
+    plt.close(fig)
+
+
 def check() -> int:
     if not SALIDA_JSON.exists() or not SALIDA_JS.exists():
         print("[check] FALLÓ: historia/datos.json o datos.js no existen. "
@@ -307,11 +438,17 @@ def main() -> int:
         description="Genera historia/datos.json y datos.js desde Data/.")
     ap.add_argument("--check", action="store_true",
                     help="no escribe: verifica que el disco coincide")
+    ap.add_argument("--og", action="store_true",
+                    help="además renderiza historia/og.png (tarjeta social)")
     args = ap.parse_args()
     if args.check:
         return check()
-    escribir(construir())
+    datos = construir()
+    escribir(datos)
     print(f"[ok] {SALIDA_JSON.relative_to(ROOT)} y datos.js escritos")
+    if args.og:
+        generar_og(datos)
+        print(f"[og] {SALIDA_OG.relative_to(ROOT)} escrito")
     return 0
 
 

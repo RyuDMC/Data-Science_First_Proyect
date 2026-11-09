@@ -122,7 +122,30 @@
    "n": 18,
    "pct": 60.0,
    "uso": "pasajeros"
-  }
+  },
+  "usos": [
+   {
+    "ic95_alto": 75.4,
+    "ic95_bajo": 42.3,
+    "n": 18,
+    "pct": 60.0,
+    "uso": "pasajeros"
+   },
+   {
+    "ic95_alto": 37.3,
+    "ic95_bajo": 9.5,
+    "n": 6,
+    "pct": 20.0,
+    "uso": "carga"
+   },
+   {
+    "ic95_alto": 37.3,
+    "ic95_bajo": 9.5,
+    "n": 6,
+    "pct": 20.0,
+    "uso": "mixto"
+   }
+  ]
  },
  "conflicto_modelo": {
   "freq_campo": 0,
@@ -153,8 +176,11 @@
   "catalogos": "2026-10-31"
  },
  "legal": {
+  "cierre_iso": "2026-12",
   "detalle": "Resolución 47/2026 del MINTRAN: régimen excepcional de licencias temporales para vehículos eléctricos sin matrícula (categoría A, alcance provincial en La Habana).",
   "fuente": "Data/fuentes_justificacion.md",
+  "gaceta": "4 de agosto de 2026",
+  "gaceta_iso": "2026-08",
   "ventana": "diciembre de 2026"
  },
  "pesos": [
@@ -187,353 +213,563 @@
  "pila": {
   "fichas": [
    {
+    "autonomia": null,
     "fuente": "casalindashop",
     "modelo": "CHILWEE",
+    "motor": null,
+    "precio": 2850.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "DDS-OD",
+    "motor": null,
+    "precio": 3500.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "DDS-OD",
+    "motor": 1200.0,
+    "precio": 3650.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "cubancargos",
     "modelo": "FURIKAZAN",
+    "motor": null,
+    "precio": 4286.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": 70.0,
     "fuente": "elyerromenu",
     "modelo": "JINPENG GELPB",
+    "motor": null,
+    "precio": 3300.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "elyerromenu",
     "modelo": "JINPENG HIBRIDO 1000W",
+    "motor": 1000.0,
+    "precio": 3800.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": null,
     "fuente": "cubancargos",
     "modelo": "JINPENG HIBRIDO 1100W",
+    "motor": 1100.0,
+    "precio": 4751.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": 100.0,
     "fuente": "elyerromenu",
     "modelo": "JINPENG HIBRIDO 1500W",
+    "motor": 1500.0,
+    "precio": 4300.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": 90.0,
     "fuente": "facebook",
     "modelo": "JINPENG PANTER 2026",
+    "motor": 3000.0,
+    "precio": 4980.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "elyerromenu",
     "modelo": "KIVITOVA GELPB",
+    "motor": 1200.0,
+    "precio": 3600.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 60.0,
     "fuente": "facebook",
     "modelo": "KIVITOVA GELPB",
+    "motor": null,
+    "precio": 2600.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "KIVITOVA GELPB",
+    "motor": 1200.0,
+    "precio": 3600.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "KIVITOVA GELPB",
+    "motor": 1200.0,
+    "precio": 3700.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "facebook",
     "modelo": "KN-KO13",
+    "motor": 1500.0,
+    "precio": 3600.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "elyerromenu",
     "modelo": "LAITUNG",
+    "motor": null,
+    "precio": 4900.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": 100.0,
     "fuente": "elyerromenu",
     "modelo": "MAF LIFEPO4",
+    "motor": 1000.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "MAF LIFEPO4",
+    "motor": null,
+    "precio": 4700.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "casalindashop",
     "modelo": "MAGIC BIKE",
+    "motor": 1800.0,
+    "precio": 4300.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "casalindashop",
     "modelo": "MAGIC BIKE M004",
+    "motor": null,
+    "precio": 3100.0,
     "propulsion": "gasolina"
    },
    {
+    "autonomia": null,
     "fuente": "casalindashop",
     "modelo": "MAGIC BIKE M005",
+    "motor": null,
+    "precio": 3400.0,
     "propulsion": "gasolina"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "MISHOZUKI 2026",
+    "motor": 2000.0,
+    "precio": 4650.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "elyerromenu",
     "modelo": "MVP POWER GELPB",
+    "motor": 1500.0,
+    "precio": 3900.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "MVP POWER GELPB",
+    "motor": 1200.0,
+    "precio": 4100.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "cubancargos",
     "modelo": "NIPPON SE",
+    "motor": null,
+    "precio": 3842.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "elyerromenu",
     "modelo": "OIM GELPB",
+    "motor": 1200.0,
+    "precio": 3400.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "elyerromenu",
     "modelo": "OIM GELPB",
+    "motor": null,
+    "precio": 3500.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "elyerromenu",
     "modelo": "ONEBOT CLASIC 2026",
+    "motor": 1200.0,
+    "precio": 4750.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "ONEBOT CLASIC 2026",
+    "motor": 1200.0,
+    "precio": 4400.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "ONEBOT CLASIC 2026",
+    "motor": 1200.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "elyerromenu",
     "modelo": "ONEBOT JINCHENG 2026 CAPATAZ LIFEPO4",
+    "motor": 1000.0,
+    "precio": 5350.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": null,
     "fuente": "elyerromenu",
     "modelo": "ONEBOT TANK LIFEPO4",
+    "motor": 1800.0,
+    "precio": 6500.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 90.0,
     "fuente": "facebook",
     "modelo": "PANTHER",
+    "motor": null,
+    "precio": 4850.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 140.0,
     "fuente": "cubancargos",
     "modelo": "PORTO BELLO",
+    "motor": 1100.0,
+    "precio": 5320.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": null,
     "fuente": "casalindashop",
     "modelo": "SK-2101",
+    "motor": null,
+    "precio": 3900.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "elyerromenu",
     "modelo": "STAR",
+    "motor": null,
+    "precio": 4400.0,
     "propulsion": "hibrido"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "STAR",
+    "motor": null,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 110.0,
     "fuente": "facebook",
     "modelo": "STAR",
+    "motor": 1500.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "STAR",
+    "motor": null,
+    "precio": 4550.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "STAR",
+    "motor": 1500.0,
+    "precio": 4300.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "elyerromenu",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4700.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": null,
+    "precio": 4350.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4600.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4300.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 110.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4200.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4000.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "facebook",
     "modelo": "TOPMAQ BRIDERK 2026 GELPB",
+    "motor": 2000.0,
+    "precio": 4400.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "TRAKTION 2026",
+    "motor": 1200.0,
+    "precio": 4000.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "facebook",
     "modelo": "TRAKTION 2026",
+    "motor": 1200.0,
+    "precio": 4300.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "facebook",
     "modelo": "TY150UK",
+    "motor": 1500.0,
+    "precio": 4500.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 40.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C300 LIFEPO4",
+    "motor": 1000.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C400 GELPB",
+    "motor": null,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C400 GELPB",
+    "motor": 1500.0,
+    "precio": 3170.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C400 GELPB",
+    "motor": null,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C400 GELPB",
+    "motor": null,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 120.0,
     "fuente": "elyerromenu",
     "modelo": "VEDCA C400 LIFEPO4",
+    "motor": 1200.0,
+    "precio": 4550.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 90.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C400 LIFEPO4",
+    "motor": 1500.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 30.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C400 LIFEPO4MN",
+    "motor": 1500.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C400A GELPB",
+    "motor": 1500.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 80.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C400A GELPB",
+    "motor": 1500.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 75.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C600 GELPB",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C600 LIFEPO4",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C600 LIFEPO4",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "vedca_telegram",
     "modelo": "VEDCA C600 LIFEPO4",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C800B LIFEPO4",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 50.0,
     "fuente": "islagrande",
     "modelo": "VEDCA C800B LIFEPO4",
+    "motor": 1200.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 100.0,
     "fuente": "islagrande",
     "modelo": "VEDCA SH001 LIFEPO4",
+    "motor": 1000.0,
+    "precio": null,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "elyerromenu",
     "modelo": "VIENTO RAPIDO",
+    "motor": 1200.0,
+    "precio": 3100.0,
     "propulsion": "electrico"
    },
    {
+    "autonomia": 70.0,
     "fuente": "facebook",
     "modelo": "VIENTO RAPIDO",
+    "motor": 1200.0,
+    "precio": 2900.0,
     "propulsion": "electrico"
    }
   ],
@@ -629,6 +865,26 @@
    "modelo": "CHILWEE",
    "rank": 3,
    "score": 0.7444
+  }
+ ],
+ "ranking_hibrido": [
+  {
+   "modelo": "JINPENG HIBRIDO 1000W",
+   "n_criterios": 3,
+   "rank": 1,
+   "score": 0.9091
+  },
+  {
+   "modelo": "JINPENG HIBRIDO 1500W",
+   "n_criterios": 5,
+   "rank": 2,
+   "score": 0.7073
+  },
+  {
+   "modelo": "STAR",
+   "n_criterios": 5,
+   "rank": 3,
+   "score": 0.5937
   }
  ],
  "sensibilidad": {

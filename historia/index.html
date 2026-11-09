@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La Historia — ¿Qué triciclo comprar en La Habana?</title>
 <meta name="description" content="Relato con datos versionados del proyecto Data-Science_First_Proyect: anuncios, catálogos y una muestra de calle, contados en seis actos.">
+<!-- Tarjeta social (og.png se regenera con: python3 codes/generar_historia.py --og).
+     Al conocer la URL final de Pages (opción A o B del despliegue),
+     conviene absolutizar og:image: https://…/historia/og.png -->
+<meta property="og:type" content="article">
+<meta property="og:locale" content="es">
+<meta property="og:title" content="La Historia — ¿Qué triciclo comprar en La Habana?">
+<meta property="og:description" content="Seis actos con lo que se anuncia, lo que ofrecen los catálogos y lo que circula. Datos versionados del repo: ninguna cifra escrita a mano.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --papel:#f7f4ef; --tinta:#22222a; --tinta-suave:#6b6b74;
@@ -17,6 +26,7 @@
     margin:0; background:var(--papel); color:var(--tinta);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
     font-size:1.02rem; line-height:1.65;
+    font-variant-numeric:tabular-nums;
   }
   .kicker{
     font-size:.72rem; letter-spacing:2.5px; text-transform:uppercase;
@@ -126,14 +136,44 @@
   #sin-datos{display:none; }
   #sin-datos.visible{display:block; margin:2rem auto; max-width:34rem;
     background:#fdf3f1; border:1px solid var(--gas); border-radius:10px; padding:1rem}
+  /* ---------- componentes nuevos (mejoras 7-12) ---------- */
+  .bala{display:inline-block; width:.72em; height:.72em; border-radius:3px;
+    background:var(--tinta); vertical-align:-1px; margin-right:.4rem}
+  #svg-pila rect[data-i]{cursor:pointer}
+  .waffle-bloque{margin-top:.7rem}
+  .wtit{font-size:.8rem; color:var(--tinta-suave); margin:.5rem 0 .25rem}
+  .wtit-nota{font-size:.75rem; color:var(--tinta-suave); margin:.25rem 0 0}
+  .hib-nota{display:block; font-size:.78rem; color:var(--tinta-suave); margin-top:.35rem}
+  .podio-hib{margin-top:.55rem; margin-bottom:0}
+  .podio-hib .chip{font-size:.75rem}
+  #odometro{
+    position:fixed; left:1rem; bottom:1rem; z-index:40;
+    background:var(--tinta); color:var(--papel);
+    font-size:.7rem; letter-spacing:1.6px; font-weight:600;
+    padding:.42rem .8rem; border-radius:999px; opacity:.93;
+  }
+  .ficha-pop{
+    display:none; position:fixed; left:50%; bottom:1.2rem; transform:translateX(-50%);
+    z-index:50; background:var(--tinta); color:var(--papel);
+    border-radius:12px; padding:.75rem 1.05rem; max-width:min(92vw, 36rem);
+    font-size:.85rem; line-height:1.55; box-shadow:0 12px 30px rgba(0,0,0,.28);
+  }
+  .ficha-pop.abierto{display:block}
+  .ficha-pop b{color:#fff}
+  .ficha-pop .fp-x{position:absolute; top:.15rem; right:.55rem; cursor:pointer;
+    opacity:.75; font-size:1.05rem}
+  .ficha-pop .fp-x:hover{opacity:1}
   @media (max-width:860px){
     .scrolly{display:block}
-    .figura-marco{top:0; height:auto; position:sticky; z-index:5;
-      background:var(--papel); padding:.6rem 0}
-    .figura{display:none}
-    .figura.activa{display:block}
+    /* modo flujo: el JS baja cada figura dentro de SU paso; la columna
+       sticky desaparece (en móvil roba viewport y tapa el texto) */
+    .figura-col{display:none}
+    body.modo-flujo .figura{position:static; height:auto; opacity:1;
+      transform:none; pointer-events:auto; margin:0 0 1.4rem}
     .paso{min-height:64vh; max-width:none}
     .hero{padding-top:4.5rem}
+    #odometro{display:none}
+    .ficha-pop{bottom:.8rem}
   }
   @media (prefers-reduced-motion:reduce){
     .bajar{animation:none} html{scroll-behavior:auto}
@@ -151,6 +191,10 @@
   <em>ofrecen formalmente</em> y lo que, de verdad, <em>circula</em>. El análisis
   completo, con sus contratos y tests, vive en el reporte técnico; aquí vamos al
   cuento.</p>
+  <svg id="svg-triciclo" viewBox="0 0 680 290" role="img" width="100%"
+       style="max-width:29rem; margin:.5rem auto 0; display:block"
+       aria-label="Triciclo line-art: sus tres ruedas son las tres ventanas de datos, cada una del tamaño de la raíz cuadrada de sus observaciones"></svg>
+  <div class="chips" id="triciclo-leyenda" style="justify-content:center"></div>
   <div class="dataline">
     <span class="dato"><b><span data-cifra="conteos.anuncios" data-fmt="int"></span></b> anuncios</span>
     <span class="dato"><b><span data-cifra="conteos.fichas_empresa" data-fmt="int"></span></b> fichas de catálogos</span>
@@ -172,7 +216,7 @@
 <main id="scrolly" class="scrolly" aria-label="Relato en seis actos">
 
   <!-- ================= columna visual (sticky) ================= -->
-  <div>
+  <div class="figura-col">
     <div class="figura-marco">
 
       <section class="figura" data-fig="apertura" id="fig-apertura">
@@ -224,12 +268,14 @@
           <p class="sub">…y el mix por propulsión de los anuncios</p>
           <svg id="svg-dona" viewBox="0 0 640 250" role="img"
                aria-label="Dona con la distribución de anuncios por propulsión"></svg>
-          <div class="uso-card">Y la calle ya contestó para qué: uso dominante
-            <b><span data-cifra="campo.uso.uso"></span></b> con
-            <b><span data-cifra="campo.uso.pct"></span>%</b> de la muestra
-            (IC 95% <span data-cifra="campo.uso.ic95_bajo"></span>–<span data-cifra="campo.uso.ic95_alto"></span>, n=
-            <span data-cifra="campo.uso.n" data-fmt="int"></span>); autonomía mediana declarada
-            <span data-cifra="campo.uso.autonomia_med"></span> km.</div>
+          <div class="waffle-bloque">
+            <p class="wtit"><b>¿Y para qué se usan en la calle?</b>
+              Diez casillas = la muestra completa de campo</p>
+            <svg id="svg-waffle" viewBox="0 0 640 124" role="img"
+                 aria-label="Waffle de usos declarados en la muestra de calle"></svg>
+            <div class="chips" id="waffle-leyenda"></div>
+            <p class="wtit-nota" id="waffle-nota"></p>
+          </div>
         </div>
       </section>
 
@@ -311,13 +357,13 @@
       <p class="kicker">Acto 3 de 6</p>
       <h2>Lo que dice la ventana de la oferta</h2>
       <p>El mercado <em>anunciado</em> es de un solo color:
-      <b id="texto-mercado" style="text-align:justify"></b></p>
-      <p class="detalle">Y del dato-garaje (el otro lado de la oferta): el uso
-      dominante en calle es <b><span data-cifra="campo.uso.uso"></span></b>
-      (<span data-cifra="campo.uso.pct"></span>% de la muestra de calle, IC 95%
-      <span data-cifra="campo.uso.ic95_bajo"></span>–<span data-cifra="campo.uso.ic95_alto"></span>.
+      <b id="texto-mercado"></b></p>
+      <p class="detalle">Y del lado de la calle: el uso dominante es
+      <b><span data-cifra="campo.uso.uso"></span></b>
+      (<span data-cifra="campo.uso.pct"></span>% de la muestra, IC 95%
+      <span data-cifra="campo.uso.ic95_bajo"></span>–<span data-cifra="campo.uso.ic95_alto"></span>).
       Lo declaran los dueños; el proyecto solo lo mide. Con ese uso en la
-      mano, la resolución del Acto 6 ordena los escenarios de compra).</p>
+      mano, la resolución del Acto 6 ordena los escenarios de compra.</p>
     </article>
 
     <article class="paso" data-fig="conflicto">
@@ -361,28 +407,32 @@
 
   <div class="mapa">
     <div class="escena">
-      <h4>🧍 Pasajeros y autonomía</h4>
+      <h4><span class="bala"></span>Pasajeros y autonomía</h4>
       <p>Eléctricos. Empieza por el podio eléctrico del ranking oficial
       (chips aquí abajo) — la calle ya dijo que el triciclo cubano circula a
       pasajero.</p>
     </div>
     <div class="escena">
-      <h4>📦 Carga de trabajo (≥800 kg)</h4>
+      <h4><span class="bala"></span>Carga de trabajo</h4>
       <p>Eléctricos <em>con la carga en tu fórmula</em>: en el análisis de
       sensibilidad, el líder oficial solo cede cuando se omite la carga — el
       podio cambia.</p>
     </div>
     <div class="escena">
-      <h4>💸 Presupuesto apretado</h4>
+      <h4><span class="bala"></span>Presupuesto apretado</h4>
       <p>Eléctricos con precio bajo y la frontera precio/autonomía — con sus
       asteriscos al lado. Los modelos sin precio en USD quedan aparte y se
       puntúan sin ese criterio.</p>
     </div>
     <div class="escena">
-      <h4>🔌 Sin red eléctrica confiable</h4>
+      <h4><span class="bala"></span>Sin red eléctrica confiable</h4>
       <p>Híbridos (con extensor de rango) o gasolina — <b>su podio propio</b>,
       jamás comparado con el de los eléctricos: los scores no son comparables
       entre propulsiones.</p>
+      <div class="podio podio-hib" id="podio-hibrido"></div>
+      <span class="hib-nota">El podio eléctrico (chips aquí abajo) es otro
+      grupo y otro orden — aquí solo deciden los híbridos, con su cobertura
+      (<code>n_criterios</code>) declarada en cada chip.</span>
     </div>
   </div>
 
@@ -391,9 +441,13 @@
   <aside class="aviso">
     <b>Fecha límite: <span data-cifra="legal.ventana"></span>.</b>
     <span data-cifra="legal.detalle"></span>
-    Si compras después, el criterio de legalidad (peso 0.10 hoy) puede cambiar
-    de base — y esa fecha también es parte de la historia.
-    (<span data-cifra="legal.fuente"></span>)
+    Publicada en la Gaceta el <span data-cifra="legal.gaceta"></span>.
+    Si compras después, el criterio de legalidad (peso
+    <span data-cifra="pesos.3.peso"></span> hoy) puede cambiar de base — y esa
+    fecha también es parte de la historia
+    (<span data-cifra="legal.fuente"></span>).
+    <svg id="cinta-tiempo" viewBox="0 0 680 88" role="img"
+         aria-label="Cinta del tiempo: desde la publicación en la Gaceta hasta el vencimiento de la ventana legal, con la fecha de hoy marcada"></svg>
   </aside>
 
   <div class="moraleja">
@@ -466,6 +520,12 @@
   Streamlit del repo.</p>
 </noscript>
 
+<div id="odometro" aria-hidden="true"><span id="odo-actual">PRÓLOGO</span></div>
+<div class="ficha-pop" id="ficha-pop" role="status">
+  <span class="fp-x" aria-hidden="true">×</span>
+  <span id="ficha-pop-texto"></span>
+</div>
+
 <script src="datos.js"></script>
 <script>
 (function () {
@@ -480,16 +540,21 @@
   var C = {
     elec: '#1f77b4', hib: '#ff7f0e', gas: '#d62728', gris: '#7f7f7f',
     muted: '#b0b0b0', grid: '#dddddd', texto: '#2a2a33',
-    azul: '#1f77b4', rojo: '#d62728'
+    tinta: '#22222a', rojo: '#d62728'
   };
+  /* Colores de FUENTE elegidos FUERA de la familia semántica de
+     propulsión (#1f77b4 eléctrico, #ff7f0e híbrido, #d62728 gasolina):
+     un mismo tono ya no significa «facebook» y «eléctrico» a la vez.
+     Espejo en el generador: codes/generar_historia.py::OG_FUENTE_COLOR */
   var FUENTE_COLOR = {
-    facebook: '#1f77b4',
-    elyerromenu: '#ff7f0e',
-    islagrande: '#2c7fb8',
-    vedca_telegram: '#9467bd',
-    casalindashop: '#8c564b',
-    cubancargos: '#d62728'
+    facebook: '#0e7490',
+    elyerromenu: '#8b5cf6',
+    islagrande: '#059669',
+    vedca_telegram: '#d97706',
+    casalindashop: '#ec4899',
+    cubancargos: '#6b7280'
   };
+  window.HISTORIA_PALETTE = FUENTE_COLOR;
   var PROP_COLOR = { electrico: C.elec, hibrido: C.hib, gasolina: C.gas,
                      indeterminado: C.gris };
   var ESCENA_OK = { base: 'base', imputado_05: 'imputando 0.5 a los ausentes',
@@ -560,7 +625,7 @@
       var xi = (i % cols) * (cell + margen), yi = Math.floor(i / cols) * (cell + margen);
       var r = el('rect', { x: xi, y: yi, width: cell, height: cell, rx: 4,
         fill: FUENTE_COLOR[f.fuente] || C.muted,
-        stroke: '#fffdf9', 'stroke-width': 2 }, svg);
+        stroke: '#fffdf9', 'stroke-width': 2, 'data-i': i }, svg);
       var t = el('title', {}, r);
       t.textContent = (f.modelo === null ? 'sin identificar' : f.modelo) +
                       ' · ' + f.fuente;
@@ -600,7 +665,7 @@
                            fill: C.texto }, svg);
       t.textContent = CRIT_NOMBRE[p.criterio] || p.criterio;
       el('rect', { x: 150, y: y + 6, width: anchoBarraMax * p.peso,
-                   height: 26, rx: 5, fill: C.elec }, svg);
+                   height: 26, rx: 5, fill: C.tinta }, svg);
       var v = el('text', { x: 158 + anchoBarraMax * p.peso, y: y + 25,
         'font-size': 14, fill: C.texto }, svg);
       v.textContent = p.peso.toFixed(2);
@@ -715,7 +780,7 @@
     var desMin = indiceDe((D.campo.destaca || {}).min_delta);
     filas.forEach(function (f, i) {
       var y = paso * i + paso / 2 + 6;
-      var hl = (i === desMax) ? C.azul
+      var hl = (i === desMax) ? C.tinta
               : (i === desMin ? C.rojo : C.muted);
       el('line', { x1: X(f.pct_campo), y1: y, x2: X(f.pct_online), y2: y,
         stroke: hl, 'stroke-width': 2, opacity: 0.85 }, svg);
@@ -847,7 +912,7 @@
       var chip = document.createElement('span');
       chip.className = 'chip';
       chip.appendChild(document.createTextNode(
-        (Number(m.rank) === 1 ? '🥇 ' : Number(m.rank) === 2 ? '🥈 ' : '🥉 ') +
+        (m.rank === 2 ? '2º ' : m.rank === 3 ? '3º ' : m.rank + 'º ') +
         m.modelo + ' · '));
       var b = document.createElement('b');
       b.textContent = m.score.toFixed(3);
@@ -906,6 +971,301 @@
       if (mejor) activa(mejor.getAttribute('data-fig'));
     }, { passive: true });
   }
+})();
+
+/* =====================================================================
+   Segundo módulo: componentes posteriores (triciclo héroe, waffle,
+   podio híbrido, cinta del tiempo, popup de ficha, odómetro y modo
+   flujo móvil). Mismo contrato: ninguna cifra escrita a mano.
+   ===================================================================== */
+(function () {
+  'use strict';
+  var D = window.HISTORIA_DATOS;
+  var doc = document;
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var TINTA = '#22222a', SUAVE = '#6b6b74', PAPEL = '#fffdf9';
+  var TEAL = '#0e7490', VIOLETA = '#8b5cf6', VERDE = '#059669';
+  var ROJO_LEGAL = '#d62728';
+  var USO_COLOR = { pasajeros: TINTA, carga: '#6b6b74', mixto: '#b0b0b0' };
+
+  function id(x) { return doc.getElementById(x); }
+  function el(nombre, attrs, padre) {
+    var n = doc.createElementNS(SVGNS, nombre);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (padre) padre.appendChild(n);
+    return n;
+  }
+  function svgv(idn) {
+    var s = id(idn);
+    if (s) while (s.firstChild) s.removeChild(s.firstChild);
+    return s;
+  }
+  function limpia(idn) { var n = id(idn); if (n) n.innerHTML = ''; return n; }
+
+  /* ---------- héroe: el triciclo ES la metodología ---------- */
+  function renderTriciclo() {
+    var svg = svgv('svg-triciclo');
+    if (!svg || !D) return;
+    var Y = 200;
+    var ventanas = [
+      { n: D.conteos.anuncios, x: 150, color: TEAL, leyenda: 'anuncios online' },
+      { n: D.conteos.fichas_empresa, x: 305, color: VIOLETA,
+        leyenda: 'fichas de catálogo' },
+      { n: D.conteos.observaciones_campo, x: 520, color: VERDE,
+        leyenda: 'observaciones de calle' }
+    ];
+    ventanas.forEach(function (v) { v.r = 6.2 * Math.sqrt(v.n || 0); });
+    // chasis line-art: eje trasero, tubo al freno, columna y puños
+    el('line', { x1: ventanas[0].x, y1: Y, x2: ventanas[1].x, y2: Y,
+      stroke: TINTA, 'stroke-width': 4 }, svg);
+    el('line', { x1: (ventanas[0].x + ventanas[1].x) / 2, y1: Y,
+      x2: ventanas[2].x - 10, y2: Y - 8, stroke: TINTA, 'stroke-width': 4 }, svg);
+    el('line', { x1: ventanas[2].x - 10, y1: Y - 8, x2: ventanas[2].x - 22,
+      y2: 132, stroke: TINTA, 'stroke-width': 4 }, svg);
+    el('line', { x1: ventanas[2].x - 50, y1: 140, x2: ventanas[2].x + 8,
+      y2: 124, stroke: TINTA, 'stroke-width': 4, 'stroke-linecap': 'round' }, svg);
+    ventanas.forEach(function (v) {
+      el('circle', { cx: v.x, cy: Y, r: v.r, fill: 'none', stroke: v.color,
+        'stroke-width': 7 }, svg);
+      el('circle', { cx: v.x, cy: Y, r: 4, fill: v.color }, svg);
+      var t = el('text', { x: v.x, y: Y + Math.round(v.r * 0.24),
+        'text-anchor': 'middle', 'font-size': Math.max(15, Math.round(v.r * 0.52)),
+        'font-weight': 'bold', fill: v.color,
+        'font-family': 'Georgia, serif' }, svg);
+      t.textContent = v.n;
+    });
+    var leg = limpia('triciclo-leyenda');
+    if (leg) ventanas.forEach(function (v) {
+      var chip = doc.createElement('span');
+      chip.className = 'chip';
+      var dot = doc.createElement('span');
+      dot.className = 'punto';
+      dot.style.background = v.color;
+      chip.appendChild(dot);
+      chip.appendChild(doc.createTextNode(v.leyenda + ' · ' + v.n));
+      leg.appendChild(chip);
+    });
+  }
+
+  /* ---------- waffle: la muestra completa en 10 casillas ---------- */
+  function renderWaffle() {
+    var svg = svgv('svg-waffle');
+    if (!svg || !D) return;
+    var usos = (D.campo.usos || []).filter(function (u) {
+      return (u.n || 0) > 0; });
+    if (!usos.length) return;
+    var total = usos.reduce(function (a, u) { return a + u.n; }, 0);
+    // 10 casillas por método de restos mayores sobre pct
+    var casillas = usos.map(function (u, i) {
+      var bruto = (u.pct / 100) * 10;
+      var base = Math.floor(bruto + 1e-9);
+      return { uso: u.uso, base: base, resto: bruto - base, orden: i };
+    });
+    var faltan = 10 - casillas.reduce(function (a, c) { return a + c.base; }, 0);
+    casillas.slice().sort(function (a, b) {
+      return (b.resto - a.resto) || (a.orden - b.orden);
+    }).slice(0, Math.max(0, faltan)).forEach(function (c) { c.base += 1; });
+    var piezas = [];
+    casillas.forEach(function (c) {
+      for (var k = 0; k < c.base; k++) piezas.push(c);
+    });
+    var size = 44, gapX = 12, gapY = 14, cols = 5;
+    var x0 = (640 - (cols * size + (cols - 1) * gapX)) / 2;
+    piezas.slice(0, 10).forEach(function (c, idx) {
+      var row = Math.floor(idx / cols), col = idx % cols;
+      el('rect', { x: x0 + col * (size + gapX), y: 8 + row * (size + gapY),
+        width: size, height: size, rx: 7,
+        fill: USO_COLOR[c.uso] || '#b0b0b0' }, svg);
+    });
+    var leg = limpia('waffle-leyenda');
+    if (leg) usos.forEach(function (u) {
+      var chip = doc.createElement('span');
+      chip.className = 'chip';
+      var dot = doc.createElement('span');
+      dot.className = 'punto';
+      dot.style.background = USO_COLOR[u.uso] || '#b0b0b0';
+      chip.appendChild(dot);
+      chip.appendChild(doc.createTextNode(
+        u.uso + ' · ' + u.pct + '% · n=' + u.n));
+      leg.appendChild(chip);
+    });
+    var nota = id('waffle-nota');
+    if (nota) nota.textContent =
+      'n=' + total + ': muestra cerrada de conveniencia — describe la ' +
+      'muestra observada, no La Habana, y no entra al score.';
+  }
+
+  /* ---------- podio híbrido propio (no comparable con el eléctrico) ---------- */
+  function podioHibrido() {
+    var cont = limpia('podio-hibrido');
+    if (!cont || !D || !D.ranking_hibrido) return;
+    var tot = (D.pesos || []).length;
+    D.ranking_hibrido.forEach(function (m, i) {
+      var chip = doc.createElement('span');
+      chip.className = 'chip';
+      chip.appendChild(doc.createTextNode(
+        m.rank + 'º ' + m.modelo + ' · '));
+      var b = doc.createElement('b');
+      b.textContent = m.score.toFixed(3) +
+        ' (' + m.n_criterios + '/' + tot + ' criterios)';
+      chip.appendChild(b);
+      cont.appendChild(chip);
+    });
+  }
+
+  /* ---------- cinta del tiempo: Gaceta → cierre, con hoy ---------- */
+  function cintaTiempo() {
+    var svg = svgv('cinta-tiempo');
+    if (!svg || !D || !D.legal) return;
+    function parseMes(s) {
+      var p = String(s).split('-');
+      var y = parseInt(p[0], 10), m = parseInt(p[1], 10);
+      if (!y || !m || m < 1 || m > 12) return null;
+      return y * 12 + (m - 1);
+    }
+    var ini = D.legal.gaceta_iso ? parseMes(D.legal.gaceta_iso) : null;
+    var fin = D.legal.cierre_iso ? parseMes(D.legal.cierre_iso) : null;
+    if (ini == null || fin == null) return;
+    var difm = fin - ini;
+    if (difm <= 0) difm = 1;
+    var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun',
+                 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    var X = function (pct) { return 40 + (pct / 100) * (640 - 80); };
+    el('line', { x1: X(0), y1: 46, x2: X(100), y2: 46, stroke: '#dddddd',
+      'stroke-width': 6, 'stroke-linecap': 'round' }, svg);
+    for (var k = 0; k <= difm; k++) {
+      var pct = (k / difm) * 100;
+      var idxM = ini + k;
+      var yy = Math.floor(idxM / 12), mm = idxM % 12;
+      var esIni = k === 0, esFin = k === difm;
+      var color = esIni ? TEAL : (esFin ? ROJO_LEGAL : '#b0b0b0');
+      el('circle', { cx: X(pct), cy: 46, r: (esIni || esFin) ? 7 : 4,
+        fill: color }, svg);
+      var t = el('text', { x: X(pct), y: 72, 'text-anchor': 'middle',
+        'font-size': 12, fill: SUAVE }, svg);
+      t.textContent = MESES[mm] + ' ' + String(yy).slice(2);
+    }
+    var tg = el('text', { x: X(0) + 2, y: 20, 'font-size': 12, fill: TEAL,
+      'font-weight': 'bold' }, svg);
+    tg.textContent = 'Gaceta · ' + (D.legal.gaceta || '');
+    var tc = el('text', { x: X(100) - 2, y: 20, 'text-anchor': 'end',
+      'font-size': 12, 'font-weight': 'bold', fill: ROJO_LEGAL }, svg);
+    tc.textContent = 'vence · ' + (D.legal.ventana || '');
+    // hoy: de la fecha de ejecución, con resolución de MES (la fuente
+    // tampoco declara día); se acota a la cinta y se dice si ya venció.
+    var hoyDate = new Date();
+    var idxHoy = hoyDate.getFullYear() * 12 + hoyDate.getMonth();
+    var pctHoy = ((idxHoy - ini) / difm) * 100;
+    pctHoy = Math.max(0, Math.min(100, pctHoy));
+    var vencio = fin != null && idxHoy > fin;
+    var anchor = pctHoy > 88 ? 'end' : (pctHoy < 12 ? 'start' : 'middle');
+    el('line', { x1: X(pctHoy), y1: 32, x2: X(pctHoy), y2: 62,
+      stroke: TINTA, 'stroke-width': 2.5 }, svg);
+    var th = el('text', { x: X(pctHoy), y: 26, 'text-anchor': anchor,
+      'font-size': 12, 'font-weight': 'bold', fill: TINTA }, svg);
+    th.textContent = 'hoy' + (vencio ? ' (ya venció)' : '');
+  }
+
+  /* ---------- popup de ficha: microhistoria bajo cada tile ---------- */
+  function popupFichas() {
+    var pop = id('ficha-pop'), popTxt = id('ficha-pop-texto');
+    var svg = id('svg-pila');
+    if (!pop || !popTxt || !svg || !D || !D.pila || !D.pila.fichas) return;
+    function cerrar() { pop.className = 'ficha-pop'; }
+    function abrir(i) {
+      var f = D.pila.fichas[i];
+      if (!f) { cerrar(); return; }
+      var specs = [
+        f.precio != null
+          ? '$' + Math.round(f.precio).toLocaleString('es')
+          : 'sin precio público',
+        f.motor != null
+          ? Math.round(f.motor).toLocaleString('es') + ' W de motor'
+          : 'motor sin dato',
+        f.autonomia != null
+          ? Math.round(f.autonomia) + ' km de autonomía'
+          : 'autonomía sin dato'
+      ];
+      popTxt.textContent = 'Anuncio ' + (i + 1) + ' de ' +
+        D.pila.fichas.length + ': ' +
+        (f.modelo ? f.modelo : 'sin identificar') + ' · ' + f.fuente +
+        ' · ' + f.propulsion + ' — ' + specs.join(' · ');
+      pop.className = 'ficha-pop abierto';
+    }
+    svg.addEventListener('click', function (ev) {
+      var t = ev.target;
+      var di = t && t.getAttribute ? t.getAttribute('data-i') : null;
+      if (di != null) abrir(parseInt(di, 10));
+      else cerrar();
+    });
+    pop.addEventListener('click', function (ev) {
+      if (ev.target && ev.target.className === 'fp-x') cerrar();
+    });
+    doc.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' || ev.keyCode === 27) cerrar();
+    });
+  }
+
+  /* ---------- odómetro: ACTO n/6 mientras ruedas ---------- */
+  function odometro() {
+    var odo = id('odo-actual');
+    if (!odo) return;
+    var ODO_MAP = {
+      apertura: 'PRÓLOGO', ventanas: 'ACTO 1/6', pesos: 'ACTO 2/6',
+      mercado: 'ACTO 3/6', conflicto: 'ACTO 4/6', subvuelo: 'ACTO 5/6'
+    };
+    function setOdo(fig) {
+      odo.textContent = ODO_MAP[fig] ||
+        (fig === 'acto-6' ? 'ACTO 6/6' : odo.textContent);
+    }
+    if (!('IntersectionObserver' in window)) return;
+    var io2 = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var fig = en.target.getAttribute('data-fig') || en.target.id;
+        if (fig) setOdo(fig);
+      });
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    Array.prototype.forEach.call(
+      doc.querySelectorAll('.paso, #acto-6'),
+      function (x) { io2.observe(x); });
+  }
+
+  /* ---------- móvil: modo flujo (nada sticky) ---------- */
+  function modoFlujo() {
+    var marco = doc.querySelector('.figura-marco');
+    if (!marco || !('matchMedia' in window)) return;
+    var mq = window.matchMedia('(max-width: 860px)');
+    var hogares = [];
+    Array.prototype.forEach.call(doc.querySelectorAll('.figura'),
+      function (f) { hogares.push(f); });
+    function aplicar() {
+      if (mq.matches) {
+        hogares.forEach(function (f) {
+          var paso = doc.querySelector(
+            '.paso[data-fig="' + f.getAttribute('data-fig') + '"]');
+          if (paso && f.parentNode !== paso) paso.insertBefore(f, paso.firstChild);
+        });
+        doc.body.classList.add('modo-flujo');
+      } else {
+        hogares.forEach(function (f) {
+          if (f.parentNode !== marco) marco.appendChild(f);
+        });
+        doc.body.classList.remove('modo-flujo');
+      }
+    }
+    if (mq.addEventListener) mq.addEventListener('change', aplicar);
+    else if (mq.addListener) mq.addListener(aplicar);
+    aplicar();
+  }
+
+  renderTriciclo();
+  renderWaffle();
+  podioHibrido();
+  cintaTiempo();
+  popupFichas();
+  odometro();
+  modoFlujo();
 })();
 </script>
 </body>

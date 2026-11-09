@@ -60,6 +60,15 @@ def test_cifras_coinciden_con_metadata():
     # el histograma de anuncios cubre TODO el ranking
     assert sum(f["modelos"] for f in d["ranking"]["hist_n_anuncios"]) == \
         m["conteos"]["modelos_ranking"]
+    # el waffle usa el arreglo completo de usos del campo (n suma la muestra)
+    usos = d["campo"].get("usos") or []
+    assert usos, "campo.usos vacío: el waffle no tendría qué dibujar"
+    assert sum(int(u["n"]) for u in usos) == \
+        m["conteos"]["observaciones_campo"]
+    # el podio híbrido es top-3 de SU propulsión (nunca del eléctrico)
+    assert 0 < len(d["ranking_hibrido"]) <= 3
+    assert all(x["n_criterios"] <= len(d["pesos"])
+               for x in d["ranking_hibrido"])
 
 
 def test_index_referencia_solo_cifras_existentes():
@@ -75,10 +84,30 @@ def test_index_referencia_solo_cifras_existentes():
         "texto-conflicto", "svg-hist", "svg-rangos", "texto-subvuelo",
         "texto-sensib", "podio-chips", "moraleja-titulo",
         "asterisco-un-anuncio", "asterisco-sin-precio", "sin-datos",
+        # componentes de las mejoras de diseño
+        "svg-triciclo", "triciclo-leyenda", "svg-waffle", "waffle-leyenda",
+        "waffle-nota", "podio-hibrido", "cinta-tiempo", "ficha-pop",
+        "ficha-pop-texto", "odometro", "odo-actual",
     ]
     presentes = set(re.findall(r'id="([^"]+)"', html))
     faltan = [i for i in ids_requeridos if i not in presentes]
     assert not faltan, f"ids que el JS necesita y el HTML no trae: {faltan}"
+
+
+def test_tarjeta_social_existe_y_se_anuncia():
+    """og.png versionado + metas sociales que lo referencian.
+
+    No se regenera en el test (matplotlib es de requirements, no de la
+    suite): solo se verifica que el archivo es un PNG real y que el HTML
+    declara la tarjeta. Regenerar con: generar_historia.py --og.
+    """
+    png = HISTORIA / "og.png"
+    assert png.exists(), "falta historia/og.png: regenera con --og"
+    assert png.read_bytes()[:4] == b"\x89PNG", "og.png no es un PNG válido"
+    html = INDEX.read_text(encoding="utf-8")
+    for meta in ('property="og:title"', 'property="og:description"',
+                 'property="og:image"', 'name="twitter:card"'):
+        assert meta in html, f"falta la meta social {meta}"
 
 
 def test_historia_sin_pii():

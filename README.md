@@ -11,7 +11,7 @@
   - 🖥️ **[`reporte/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte)** — Aplicación Streamlit multipágina.
     - ⚙️ **[`.streamlit/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/.streamlit)** — Configuración de tema y servidor.
     - 📄 **[`pages/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages)** — Las 10 páginas del reporte.
-  - 🌐 **[`historia/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/historia)** — «La Historia»: página estática scrollytelling, aparte del reporte técnico (`index.html` + `datos.json`/`datos.js` generados por `codes/generar_historia.py`).
+  - 🌐 **[`historia/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/historia)** — «La Historia»: página estática scrollytelling, aparte del reporte técnico (`index.html` + `datos.json`/`datos.js` generados por `codes/generar_historia.py`; la tarjeta social `og.png` se regenera con `--og`).
   - 🧪 **[`tests/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/tests)** — Cifras, contratos, identidad, páginas, historia y privacidad.
   - 📓 **[`opencode/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/opencode)** — Handoff, diario de trabajo y auditoría JINPEN.
   - 💬 **[`Prompts/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Prompts)** — Prompts e instrucciones del proyecto.
@@ -55,6 +55,7 @@ Desde la raíz del proyecto, paso a paso:
 
    ```bash
    python3 codes/generar_historia.py     # genera historia/datos.json y datos.js
+   python3 codes/generar_historia.py --og  # (opcional) regenera historia/og.png
    python3 -m http.server --directory historia
    # → http://localhost:8000  (Ctrl+C para parar)
    ```
