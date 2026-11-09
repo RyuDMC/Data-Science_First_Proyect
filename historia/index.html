@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Historia — ¿Qué triciclo comprar en La Habana?</title>
+<meta name="description" content="Relato con datos versionados del proyecto Data-Science_First_Proyect: anuncios, catálogos y una muestra de calle, contados en seis actos.">
+<style>
+  :root{
+    --papel:#f7f4ef; --tinta:#22222a; --tinta-suave:#6b6b74;
+    --elec:#1f77b4; --hib:#ff7f0e; --gas:#d62728; --gris:#7f7f7f; --muted:#b0b0b0;
+    --linea:#e3ddd2; --caja:#fffdf9;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--papel); color:var(--tinta);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
+    font-size:1.02rem; line-height:1.65;
+  }
+  .kicker{
+    font-size:.72rem; letter-spacing:2.5px; text-transform:uppercase;
+    color:var(--tinta-suave); margin:0 0 .35rem;
+  }
+  .kicker b{color:var(--elec); font-weight:600}
+  /* ---------- hero ---------- */
+  .hero{
+    max-width:46rem; margin:0 auto; padding:6.5rem 1.4rem 4rem; text-align:center;
+  }
+  .hero h1{
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+    font-size:clamp(2.1rem,6vw,3.4rem); line-height:1.12; margin:.2rem 0 1rem;
+  }
+  .hero .antetitulo{max-width:38rem; margin:0 auto 1.6rem; color:#3f3f49; font-size:1.08rem}
+  .dataline{
+    display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center;
+    font-size:.8rem; color:var(--tinta-suave);
+  }
+  .dataline .dato{
+    background:var(--caja); border:1px solid var(--linea);
+    border-radius:999px; padding:.28rem .8rem;
+  }
+  .dataline .dato b{color:var(--tinta); font-weight:650}
+  .bajar{display:inline-block; margin-top:2.6rem; font-size:1.5rem; color:var(--tinta-suave);
+    text-decoration:none; animation:lat 2.2s infinite}
+  @keyframes lat{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  /* ---------- scrolly ---------- */
+  .scrolly{
+    max-width:74rem; margin:0 auto; padding:0 1.2rem;
+    display:grid; grid-template-columns:44% 1fr; gap:1.6rem;
+  }
+  .figura-marco{position:sticky; top:9vh; height:80vh;
+    display:flex; align-items:center; justify-content:center}
+  .figura{
+    width:100%; opacity:0; transform:translateY(10px);
+    transition:opacity .45s ease, transform .45s ease; pointer-events:none;
+  }
+  .figura.activa{opacity:1; transform:none; pointer-events:auto}
+  .figura .marco-int{
+    background:var(--caja); border:1px solid var(--linea); border-radius:14px;
+    padding:1.1rem 1.2rem 1rem; box-shadow:0 10px 30px rgba(34,34,42,.06);
+  }
+  .figura h3{margin:.1rem 0 .15rem; font-size:1rem}
+  .figura p.sub{margin:.05rem 0 .6rem; font-size:.83rem; color:var(--tinta-suave)}
+  .figura svg{width:100%; height:auto; display:block}
+  .pasos-col{padding:4vh 0 6vh}
+  .paso{min-height:86vh; max-width:26rem; display:flex; flex-direction:column; justify-content:center}
+  .paso:first-child{min-height:80vh}
+  .paso h2{
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+    font-size:1.7rem; line-height:1.2; margin:.25rem 0 .9rem;
+  }
+  .paso p{margin:0 0 1rem; color:#34343d}
+  .paso p.detalle{font-size:.9rem; color:var(--tinta-suave)}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.2rem 0 .4rem}
+  .chip{
+    background:var(--caja); border:1px solid var(--linea); border-radius:8px;
+    padding:.25rem .6rem; font-size:.8rem;
+  }
+  .chip .punto{display:inline-block;width:.68em;height:.68em;border-radius:2px;vertical-align:-1px;margin-right:.35rem}
+  .tres-card{
+    background:var(--caja); border:1px solid var(--linea); border-radius:10px;
+    padding:.7rem .85rem; margin-bottom:.55rem;
+  }
+  .tres-card .n{font-size:1.75rem; font-weight:700; font-family:Georgia,serif}
+  .tres-card .l{font-size:.8rem; color:var(--tinta-suave)}
+  .uso-card{margin-top:.2rem; font-size:.86rem; color:#34343d}
+  .uso-card b{font-size:1.05rem}
+  /* ---------- acto final ---------- */
+  .acto-final{max-width:46rem; margin:0 auto; padding:5rem 1.4rem 2rem}
+  .acto-final h2{
+    font-family:Georgia,serif; font-size:2rem; line-height:1.2; margin:.25rem 0 1rem;
+  }
+  .mapa{display:grid; grid-template-columns:repeat(auto-fit,minmax(17rem,1fr)); gap:.8rem; margin:1.2rem 0}
+  .escena{
+    background:var(--caja); border:1px solid var(--linea); border-radius:12px;
+    padding:.9rem 1rem;
+  }
+  .escena h4{margin:.05rem 0 .35rem; font-size:.95rem}
+  .escena p{margin:0; font-size:.85rem; color:#3f3f49}
+  .podio{display:flex; flex-wrap:wrap; gap:.4rem; margin:.9rem 0}
+  .podio .chip b{font-family:Georgia,serif}
+  .aviso{
+    border-left:4px solid var(--gas); background:#fdf3f1;
+    padding:.85rem 1rem; border-radius:0 10px 10px 0; margin:1.4rem 0;
+    font-size:.92rem;
+  }
+  .moraleja{
+    font-family:Georgia,serif; font-size:1.12rem; line-height:1.55;
+    border-top:2px solid var(--linea); border-bottom:2px solid var(--linea);
+    padding:1.4rem .2rem; margin:2rem 0;
+  }
+  .moraleja p{margin:.3rem 0}
+  .asteriscos{font-size:.88rem; color:#3f3f49}
+  .asteriscos li{margin-bottom:.45rem}
+  /* ---------- apéndice ---------- */
+  .apendice{max-width:46rem; margin:0 auto; padding:2.5rem 1.4rem 1rem; border-top:1px solid var(--linea)}
+  .apendice h3{font-size:1.15rem; margin:.2rem 0 .8rem}
+  .tabla-lite{width:100%; border-collapse:collapse; font-size:.85rem; margin:.6rem 0 1rem}
+  .tabla-lite td{border-bottom:1px solid var(--linea); padding:.35rem .3rem}
+  .tabla-lite td:first-child{color:var(--tinta-suave)}
+  .apendice p{font-size:.88rem; color:#3f3f49}
+  code{background:#efe9df; border-radius:5px; padding:.1rem .35rem; font-size:.85em}
+  a{color:var(--elec)}
+  footer{max-width:46rem; margin:0 auto; padding:1.2rem 1.4rem 3.5rem; font-size:.78rem; color:var(--tinta-suave)}
+  #sin-datos{display:none; }
+  #sin-datos.visible{display:block; margin:2rem auto; max-width:34rem;
+    background:#fdf3f1; border:1px solid var(--gas); border-radius:10px; padding:1rem}
+  @media (max-width:860px){
+    .scrolly{display:block}
+    .figura-marco{top:0; height:auto; position:sticky; z-index:5;
+      background:var(--papel); padding:.6rem 0}
+    .figura{display:none}
+    .figura.activa{display:block}
+    .paso{min-height:64vh; max-width:none}
+    .hero{padding-top:4.5rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bajar{animation:none} html{scroll-behavior:auto}
+    .figura{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="kicker">Relato de datos versionados · <b>Data-Science_First_Proyect</b></p>
+  <h1>¿Qué triciclo comprar en La Habana?</h1>
+  <p class="antetitulo">Una historia en seis actos, con las únicas tres cosas que
+  este proyecto decidió creer: lo que se <em>anuncia</em>, lo que las empresas
+  <em>ofrecen formalmente</em> y lo que, de verdad, <em>circula</em>. El análisis
+  completo, con sus contratos y tests, vive en el reporte técnico; aquí vamos al
+  cuento.</p>
+  <div class="dataline">
+    <span class="dato"><b><span data-cifra="conteos.anuncios" data-fmt="int"></span></b> anuncios</span>
+    <span class="dato"><b><span data-cifra="conteos.fichas_empresa" data-fmt="int"></span></b> fichas de catálogos</span>
+    <span class="dato"><b><span data-cifra="conteos.observaciones_campo" data-fmt="int"></span></b> observaciones de calle</span>
+    <span class="dato">corte de análisis <b><span data-cifra="cortes.anuncios"></span></b></span>
+  </div>
+  <a class="bajar" href="#scrolly" aria-label="Bajar al relato">↓</a>
+</header>
+
+<div id="sin-datos">
+  <b>Datos no cargados.</b> Esta página se monta sobre <code>datos.js</code>, un
+  archivo generado por <code>codes/generar_historia.py</code> desde los datos
+  versionados del repo. Si lo moviste de carpeta, o si <code>datos.js</code> no
+  está junto a este HTML, la página no dibuja nada (a propósito: aquí no se
+  inventan cifras). Regenera con
+  <code>python3 codes/generar_historia.py</code>.
+</div>
+
+<main id="scrolly" class="scrolly" aria-label="Relato en seis actos">
+
+  <!-- ================= columna visual (sticky) ================= -->
+  <div>
+    <div class="figura-marco">
+
+      <section class="figura" data-fig="apertura" id="fig-apertura">
+        <div class="marco-int">
+          <h3>Todo lo que el proyecto vio publicado</h3>
+          <p class="sub">Cada ficha es un anuncio · color = fuente</p>
+          <svg id="svg-pila" viewBox="0 0 680 208" role="img"
+               aria-label="Cuadrícula de los anuncios coloreados por fuente"></svg>
+          <div class="chips" id="leyenda-fuentes"></div>
+        </div>
+      </section>
+
+      <section class="figura" data-fig="ventanas" id="fig-ventanas">
+        <div class="marco-int">
+          <h3>Tres ventanas sobre la misma pregunta</h3>
+          <div class="tres-card">
+            <span class="n"><span data-cifra="conteos.anuncios" data-fmt="int"></span></span>
+            <div class="l">anuncios online · oferta publicada
+              (<span data-cifra="conteos.anuncios_scraper" data-fmt="int"></span> scraper +
+              <span data-cifra="conteos.anuncios_facebook" data-fmt="int"></span> Facebook)</div>
+          </div>
+          <div class="tres-card">
+            <span class="n"><span data-cifra="conteos.fichas_empresa" data-fmt="int"></span></span>
+            <div class="l">fichas de <b><span data-cifra="conteos.empresas" data-fmt="int"></span></b>
+              empresas · corte <span data-cifra="cortes.catalogos"></span></div>
+          </div>
+          <div class="tres-card">
+            <span class="n"><span data-cifra="conteos.observaciones_campo" data-fmt="int"></span></span>
+            <div class="l">observaciones de calle ·
+              <b><span data-cifra="conteos.municipios_campo" data-fmt="int"></span></b> de 15 municipios ·
+              corte <span data-cifra="cortes.campo"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="figura" data-fig="pesos" id="fig-pesos">
+        <div class="marco-int">
+          <h3>La regla del juego</h3>
+          <p class="sub">Pesos del score (suman 1.0) · espejo de <code>codes/analisis.py</code></p>
+          <svg id="svg-pesos" viewBox="0 0 640 240" role="img"
+               aria-label="Barras con el peso de cada criterio"></svg>
+          <div id="citas-pesos" class="uso-card"></div>
+        </div>
+      </section>
+
+      <section class="figura" data-fig="mercado" id="fig-mercado">
+        <div class="marco-int">
+          <h3>El mercado anunciado es eléctrico…</h3>
+          <p class="sub">…y el mix por propulsión de los anuncios</p>
+          <svg id="svg-dona" viewBox="0 0 640 250" role="img"
+               aria-label="Dona con la distribución de anuncios por propulsión"></svg>
+          <div class="uso-card">Y la calle ya contestó para qué: uso dominante
+            <b><span data-cifra="campo.uso.uso"></span></b> con
+            <b><span data-cifra="campo.uso.pct"></span>%</b> de la muestra
+            (IC 95% <span data-cifra="campo.uso.ic95_bajo"></span>–<span data-cifra="campo.uso.ic95_alto"></span>, n=
+            <span data-cifra="campo.uso.n" data-fmt="int"></span>); autonomía mediana declarada
+            <span data-cifra="campo.uso.autonomia_med"></span> km.</div>
+        </div>
+      </section>
+
+      <section class="figura" data-fig="conflicto" id="fig-conflicto">
+        <div class="marco-int">
+          <h3>Se anuncia vs. se ve, por marca</h3>
+          <p class="sub">○ cuota dentro de los anuncios · ● cuota dentro de la muestra de calle ·
+             Δ en puntos porcentuales</p>
+          <svg id="svg-dumbbell" viewBox="0 0 680 330" role="img"
+               aria-label="Comparación de cuota publicitaria y cuota de calle por marca"></svg>
+        </div>
+      </section>
+
+      <section class="figura" data-fig="subvuelo" id="fig-subvuelo">
+        <div class="marco-int">
+          <h3>¿Cuánta evidencia sostiene cada modelo?</h3>
+          <p class="sub">anuncios por modelo (rojo = modelos con uno solo)</p>
+          <svg id="svg-hist" viewBox="0 0 640 150" role="img"
+               aria-label="Histograma de anuncios por modelo"></svg>
+          <h3 style="margin-top:.6rem">¿Y cuánto puede moverse el podio?</h3>
+          <p class="sub">puesto eléctrico en 6 escenarios de omisión + 2.000 perturbaciones de ±0.05
+             (<code>codes/sensibilidad.py</code>, semilla fija)</p>
+          <svg id="svg-rangos" viewBox="0 0 680 330" role="img"
+               aria-label="Rangos de posición del podio eléctrico bajo escenarios y perturbaciones"></svg>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================= columna de texto ================= -->
+  <div class="pasos-col">
+
+    <article class="paso" data-fig="apertura">
+      <p class="kicker">Apertura</p>
+      <h2>Toda la evidencia, de una sola vez</h2>
+      <p>Antes de cualquier conclusión: <b>esto es todo lo que el proyecto pudo
+      ver publicado</b>, ficha por ficha —<span data-cifra="conteos.anuncios" data-fmt="int"></span>
+      anuncios entre clasificados, catálogos de tiendas y canales de
+      Telegram<span id="texto-fuentes"></span>.</p>
+      <p class="detalle">Color = fuente. Capturas hasta
+      <span data-cifra="cortes.anuncios_captura"></span>; corte de análisis
+      <span data-cifra="cortes.anuncios"></span>. Ninguna fuente es oficial
+      ni sirve de censo: son portales de anuncios, redes y catálogos. Eso
+      define el suelo de toda la historia.</p>
+    </article>
+
+    <article class="paso" data-fig="ventanas">
+      <p class="kicker">Acto 1 de 6</p>
+      <h2>Tres ventanas, una pregunta</h2>
+      <p>No hay un dataset único: hay <b>tres ventanas</b>, cada una con su método,
+      su sesgo y dueños distintos de la misma realidad. La primera es la oferta
+      publicada; la segunda, la oferta formal de catálogos; la tercera es la
+      calle.</p>
+      <p class="detalle">La tercera ventana mide <b>circulación, no oferta</b>: es
+      una muestra cerrada de conveniencia (<span data-cifra="conteos.observaciones_campo" data-fmt="int"></span>
+      observaciones en <span data-cifra="conteos.municipios_campo" data-fmt="int"></span>
+      de los 15 municipios que preveía el diseño). Describe la muestra y
+      <b>no se extrapola a La Habana</b> — y por eso mismo no entra al score.
+      Publicar sin datos personales no es una promesa: lo vigila
+      <code>tests/test_privacidad.py</code>.</p>
+    </article>
+
+    <article class="paso" data-fig="pesos">
+      <p class="kicker">Acto 2 de 6</p>
+      <h2>La regla del juego: los pesos</h2>
+      <p>El ranking no nace de una tabla mágica: es una suma ponderada de cinco
+      criterios, normalizados min-max <b>dentro de cada propulsión</b>. Si un
+      criterio no tiene dato, <b>no se imputa</b>: el score se re-pondera solo con
+      lo presente de cada modelo (<code>n_criterios</code> deja ver esa
+      cobertura).</p>
+      <p>Y lo valioso: <b>el origen de los pesos está escrito</b>, no escondido.
+      El precio manda porque la evidencia metodológica y la práctica MCDM lo
+      ordenan así; la legalidad pesa porque hay una resolución vigente que se
+      vence — pero de eso hablamos en el Acto 6.</p>
+    </article>
+
+    <article class="paso" data-fig="mercado">
+      <p class="kicker">Acto 3 de 6</p>
+      <h2>Lo que dice la ventana de la oferta</h2>
+      <p>El mercado <em>anunciado</em> es de un solo color:
+      <b id="texto-mercado" style="text-align:justify"></b></p>
+      <p class="detalle">Y del dato-garaje (el otro lado de la oferta): el uso
+      dominante en calle es <b><span data-cifra="campo.uso.uso"></span></b>
+      (<span data-cifra="campo.uso.pct"></span>% de la muestra de calle, IC 95%
+      <span data-cifra="campo.uso.ic95_bajo"></span>–<span data-cifra="campo.uso.ic95_alto"></span>.
+      Lo declaran los dueños; el proyecto solo lo mide. Con ese uso en la
+      mano, la resolución del Acto 6 ordena los escenarios de compra).</p>
+    </article>
+
+    <article class="paso" data-fig="conflicto">
+      <p class="kicker">Acto 4 de 6</p>
+      <h2>El conflicto: el rey de los clasificados es un fantasma en la calle</h2>
+      <p id="texto-conflicto"></p>
+      <p>Y el extremo a nivel de <em>modelo exacto</em>: el más anunciado del
+      dataset es <b><span data-cifra="conflicto_modelo.modelo"></span></b> —
+      <span data-cifra="conflicto_modelo.n_anuncios" data-fmt="int"></span> anuncios
+      y un score eléctrico de <span data-cifra="conflicto_modelo.score" data-fmt="score"></span> —
+      y aparece <b><span id="texto-frecuencia"></span></b> en el registro de calle de
+      <span data-cifra="conteos.observaciones_campo" data-fmt="int"></span> observaciones.</p>
+      <p class="detalle">No es un error de muestreo que se arregla mirando mejor:
+      las dos ventanas hablan idiomas distintos. Un clasificado vende a quien
+      navega; la calle compra por bocina, aval de vecino y batería que aguanta el
+      apagón.</p>
+    </article>
+
+    <article class="paso" data-fig="subvuelo">
+      <p class="kicker">Acto 5 de 6</p>
+      <h2>El subvuelo: ¿el ranking aguanta una decisión?</h2>
+      <p id="texto-subvuelo"></p>
+      <p id="texto-sensib"></p>
+      <p class="detalle">La sensibilidad <b>no propone otros pesos</b>: mide
+      cuánto aguanta el orden y se reporta junto al score oficial. ¿Quieres
+      mover los pesos tú? Eso se hace en el reporte técnico (página
+      <b>🏆 Ranking</b>), donde el score se recalcula en vivo con la misma
+      fórmula re-ponderada que corre <code>codes/analisis.py</code>.</p>
+    </article>
+
+  </div>
+</main>
+
+<!-- ================= ACTO 6 ================= -->
+<section class="acto-final" id="acto-6">
+  <p class="kicker">Acto 6 de 6 · Resolución</p>
+  <h2>No hay ranking único: hay mapa de escenarios</h2>
+  <p>¿Y entonces cuál es <em>el mejor</em>? El proyecto no contesta eso a
+  secas, contesta <b>qué comprar según qué necesitas</b>, con las tres
+  ventanas ya contadas:</p>
+
+  <div class="mapa">
+    <div class="escena">
+      <h4>🧍 Pasajeros y autonomía</h4>
+      <p>Eléctricos. Empieza por el podio eléctrico del ranking oficial
+      (chips aquí abajo) — la calle ya dijo que el triciclo cubano circula a
+      pasajero.</p>
+    </div>
+    <div class="escena">
+      <h4>📦 Carga de trabajo (≥800 kg)</h4>
+      <p>Eléctricos <em>con la carga en tu fórmula</em>: en el análisis de
+      sensibilidad, el líder oficial solo cede cuando se omite la carga — el
+      podio cambia.</p>
+    </div>
+    <div class="escena">
+      <h4>💸 Presupuesto apretado</h4>
+      <p>Eléctricos con precio bajo y la frontera precio/autonomía — con sus
+      asteriscos al lado. Los modelos sin precio en USD quedan aparte y se
+      puntúan sin ese criterio.</p>
+    </div>
+    <div class="escena">
+      <h4>🔌 Sin red eléctrica confiable</h4>
+      <p>Híbridos (con extensor de rango) o gasolina — <b>su podio propio</b>,
+      jamás comparado con el de los eléctricos: los scores no son comparables
+      entre propulsiones.</p>
+    </div>
+  </div>
+
+  <div class="podio" id="podio-chips"></div>
+
+  <aside class="aviso">
+    <b>Fecha límite: <span data-cifra="legal.ventana"></span>.</b>
+    <span data-cifra="legal.detalle"></span>
+    Si compras después, el criterio de legalidad (peso 0.10 hoy) puede cambiar
+    de base — y esa fecha también es parte de la historia.
+    (<span data-cifra="legal.fuente"></span>)
+  </aside>
+
+  <div class="moraleja">
+    <p id="moraleja-titulo"></p>
+    <p>Para el debate de internet, seguro; para el bolsillo, menos. Lo que le
+    queda a uno después de seis actos: <b>el más anunciado no es el más
+    visto, el más visto no es automáticamente el mejor valorado, y el mejor
+    valorado depende de los pesos</b> — y de si el año que viene hay o no
+    papeles. Un ranking honesto no te dice qué comprar: te da las tres
+    ventanas, el margen con el que cada una habla, y la herramienta para
+    mover los pesos y ver el podio cambiar en vivo.</p>
+  </div>
+
+  <h3 style="font-size:1.1rem">Los asteriscos (el rango manda, no la celda)</h3>
+  <ul class="asteriscos">
+    <li>El campo es una <b>muestra cerrada de conveniencia</b>
+      (<span data-cifra="conteos.observaciones_campo" data-fmt="int"></span> obs.,
+      <span data-cifra="conteos.municipios_campo" data-fmt="int"></span> de 15
+      municipios): describe la muestra, no La Habana.</li>
+    <li><b>Oferta ≠ circulación</b>: el ranking mide la oferta publicada; la
+    calle sigue su propia lógica (y por eso no entra al score).</li>
+    <li id="asterisco-un-anuncio"></li>
+    <li id="asterisco-sin-precio"></li>
+    <li><b>Legalidad</b> = el anuncio menciona papeles; no se verifica el
+    trámite. <b>Repuestos</b> = proxy de presencia en más de una fuente, no
+    stock real.</li>
+  </ul>
+</section>
+
+<!-- ================= APÉNDICE ================= -->
+<section class="apendice" id="apendice">
+  <h3>🧾 Cómo se hizo esta historia</h3>
+  <table class="tabla-lite">
+    <tr><td>Anuncios — captura</td><td><span data-cifra="cortes.anuncios_captura"></span></td></tr>
+    <tr><td>Anuncios — corte de análisis</td><td><span data-cifra="cortes.anuncios"></span></td></tr>
+    <tr><td>Catálogos de empresas</td><td><span data-cifra="cortes.catalogos"></span></td></tr>
+    <tr><td>Trabajo de campo</td><td><span data-cifra="cortes.campo"></span></td></tr>
+  </table>
+  <p><b>Una sola fuente de verdad:</b> los archivos <code>historia/datos.json</code> y
+  <code>datos.js</code> se generan con <code>codes/generar_historia.py</code> leyendo
+  <code>Data/</code> y <code>Data/metadata.json</code>; <code>--check</code> falla si el
+  texto y los datos se descuelgan. Este HTML no trae una sola cifra escrita a
+  mano: todo lo que ves arriba llega por esos archivos — igual que el reporte
+  técnico, que los lee en vivo con Streamlit.</p>
+  <p><b>Reporte técnico:</b> cloná el repo, <code>python3 -m venv .venv</code>,
+  <code>pip install -r requirements.txt</code> y
+  <code>streamlit run reporte/app.py</code>. Ahí están método completo, ranking
+  ordenable, frontera precio/autonomía, campo con IC 95% por marca, empresas y
+  la página de limitaciones con sus fuentes.</p>
+  <p><b>Sin datos personales:</b> el trabajo de campo se anonimiza por diseño en
+  el origen (<code>Data/registro_ubicaciones.csv</code>) y la puerta la guarda
+  <code>tests/test_privacidad.py</code> (CI de 11 dígitos, móviles, +53, WhatsApp).
+  Documentación de las decisiones: <code>Data/fuentes_justificacion.md</code> y
+  <code>Data/resumen_pesos_scoring.md</code>.</p>
+</section>
+
+<footer>
+  La Historia · página estática del proyecto Data-Science_First_Proyect ·
+  datos versionados en este repo · licencia MIT. El scrollytelling usa
+  HTML/CSS/JS sin dependencias externas — se abre sin servidor y sobrevive
+  sin conexión.
+</footer>
+
+<noscript>
+  <p style="max-width:34rem;margin:2rem auto;padding:1rem;background:#fdf3f1;border:1px solid #d62728;border-radius:10px">
+  Esta página dibuja sus gráficos con JavaScript a partir de
+  <code>historia/datos.js</code> (generado desde los datos versionados).
+  Sin JavaScript no hay gráficos; los números crudos están en
+  <code>historia/datos.json</code> y el análisis completo, en el reporte
+  Streamlit del repo.</p>
+</noscript>
+
+<script src="datos.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var D = window.HISTORIA_DATOS;
+  var caja = document.getElementById('sin-datos');
+  if (!D) { if (caja) caja.className = 'visible'; return; }
+  if (caja) caja.className = '';
+
+  /* ---------- colores (presentación, no datos) ---------- */
+  var C = {
+    elec: '#1f77b4', hib: '#ff7f0e', gas: '#d62728', gris: '#7f7f7f',
+    muted: '#b0b0b0', grid: '#dddddd', texto: '#2a2a33',
+    azul: '#1f77b4', rojo: '#d62728'
+  };
+  var FUENTE_COLOR = {
+    facebook: '#1f77b4',
+    elyerromenu: '#ff7f0e',
+    islagrande: '#2c7fb8',
+    vedca_telegram: '#9467bd',
+    casalindashop: '#8c564b',
+    cubancargos: '#d62728'
+  };
+  var PROP_COLOR = { electrico: C.elec, hibrido: C.hib, gasolina: C.gas,
+                     indeterminado: C.gris };
+  var ESCENA_OK = { base: 'base', imputado_05: 'imputando 0.5 a los ausentes',
+                    sin_autonomia_km: 'quitando la autonomía',
+                    sin_carga_kg: 'quitando la carga',
+                    sin_legalidad: 'quitando la legalidad',
+                    sin_precio_usd: 'quitando el precio',
+                    sin_repuestos: 'quitando los repuestos' };
+  var CRIT_NOMBRE = { precio_usd: 'Precio', autonomia_km: 'Autonomía',
+                      carga_kg: 'Carga', legalidad: 'Legalidad',
+                      repuestos: 'Repuestos' };
+
+  /* ---------- helpers ---------- */
+  function get(obj, path) {
+    var cur = obj, partes = String(path).split('.');
+    for (var i = 0; i < partes.length; i++) {
+      if (cur == null) return null;
+      var p = partes[i];
+      cur = (/^\d+$/.test(p)) ? cur[parseInt(p, 10)]
+                              : (typeof cur === 'object' ? cur[p] : undefined);
+      if (cur === undefined) return null;
+    }
+    return (cur === undefined) ? null : cur;
+  }
+  function fmt(v, tipo) {
+    if (v === null || v === undefined) return '—';
+    if (tipo === 'int') return String(Math.round(v));
+    if (tipo === 'score') return Number(v).toFixed(3);
+    if (tipo === 'pct0') return String(Math.round(v));
+    return String(v);
+  }
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function el(nombre, attrs, padre) {
+    var n = document.createElementNS(SVGNS, nombre);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (padre) padre.appendChild(n);
+    return n;
+  }
+  function svgv(id) {
+    var s = document.getElementById(id);
+    if (s) while (s.firstChild) s.removeChild(s.firstChild);
+    return s;
+  }
+  function limpia(id) { var n = document.getElementById(id); if (n) n.innerHTML = ''; return n; }
+  function trim(txta, max) {
+    return String(txta).length > max ? String(txta).slice(0, max - 1) + '…' : String(txta);
+  }
+
+  /* ---------- cifras en spans ---------- */
+  var spans = document.querySelectorAll('[data-cifra]');
+  for (var i = 0; i < spans.length; i++) {
+    var s = spans[i];
+    s.textContent = fmt(get(D, s.getAttribute('data-cifra')),
+                        s.getAttribute('data-fmt'));
+  }
+
+  /* ---------- apertura: pila de anuncios ---------- */
+  (function pila() {
+    var svg = svgv('svg-pila');
+    if (!svg) return;
+    var fichas = D.pila.fichas || [], cols = 10;
+    var cell = 30, margen = 4;
+    var filas = Math.max(1, Math.ceil(fichas.length / cols));
+    svg.setAttribute('viewBox', '0 0 ' + (cols * (cell + margen)) + ' ' +
+                     (filas * (cell + margen)));
+    for (var i = 0; i < fichas.length; i++) {
+      var f = fichas[i];
+      var xi = (i % cols) * (cell + margen), yi = Math.floor(i / cols) * (cell + margen);
+      var r = el('rect', { x: xi, y: yi, width: cell, height: cell, rx: 4,
+        fill: FUENTE_COLOR[f.fuente] || C.muted,
+        stroke: '#fffdf9', 'stroke-width': 2 }, svg);
+      var t = el('title', {}, r);
+      t.textContent = (f.modelo === null ? 'sin identificar' : f.modelo) +
+                      ' · ' + f.fuente;
+    }
+    var leyenda = limpia('leyenda-fuentes');
+    (D.pila.fuentes || []).forEach(function (f) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      var dot = document.createElement('span');
+      dot.className = 'punto';
+      dot.style.background = FUENTE_COLOR[f.fuente] || C.muted;
+      chip.appendChild(dot);
+      chip.appendChild(document.createTextNode(
+        f.fuente + ' · ' + f.n));
+      leyenda.appendChild(chip);
+    });
+    var frases = (D.pila.fuentes || []).map(function (f) {
+      return f.fuente + ' (' + f.n + ')';
+    });
+    var tf = document.getElementById('texto-fuentes');
+    if (tf) tf.textContent = frases.length
+      ? ': ' + frases.join(', ').replace(/, ([^,]*)$/, ' y $1') + '.'
+      : '.';
+  })();
+
+  /* ---------- pesos: barras + citas ---------- */
+  (function pesos() {
+    var svg = svgv('svg-pesos');
+    if (!svg) return;
+    var filas = D.pesos || [];
+    var alto = Math.max(1, filas.length) * 44 + 16;
+    svg.setAttribute('viewBox', '0 0 640 ' + alto);
+    var anchoBarraMax = 400;
+    filas.forEach(function (p, i) {
+      var y = i * 44 + 6;
+      var t = el('text', { x: 0, y: y + 20, 'font-size': 15,
+                           fill: C.texto }, svg);
+      t.textContent = CRIT_NOMBRE[p.criterio] || p.criterio;
+      el('rect', { x: 150, y: y + 6, width: anchoBarraMax * p.peso,
+                   height: 26, rx: 5, fill: C.elec }, svg);
+      var v = el('text', { x: 158 + anchoBarraMax * p.peso, y: y + 25,
+        'font-size': 14, fill: C.texto }, svg);
+      v.textContent = p.peso.toFixed(2);
+    });
+    var citas = limpia('citas-pesos');
+    filas.forEach(function (p) {
+      var li = document.createElement('div');
+      li.innerHTML = '';
+      li.appendChild(document.createTextNode(
+        (CRIT_NOMBRE[p.criterio] || p.criterio) + ' → ' + p.cita));
+      li.style.fontSize = '0.78rem';
+      li.style.marginBottom = '0.2rem';
+      citas.appendChild(li);
+    });
+  })();
+
+  /* ---------- mercado: dona ---------- */
+  (function dona() {
+    var svg = svgv('svg-dona');
+    if (!svg) return;
+    var con = (D.pila.por_propulsion || []).filter(function (p) {
+      return p.n > 0;
+    });
+    var total = con.reduce(function (a, p) { return a + p.n; }, 0);
+    var cx = 120, cy = 125, R = 100, r = 58;
+    var a0 = -Math.PI / 2;
+    con.forEach(function (p) {
+      var ang = total ? (p.n / total) * Math.PI * 2 : 0;
+      var a1 = a0 + ang;
+      var x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0);
+      var x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
+      var xi1 = cx + r * Math.cos(a1), yi1 = cy + r * Math.sin(a1);
+      var xi0 = cx + r * Math.cos(a0), yi0 = cy + r * Math.sin(a0);
+      var grande = ang > Math.PI ? 1 : 0;
+      var d = ang >= Math.PI * 2
+        ? '' : ('M ' + x0 + ' ' + y0 +
+                ' A ' + R + ' ' + R + ' 0 ' + grande + ' 1 ' + x1 + ' ' + y1 +
+                ' L ' + xi1 + ' ' + yi1 +
+                ' A ' + r + ' ' + r + ' 0 ' + grande + ' 0 ' + xi0 + ' ' + yi0 +
+                ' Z');
+      if (ang >= Math.PI * 2) {
+        el('circle', { cx: cx, cy: cy, r: R, fill: PROP_COLOR[p.propulsion] ||
+          C.gris }, svg);
+        el('circle', { cx: cx, cy: cy, r: r, fill: '#fffdf9' }, svg);
+      } else {
+        el('path', { d: d, fill: PROP_COLOR[p.propulsion] || C.gris }, svg);
+      }
+      a0 = a1;
+    });
+    var elec = con.filter(function (p) { return p.propulsion === 'electrico'; })[0];
+    if (elec) {
+      var t = el('text', { x: cx, y: cy - 2, 'text-anchor': 'middle',
+        'font-size': 30, 'font-family': 'Georgia, serif', fill: C.texto }, svg);
+      t.textContent = Math.round((elec.n / total) * 100) + '%';
+      var t2 = el('text', { x: cx, y: cy + 20, 'text-anchor': 'middle',
+        'font-size': 13, fill: C.gris }, svg);
+      t2.textContent = 'eléctricos (' + elec.n + ' de ' + total + ')';
+    }
+    var lx = 260, ly = 78;
+    con.forEach(function (p) {
+      el('rect', { x: lx, y: ly, width: 15, height: 15, rx: 3,
+        fill: PROP_COLOR[p.propulsion] || C.gris }, svg);
+      var t = el('text', { x: lx + 24, y: ly + 12, 'font-size': 15,
+        fill: C.texto }, svg);
+      var nombre = { electrico: 'Eléctricos', hibrido: 'Híbridos',
+                     gasolina: 'Gasolina',
+                     indeterminado: 'Indeterminados' }[p.propulsion] || p.propulsion;
+      t.textContent = nombre + ' · ' + p.n;
+      ly += 30;
+    });
+    var tm = document.getElementById('texto-mercado');
+    if (tm && elec) {
+      var resto = con.filter(function (p) {
+        return p.propulsion !== 'electrico'; })
+        .map(function (p) {
+          var nombre = { hibrido: 'híbridos', gasolina: 'gasolina',
+                         indeterminado: 'indeterminados' }[p.propulsion] || p.propulsion;
+          return nombre + ' ' + p.n; }).join(', ');
+      var linea = Math.round((elec.n / total) * 100) +
+        '% de los ' + total + ' anuncios publicados son eléctricos (' +
+        elec.n + ')';
+      if (resto) linea += '; el resto: ' + resto + ' — presencia testimonial';
+      tm.textContent = linea + '.';
+    }
+  })();
+
+  /* ---------- conflicto: dumbbell por marca ---------- */
+  (function conflicto() {
+    var svg = svgv('svg-dumbbell');
+    if (!svg) return;
+    var filas = D.campo.marcas || [];
+    if (!filas.length) return;
+    var maxPct = Math.max(26, Math.max.apply(null, filas.map(function (f) {
+      return Math.max(f.pct_online || 0, f.pct_campo || 0);
+    })));
+    var escMax = maxPct * 1.12;
+    var paso = 330 / filas.length;
+    var X = function (v) { return 40 + (v / escMax) * (640 - 40); };
+    [].concat([0, 10, 20], maxPct > 20 ? [Math.round(maxPct)] : [])
+      .forEach(function (v) {
+        var t = el('text', { x: X(v), y: 12, 'text-anchor': 'middle',
+          'font-size': 11, fill: C.gris }, svg);
+        t.textContent = v + '%';
+      });
+    function indiceDe(marca) {
+      for (var k = 0; k < filas.length; k++) {
+        if (filas[k].marca === marca) return k;
+      }
+      return -1;
+    }
+    var desMax = indiceDe((D.campo.destaca || {}).max_delta);
+    var desMin = indiceDe((D.campo.destaca || {}).min_delta);
+    filas.forEach(function (f, i) {
+      var y = paso * i + paso / 2 + 6;
+      var hl = (i === desMax) ? C.azul
+              : (i === desMin ? C.rojo : C.muted);
+      el('line', { x1: X(f.pct_campo), y1: y, x2: X(f.pct_online), y2: y,
+        stroke: hl, 'stroke-width': 2, opacity: 0.85 }, svg);
+      el('circle', { cx: X(f.pct_online), cy: y, r: 6,
+        fill: '#fffdf9', stroke: C.gris, 'stroke-width': 1.6 }, svg);
+      el('circle', { cx: X(f.pct_campo), cy: y, r: 6, fill: hl,
+        stroke: '#fffdf9', 'stroke-width': 1.2 }, svg);
+      var t = el('text', { x: 2, y: y + 4, 'font-size': 11,
+        fill: C.texto }, svg);
+      t.textContent = trim(f.marca, 14);
+      if (i === desMax || i === desMin) {
+        var dx = X(Math.max(f.pct_online, f.pct_campo));
+        var dl = el('text', { x: dx + 16, y: y + 4, 'font-size': 11,
+          fill: hl }, svg);
+        dl.textContent = 'Δ ' + (f.delta > 0 ? '+' : '') + f.delta +
+                         ' pp · n calle ' + f.n_campo;
+      }
+    });
+    var merc = document.getElementById('texto-conflicto');
+    if (merc && D.campo.destaca.max_delta && D.campo.destaca.min_delta) {
+      var filaMax = D.campo.marcas.filter(function (f) {
+        return f.marca === D.campo.destaca.max_delta;
+      })[0];
+      var filaMin = D.campo.marcas.filter(function (f) {
+        return f.marca === D.campo.destaca.min_delta;
+      })[0];
+      merc.textContent = 'El corazón del conflicto está en los dos extremos: ' +
+        (filaMin ? '«' + filaMin.marca + '» concentra el ' + filaMin.pct_online +
+          '% de los anuncios y solo el ' + filaMin.pct_campo + '% de la calle (Δ ' +
+          filaMin.delta + ' pp), mientras que ' : '') +
+        (filaMax ? '«' + filaMax.marca + '» rueda el ' + filaMax.pct_campo +
+          '% de la calle y apenas se anuncia (' + filaMax.pct_online + '%, Δ +' +
+          filaMax.delta + ' pp).' : '.');
+    }
+  })();
+
+  /* ---------- subvuelo: hist + rangos ---------- */
+  (function subvuelo() {
+    var hist = svgv('svg-hist');
+    if (hist) {
+      var filas = D.ranking.hist_n_anuncios || [];
+      var maxM = Math.max.apply(null, filas.map(function (f) {
+        return f.modelos; }).concat([1]));
+      var paso = 640 / (filas.length + 1);
+      filas.forEach(function (f, i) {
+        var h = (f.modelos / maxM) * 100;
+        var x = paso * (i + 1) - paso * 0.32;
+        el('rect', { x: x, y: 116 - h, width: paso * 0.64, height: h,
+          rx: 4, fill: f.n === 1 ? C.rojo : C.muted }, svg);
+        var t = el('text', { x: x + paso * 0.32, y: 110 - h,
+          'text-anchor': 'middle', 'font-size': 12, fill: C.texto }, svg);
+        t.textContent = f.modelos;
+        var e1 = el('text', { x: x + paso * 0.32, y: 132,
+          'text-anchor': 'middle', 'font-size': 11, fill: C.gris }, svg);
+        e1.textContent = f.n;
+      });
+      var eje = el('text', { x: 636, y: 34, 'text-anchor': 'end',
+        'font-size': 11, fill: C.gris }, svg);
+      eje.textContent = '↑ modelos · → anuncios';
+    }
+    var rng = svgv('svg-rangos');
+    var res = D.sensibilidad.por_modelo || [];
+    if (rng && res.length) {
+      var maxRk = Math.max.apply(null, res.map(function (f) {
+        return Math.max(f.rank_max, f.rank_p95); }));
+      var pasoY = 320 / res.length;
+      var Xr = function (v) { return 155 + (v - 0.5) / (maxRk + 0.5 - 0.5) * (672 - 155); };
+      el('rect', { x: Xr(1), y: 0, width: Xr(3.5) - Xr(1),
+        height: 330, fill: '#efe9df', opacity: 0.55 }, svg);
+      res.forEach(function (f, i) {
+        var y = pasoY * i + pasoY / 2 + 6;
+        el('line', { x1: Xr(f.rank_min), y1: y, x2: Xr(f.rank_max), y2: y,
+          stroke: C.grid, 'stroke-width': 7 }, svg);
+        el('line', { x1: Xr(f.rank_p05), y1: y, x2: Xr(f.rank_p95), y2: y,
+          stroke: C.muted, 'stroke-width': 3 }, svg);
+        el('circle', { cx: Xr(f.rank_base), cy: y, r: 5, fill: C.elec,
+          stroke: '#fffdf9', 'stroke-width': 1 }, svg);
+        var t = el('text', { x: 2, y: y + 4, 'font-size': 11,
+          fill: C.texto }, svg);
+        t.textContent = trim(f.modelo, 22);
+      });
+      if (res[0] && res[0].top1_pct != null) {
+        var an = el('text', { x: Xr(res[0].rank_base) + 12, y: 16,
+          'font-size': 12, fill: C.texto }, svg);
+        an.textContent = 'nº1 base aguanta el top-1 en ' +
+                         Math.round(res[0].top1_pct) + '% de las perturbaciones';
+      }
+      var escalas = el('text', { x: 672, y: 326, 'text-anchor': 'end',
+        'font-size': 11, fill: C.gris }, svg);
+      escalas.textContent = 'escenarios de omisión + 2.000 perturbaciones ±0.05';
+    }
+    var tsub = document.getElementById('texto-subvuelo');
+    if (tsub) {
+      var uno = (D.ranking.hist_n_anuncios || []).filter(function (f) {
+        return f.n === 1; })[0];
+      tsub.textContent = uno
+        ? ('La base del ranking es frágil por construcción: ' + uno.modelos +
+           ' de los ' + (D.conteos.modelos_ranking || '—') +
+           ' modelos que puntúan viven de UN solo anuncio — cada peso ' +
+           'golpea una muestra mínima.')
+        : '';
+    }
+    var tsen = document.getElementById('texto-sensib');
+    if (tsen) {
+      var cambios = (D.sensibilidad.escena_lider || []).filter(function (x) {
+        return x.cambia; });
+      var nom = cambios.map(function (x) {
+        return (ESCENA_OK[x.escenario] || x.escenario) + ' → ' + x.lider;
+      });
+      tsen.textContent = cambios.length
+        ? ('El nº1 base (' +
+           String(D.sensibilidad.base_lider || '—').split(' ')
+             .slice(0, 2).join(' ') +
+           '…) aguanta el top-1 pero cede el podio en ' + cambios.length +
+           ' de 6 escenarios de omisión: ' +
+           nom.join('; ').replace(/;([^;]*)$/, ' y$1') + '.')
+        : null;
+      if (!cambios.length) {
+        tsen.textContent = 'El nº1 base (' + (D.sensibilidad.base_lider || '—') +
+          ') aguanta el top-1 en los 6 escenarios de omisión.';
+      }
+    }
+  })();
+
+  /* ---------- acto 6: podio + moraleja + asteriscos ---------- */
+  (function resolucion() {
+    var chips = limpia('podio-chips');
+    (D.ranking_electrico || []).forEach(function (m) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.appendChild(document.createTextNode(
+        (Number(m.rank) === 1 ? '🥇 ' : Number(m.rank) === 2 ? '🥈 ' : '🥉 ') +
+        m.modelo + ' · '));
+      var b = document.createElement('b');
+      b.textContent = m.score.toFixed(3);
+      chip.appendChild(b);
+      chips.appendChild(chip);
+    });
+    if (D.top2_scores && D.top2_scores.length === 2) {
+      var mt = document.getElementById('moraleja-titulo');
+      if (mt) mt.textContent = '¿Importa la diferencia entre ' +
+        D.top2_scores[0].toFixed(3) + ' y ' + D.top2_scores[1].toFixed(3) + '?';
+    }
+    var uno = (D.ranking.hist_n_anuncios || []).filter(function (f) {
+      return f.n === 1; })[0];
+    var au = document.getElementById('asterisco-un-anuncio');
+    if (au && uno) {
+      au.textContent = uno.modelos + ' de los ' +
+        (D.conteos.modelos_ranking || '—') + ' modelos del ranking viven ' +
+        'con un solo anuncio: el orden se sostiene sobre muestras mínimas.';
+    }
+    var ap = document.getElementById('asterisco-sin-precio');
+    if (ap && D.ranking.sin_precio && D.ranking.sin_precio.n) {
+      ap.textContent = D.ranking.sin_precio.n +
+        ' modelos no tienen precio en USD (catálogo en EUR): su score ' +
+        'viene re-ponderado sin ese criterio y el reporte los muestra ' +
+        'aparte — se declara, no se inventa tipo de cambio.';
+    }
+  })();
+
+  /* ---------- activación según scroll ---------- */
+  var figuras = Array.prototype.slice.call(
+    document.querySelectorAll('.figura'));
+  var pasos = Array.prototype.slice.call(
+    document.querySelectorAll('.paso'));
+  function activa(id) {
+    figuras.forEach(function (f) {
+      f.classList.toggle('activa', f.getAttribute('data-fig') === id);
+    });
+  }
+  activa('apertura');
+  var funciones = ['IntersectionObserver' in window];
+  if (funciones[0]) {
+    var io = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (en) {
+        if (en.isIntersecting) activa(en.target.getAttribute('data-fig'));
+      });
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    pasos.forEach(function (p) { io.observe(p); });
+  } else {
+    window.addEventListener('scroll', function () {
+      var mejor = pasos[0], mejorD = Infinity;
+      pasos.forEach(function (p) {
+        var r = p.getBoundingClientRect();
+        var d = Math.abs(r.top + r.height / 2 - window.innerHeight / 2);
+        if (d < mejorD) { mejorD = d; mejor = p; }
+      });
+      if (mejor) activa(mejor.getAttribute('data-fig'));
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

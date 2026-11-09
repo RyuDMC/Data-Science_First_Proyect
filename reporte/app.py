@@ -84,17 +84,21 @@ integrando **tres fuentes de evidencia**:
 ### 🎯 Navegación del reporte
 Usa el **menú lateral** (☰) para ir a cada sección:
 
-1. **📖 La Historia** — scrollytelling en 6 actos: pregunta, conflicto y cierre por escenario
-2. **📋 Resumen** — La pregunta y los 3 titulares clave
-3. **🔬 Método** — Pesos, normalización, reglas de decisión
-4. **📊 Mercado** — KPIs, mix por propulsión y fuentes
-5. **🏆 Ranking** — Filtro por grupo, tabla ordenable, comparador
-6. **💰 Precio / Autonomía / Carga** — Burbuja y frontera eficiente
-7. **🎯 Contendientes** — Top por grupo + radar de criterios
-8. **✅ Mejor opción** — Recomendación por escenario
-9. **🗺️ Trabajo de campo** — Circulación real observada (muestra cerrada, 5 municipios)
-10. **🏢 Empresas** — {_n('fichas_empresa')} fichas de catálogos
-11. **⚠️ Limitaciones** — Qué no sabemos y por qué
+1. **📋 Resumen** — La pregunta y los 3 titulares clave
+2. **🔬 Método** — Pesos, normalización, reglas de decisión
+3. **📊 Mercado** — KPIs, mix por propulsión y fuentes
+4. **🏆 Ranking** — Filtro por grupo, tabla ordenable, comparador
+5. **💰 Precio / Autonomía / Carga** — Burbuja y frontera eficiente
+6. **🎯 Contendientes** — Top por grupo + radar de criterios
+7. **✅ Mejor opción** — Recomendación por escenario
+8. **🗺️ Trabajo de campo** — Circulación real observada (muestra cerrada, 5 municipios)
+9. **🏢 Empresas** — {_n('fichas_empresa')} fichas de catálogos
+10. **⚠️ Limitaciones** — Qué no sabemos y por qué
+
+> 📖 ¿La versión narrativa? **La Historia** no es una página de este
+> reporte: es una web estática aparte en `historia/index.html`
+> (funciona sin servidor; sus datos se generan con
+> `python3 codes/generar_historia.py` y se verifica con `--check`).
 
 ---
 
@@ -113,8 +117,9 @@ python3 codes/analisis.py
 python3 codes/analisis_campo.py   # campo: cuotas, IC95, uso, cruce con score
 python3 codes/sensibilidad.py     # robustez del ranking (no cambia el score)
 python3 codes/generar_metadata.py # conteos, cortes y resultados -> Data/metadata.json
+python3 codes/generar_historia.py # datos de «La Historia» -> historia/datos.{{json,js}}
 
-# 2. El reporte lee Data/clean_data/ en vivo → refresca y listo
+# 2. El reporte lee Data/clean_data/ en vivo -> refresca y listo
 streamlit run reporte/app.py
 ```
 """)

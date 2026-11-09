@@ -1,4 +1,4 @@
-"""Smoke test de las 12 pantallas con Streamlit AppTest.
+"""Smoke test de las 11 pantallas con Streamlit AppTest.
 
 No valida el contenido: garantiza que cada página arranca sin excepción con
 los datos versionados. Es el mismo chequeo que se hacía a mano.

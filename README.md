@@ -1,7 +1,7 @@
 # 🗂️ Estructura
 
 - 📦 **[Data-Science_First_Proyect](https://github.com/RyuDMC/Data-Science_First_Proyect)**
-  - 🔧 **[`codes/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/codes)** — Scrapers, normalización, scoring, campo, sensibilidad y metadata.
+  - 🔧 **[`codes/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/codes)** — Scrapers, normalización, scoring, campo, sensibilidad, metadata y el generador de datos de «La Historia».
   - 🗃️ **[`Data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data)** — Datos, tabla canónica, metadata y documentación.
     - 🗄️ **[`archive/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/archive)** — Versiones históricas; ranking legado del 2026-10-11.
     - 🧹 **[`clean_data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/clean_data)** — JSONL procesados y CSV derivados (score, campo, sensibilidad).
@@ -10,8 +10,9 @@
     - 📥 **[`raw_data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/raw_data)** — Capturas genuinas: transcripción de Facebook y hoja de campo (esta última ignorada por git). El JSONL del scraper vive una sola vez en [`clean_data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/clean_data).
   - 🖥️ **[`reporte/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte)** — Aplicación Streamlit multipágina.
     - ⚙️ **[`.streamlit/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/.streamlit)** — Configuración de tema y servidor.
-    - 📄 **[`pages/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages)** — Las 11 páginas del reporte (la `0_La_Historia` es el scrollytelling).
-  - 🧪 **[`tests/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/tests)** — Cifras, contratos, identidad, páginas y privacidad.
+    - 📄 **[`pages/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages)** — Las 10 páginas del reporte.
+  - 🌐 **[`historia/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/historia)** — «La Historia»: página estática scrollytelling, aparte del reporte técnico (`index.html` + `datos.json`/`datos.js` generados por `codes/generar_historia.py`).
+  - 🧪 **[`tests/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/tests)** — Cifras, contratos, identidad, páginas, historia y privacidad.
   - 📓 **[`opencode/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/opencode)** — Handoff, diario de trabajo y auditoría JINPEN.
   - 💬 **[`Prompts/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Prompts)** — Prompts e instrucciones del proyecto.
   - 📌 **[`requirements.txt`](https://github.com/RyuDMC/Data-Science_First_Proyect/blob/main/requirements.txt)** — Dependencias del pipeline y del reporte.
@@ -50,6 +51,27 @@ Desde la raíz del proyecto, paso a paso:
    Para detenerla, pulsa `Ctrl+C` en la terminal.
    En Windows, sustituye `python3` por `python`.
 
+4. **Ver «La Historia», la página estática aparte**
+
+   ```bash
+   python3 codes/generar_historia.py     # genera historia/datos.json y datos.js
+   python3 -m http.server --directory historia
+   # → http://localhost:8000  (Ctrl+C para parar)
+   ```
+
+   También funciona con doble clic en `historia/index.html`: los datos van
+   embebidos en `datos.js`, no hay fetch ni dependencias externas. Alinear
+   con el estado real de los datos:
+
+   ```bash
+   python3 codes/generar_historia.py --check
+   # [check] OK: historia/datos.json y datos.js coinciden con los datos de Data/
+   ```
+
+   Para publicarla (opcional), GitHub Pages → *Settings* → *Pages* →
+   *Deploy from a branch* → `main` basta: no hace falta ningún workflow
+   nuevo y la página queda en `https://<usuario>.github.io/Data-Science_First_Proyect/historia/`.
+
 > Los datos ya generados (`Data/clean_data/*.csv` y `*.jsonl`, `Data/metadata.json`)
 > están versionados, así que la página funciona sin re-scrapear.
 >
@@ -68,11 +90,13 @@ Desde la raíz del proyecto, paso a paso:
 > python3 codes/analisis_campo.py
 > python3 codes/sensibilidad.py
 > python3 codes/generar_metadata.py
+> python3 codes/generar_historia.py
 > ```
 >
 > Al terminar, verifica la coherencia con `python3 codes/generar_metadata.py --check`
-> y, si instalaste `requirements-dev.txt`, ejecuta la suite con
-> `python3 -m pytest -q tests/`.
+> y `python3 codes/generar_historia.py --check` (hace coincidir la historia
+> con los datos); y, si instalaste `requirements-dev.txt`, ejecuta la suite
+> con `python3 -m pytest -q tests/`.
 >
 > **Nota de reproducibilidad:** `codes/parse_campo.py` necesita
 > `Data/raw_data/data_personas.txt`, que está ignorado por contener datos
