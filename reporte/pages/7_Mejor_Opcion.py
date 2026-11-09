@@ -15,7 +15,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, load_campo_uso, filter_by_propulsion
+from reporte.data import (load_scores, load_campo_uso, filter_by_propulsion,
+                          solo_precio_comparable, sin_precio_comparable)
 from reporte.theme import apply_style, fig_ax, bar_ranking, color_for_prop, label_for_prop
 
 
@@ -30,8 +31,10 @@ if df_scores.empty:
     st.error("No hay datos de scoring. Ejecuta `python3 codes/analisis.py` primero.")
     st.stop()
 
-# Solo ofertas vivas
-df = df_scores[df_scores["oferta_viva"] == True].copy()
+# Solo ofertas vivas y solo modelos con precio USD comparable: los del
+# catálogo VEDCA (EUR) no tienen precio y no entran a un ranking de precio.
+df_vivas = df_scores[df_scores["oferta_viva"] == True].copy()
+df = solo_precio_comparable(df_vivas).copy()
 
 st.markdown("""
 La "mejor opción" **depende de tu caso de uso**. No hay un ganador universal.
@@ -137,6 +140,28 @@ for esc in escenarios:
                 col3.metric("$", f"{row['precio_usd']:,.0f}" if pd.notna(row['precio_usd']) else "—")
                 col4.metric("km", f"{row['autonomia_km']:.0f}" if pd.notna(row['autonomia_km']) else "—")
                 col5.metric("kg", f"{row['carga_kg']:.0f}" if pd.notna(row['carga_kg']) else "—")
+
+# ======= MODELOS SIN PRECIO USD (APARTE) =======
+_df_sin_precio = sin_precio_comparable(df_vivas)
+if not _df_sin_precio.empty:
+    st.markdown("---")
+    st.subheader("🚫 Opciones sin precio USD: no comparables")
+    st.caption(
+        "Estos modelos solo tienen precio en EUR. No se convierten ni se "
+        "imputan: se listan aparte porque su score no incluye el precio y no "
+        "se puede comparar con las recomendaciones de arriba."
+    )
+    _sp = _df_sin_precio[["modelo_norm", "score", "n_criterios",
+                          "autonomia_km", "carga_kg", "precio_valor"]].copy()
+    _sp["precio_valor"] = _sp["precio_valor"].map(
+        lambda v: f"{v:,.0f} EUR" if pd.notna(v) else "—"
+    )
+    _sp = _sp.rename(columns={
+        "modelo_norm": "Modelo", "score": "Score", "n_criterios": "N crit.",
+        "autonomia_km": "Autonomía (km)", "carga_kg": "Carga (kg)",
+        "precio_valor": "Precio",
+    })
+    st.dataframe(_sp, width="stretch", hide_index=True)
 
 st.markdown("---")
 

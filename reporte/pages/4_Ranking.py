@@ -15,7 +15,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from reporte.data import (load_scores, filter_by_propulsion,
-                          load_sensibilidad, load_sensibilidad_resumen)
+                          load_sensibilidad, load_sensibilidad_resumen,
+                          solo_precio_comparable, sin_precio_comparable)
 from reporte.theme import apply_style, fig_ax, bar_ranking, color_for_prop, label_for_prop
 
 
@@ -38,12 +39,19 @@ selected_prop = st.sidebar.selectbox("Propulsión", prop_options, index=0)
 
 min_criteria = st.sidebar.slider("Mín. criterios con dato (n_criterios)", 1, 5, 3)
 only_viva = st.sidebar.checkbox("Solo ofertas vivas", value=True)
+incluir_sin_precio = st.sidebar.checkbox(
+    "Incluir modelos sin precio USD", value=False,
+    help="Su score se calcula sin el criterio de precio y no es comparable "
+         "con el resto. Por defecto se muestran aparte.",
+)
 top_n = st.sidebar.slider("Top N a mostrar", 5, 50, 20)
 
 # Aplicar filtros
 df = df_scores.copy()
 if selected_prop != "Todos":
     df = df[df["propulsion"] == selected_prop]
+if not incluir_sin_precio:
+    df = solo_precio_comparable(df)
 df = df[df["n_criterios"] >= min_criteria]
 if only_viva:
     df = df[df["oferta_viva"] == True]
@@ -53,7 +61,12 @@ if "rank_propulsion" in df.columns:
     df = df.sort_values(["propulsion", "rank_propulsion"], kind="mergesort")
 df = df.head(top_n).reset_index(drop=True)
 
-st.caption(f"Mostrando {len(df)} de {len(df_scores)} modelos | Filtro: {selected_prop} | n_criterios ≥ {min_criteria} | Oferta viva: {only_viva}")
+n_sin_precio = len(sin_precio_comparable(df_scores))
+st.caption(
+    f"Mostrando {len(df)} de {len(df_scores)} modelos | Filtro: {selected_prop} | "
+    f"n_criterios ≥ {min_criteria} | Oferta viva: {only_viva} | "
+    f"Sin precio USD: {'incluidos' if incluir_sin_precio else f'{n_sin_precio} aparte'}"
+)
 
 # ======= TABLA PRINCIPAL =======
 st.subheader("📋 Tabla de Ranking")
@@ -128,6 +141,30 @@ st.caption(
     "garantía y margen distintos)."
 )
 
+# ======= MODELOS SIN PRECIO (APARTE) =======
+df_sin_precio = sin_precio_comparable(df_scores)
+if not df_sin_precio.empty:
+    st.subheader("🚫 Modelos sin precio USD (fuera del ranking)")
+    st.caption(
+        "Estos modelos solo se anuncian en EUR y no tienen `precio_usd`. No se "
+        "inventa un tipo de cambio ni se imputa un precio neutro: su score se "
+        "calcula con autonomía, carga, legalidad y repuestos, así que **no es "
+        "comparable** con el ranking principal (que incluye precio, peso 0.40)."
+    )
+    tabla_sp = df_sin_precio[[
+        "modelo_norm", "propulsion", "score", "n_criterios",
+        "precio_valor", "monedas", "n_anuncios_total",
+    ]].copy()
+    tabla_sp["precio_valor"] = tabla_sp["precio_valor"].map(
+        lambda v: f"{v:,.0f}" if pd.notna(v) else "—"
+    )
+    tabla_sp = tabla_sp.rename(columns={
+        "modelo_norm": "Modelo", "propulsion": "Propulsión", "score": "Score",
+        "n_criterios": "N crit.", "precio_valor": "Precio (EUR)",
+        "monedas": "Moneda", "n_anuncios_total": "Anuncios",
+    })
+    st.dataframe(tabla_sp, hide_index=True, width="stretch")
+
 # ======= GRÁFICO DE BARRAS =======
 st.subheader("📊 Visualización del Ranking")
 
@@ -153,12 +190,13 @@ st.markdown("---")
 
 # ======= SENSIBILIDAD DEL RANKING =======
 # Análisis de robustez (codes/sensibilidad.py). NO cambia el score oficial:
-# responde "¿cuánto depende este orden de los pesos y de la imputación 0.5?".
+# responde "¿cuánto depende este orden de los pesos y de los criterios
+# presentes?".
 st.subheader("🎚️ ¿Cuánto depende el ranking de los pesos?")
 
 ESCENARIOS = {
-    "base": "Base (0.5 neutro)",
-    "reponderado": "Re-ponderado (sin imputar)",
+    "base": "Base (re-ponderado)",
+    "imputado_05": "Imputación 0.5 (método anterior)",
     "sin_precio_usd": "Sin precio",
     "sin_autonomia_km": "Sin autonomía",
     "sin_carga_kg": "Sin carga",
@@ -177,11 +215,11 @@ if df_sens.empty or df_sens_res.empty:
 else:
     st.caption(
         "El score usa pesos fijos (precio 0.40, autonomía 0.25, carga 0.20, "
-        "legalidad 0.10, repuestos 0.05) e imputación neutra 0.5. Aquí se prueba "
-        "cuánto aguanta el orden: **perturbaciones** uniformes de ±0.05 en "
-        "los pesos (semilla fija), **omisión de cada criterio** con "
-        "re-normalización y **re-ponderación** solo con los criterios presentes "
-        "(en vez de imputar 0.5). El ranking oficial no cambia."
+        "legalidad 0.10, repuestos 0.05) y **re-pondera solo los criterios "
+        "presentes**. Aquí se prueba cuánto aguanta el orden: "
+        "**perturbaciones** uniformes de ±0.05 en los pesos (semilla fija), "
+        "**omisión de cada criterio** con re-normalización y el **método "
+        "anterior** de imputación neutra 0.5. El ranking oficial no cambia."
     )
 
     # --- Podio bajo cada escenario (respeta el filtro de propulsión) ---
@@ -223,7 +261,7 @@ else:
             lambda r: f"{int(r['rank_min'])}–{int(r['rank_max'])}" if pd.notna(r["rank_min"]) else "—",
             axis=1,
         ),
-        "Top-3 en 6 escenarios": stab["n_escenarios_top3"].astype("Int64"),
+        "Top-3 en escenarios": stab["n_escenarios_top3"].astype("Int64"),
         "Peor escenario": stab["escenario_peor"].map(lambda e: ESCENARIOS.get(e, e)),
         "N crit.": stab["n_criterios"].astype("Int64"),
         "Anuncios": stab["n_anuncios"].astype("Int64"),
@@ -242,33 +280,38 @@ else:
     if len(top3) == 3:
         pcts = top3["top3_pct"].tolist()
         nombres = top3["modelo_norm"].tolist()
-        cambios = (df_sens[(df_sens["propulsion"] == prop_txt)
-                           & (df_sens["rank"] == 1)
-                           & (df_sens["escenario"] != "base")]
-                   .set_index("escenario")["modelo_norm"])
-        otros = cambios[cambios != nombres[0]]
+        alt = df_sens[(df_sens["propulsion"] == prop_txt)
+                      & (df_sens["escenario"] != "base")]
+        cambios = alt[alt["rank"] == 1].set_index("escenario")["modelo_norm"]
+        omision = cambios[cambios.index.str.startswith("sin_")]
+        imputado = cambios.get("imputado_05")
+        otros = omision[omision != nombres[0]]
         detalle = "; ".join(
-            (f"al quitar {ESCENARIOS[e].replace('Sin ', '').lower()}"
-             if e.startswith("sin_") else "al re-ponderar") + f" → {m}"
+            f"al quitar {ESCENARIOS[e].replace('Sin ', '').lower()} → {m}"
             for e, m in otros.items()
         )
         base_top3 = set(nombres)
         cambia_top3 = [
-            esc for esc, sub in df_sens[(df_sens["propulsion"] == prop_txt)
-                                        & (df_sens["escenario"] != "base")]
-            .groupby("escenario", sort=True)
+            esc for esc, sub in alt.groupby("escenario", sort=True)
             if set(sub.nsmallest(3, "rank")["modelo_norm"]) != base_top3
         ]
         txt_podio = (f"el trío del podio cambia en {len(cambia_top3)} de "
-                     f"{len(cambios)} escenarios" if cambia_top3 else
-                     f"el trío del podio se mantiene en los {len(cambios)} escenarios")
+                     f"{len(alt)} escenarios alternativos" if cambia_top3 else
+                     f"el trío del podio se mantiene en los {len(alt)} "
+                     "escenarios alternativos")
+        if imputado is None:
+            txt_imp = ""
+        elif imputado == nombres[0]:
+            txt_imp = " La imputación 0.5 no cambia el 1º."
+        else:
+            txt_imp = f" Con imputación 0.5 el 1º sería {imputado}."
         st.markdown(
             f"**{label_for_prop(prop_txt)}:** el top-3 se mantiene en "
             f"{pcts[0]:.0f}%, {pcts[1]:.0f}% y {pcts[2]:.0f}% de las perturbaciones. "
-            f"El 1º puesto aguanta {len(cambios) - len(otros)} de {len(cambios)} "
+            f"El 1º puesto aguanta {len(omision) - len(otros)} de {len(omision)} "
             f"escenarios de omisión"
             + (f"; cambia {detalle}" if len(otros) else "")
-            + f". Además, {txt_podio}."
+            + f".{txt_imp} Además, {txt_podio}."
         )
     else:
         st.caption("Con menos de 3 modelos en el grupo, el orden no es informativo.")

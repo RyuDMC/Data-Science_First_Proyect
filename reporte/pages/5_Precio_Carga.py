@@ -15,7 +15,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, filter_by_propulsion, frontera_pareto
+from reporte.data import (load_scores, filter_by_propulsion, frontera_pareto,
+                          sin_precio_comparable)
 from reporte.theme import apply_style, fig_ax, scatter_bubble, color_for_prop, label_for_prop, ACCENT_GREEN, MUTED, GRID_COLOR, TEXT_COLOR
 
 
@@ -51,14 +52,23 @@ if selected_prop != "Todos":
 if only_viva:
     df = df[df["oferta_viva"] == True]
 
-# Eliminar filas sin datos en ejes
+# Eliminar filas sin datos en ejes. Si un eje es precio, esto deja fuera a los
+# modelos sin precio USD (catálogo en EUR): no se inventa un precio.
 df = df.dropna(subset=[x_metric, y_metric]).reset_index(drop=True)
 
 if df.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
 
-st.caption(f"Modelos: {len(df)} | Propulsión: {selected_prop} | Oferta viva: {only_viva}")
+_n_sin_precio = len(sin_precio_comparable(df_scores))
+_nota_precio = (
+    f" | {_n_sin_precio} modelos sin precio USD quedan fuera"
+    if "precio_usd" in (x_metric, y_metric) else ""
+)
+st.caption(
+    f"Modelos: {len(df)} | Propulsión: {selected_prop} | "
+    f"Oferta viva: {only_viva}{_nota_precio}"
+)
 
 # ======= LABELS =======
 x_labels = {"precio_usd": "Precio (USD)", "autonomia_km": "Autonomía (km)", "carga_kg": "Carga (kg)"}
@@ -149,10 +159,16 @@ with col2:
 # ======= TABLA DE FRENTERA =======
 if show_frontera and not pareto_df.empty:
     st.subheader("Modelos en la frontera eficiente")
-    frontera_df = pareto_df[["modelo_norm", x_metric, y_metric]].rename(columns={
-        "modelo_norm": "Modelo",
-        x_metric: x_labels[x_metric],
-        y_metric: y_labels[y_metric],
+    # Construcción por columnas (no `.rename`): si el criterio de ambos ejes es
+    # el mismo, un dict de rename solo puede mapear un nombre y las dos columnas
+    # quedan iguales → pyarrow falla con "Duplicate column names".
+    x_label, y_label = x_labels[x_metric], y_labels[y_metric]
+    if x_label == y_label:
+        x_label, y_label = f"{x_label} (eje X)", f"{y_label} (eje Y)"
+    frontera_df = pd.DataFrame({
+        "Modelo": pareto_df["modelo_norm"].to_numpy(),
+        x_label: pareto_df[x_metric].to_numpy(),
+        y_label: pareto_df[y_metric].to_numpy(),
     })
     st.dataframe(frontera_df, width="stretch", hide_index=True)
 

@@ -16,7 +16,8 @@ import pandas as pd
 from reporte.data import (load_anuncios, load_empresas, load_campo, load_scores,
                           load_sensibilidad, load_sensibilidad_resumen,
                           get_kpis, top_por_anuncios,
-                          top_por_propulsion, texto_sensibilidad_electrico)
+                          top_por_propulsion, texto_sensibilidad_electrico,
+                          sin_precio_comparable)
 from reporte.theme import color_for_prop, label_for_prop, apply_style
 
 
@@ -65,7 +66,7 @@ with col_t1:
     top_ofertado = top_por_anuncios(df_scores)
     if top_ofertado is not None:
         st.success(f"**{top_ofertado['modelo_norm']}** ({label_for_prop(top_ofertado['propulsion'])})")
-        st.metric("Score", f"{top_ofertado['score']:.3f}", help="Score ponderado: precio 40%, autonomía 25%, carga 20%, legalidad 10%, repuestos 5%")
+        st.metric("Score", f"{top_ofertado['score']:.3f}", help="Score ponderado (precio 40%, autonomía 25%, carga 20%, legalidad 10%, repuestos 5%), re-ponderado solo con los criterios presentes")
         st.caption(f"n_anuncios: {int(top_ofertado['n_anuncios_total'])} | Oferta viva: {'Sí' if top_ofertado['oferta_viva'] else 'No'}")
         if not df_campo.empty:
             _m = df_campo["marca"].value_counts()
@@ -97,7 +98,8 @@ with col_t2:
         )
         if len(_elec) >= 2:
             _brecha = float(_elec.iloc[0]["score"] - _elec.iloc[1]["score"])
-            _n_elec = df_scores[df_scores["propulsion"] == "electrico"]
+            _n_elec = df_scores[(df_scores["propulsion"] == "electrico")
+                                & df_scores["precio_comparable"].fillna(False)]
             _n_un = int((_n_elec["n_anuncios_total"] == 1).sum())
             st.caption(
                 f"Brecha con el 2º: **{_brecha:.3f}**. "
@@ -143,6 +145,14 @@ if not df_scores.empty:
                     c3.metric("$", f"{row['precio_usd']:,.0f}" if pd.notna(row['precio_usd']) else "—")
                     c4.metric("km", f"{row['autonomia_km']:.0f}" if pd.notna(row['autonomia_km']) else "—")
                     c5.metric("kg", f"{row['carga_kg']:.0f}" if pd.notna(row['carga_kg']) else "—")
+
+    _sin_precio = sin_precio_comparable(df_scores)
+    if not _sin_precio.empty:
+        st.caption(
+            f"**Fuera de este podio:** {len(_sin_precio)} modelos del catálogo "
+            "VEDCA solo tienen precio en EUR y no son comparables con el "
+            "ranking de precio (peso 0.40). Se muestran aparte en 🏆 Ranking."
+        )
 
 st.markdown("---")
 

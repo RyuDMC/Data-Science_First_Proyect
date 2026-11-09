@@ -15,7 +15,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from reporte.data import load_scores, filter_by_propulsion, get_top_models
+from reporte.data import (load_scores, filter_by_propulsion, get_top_models,
+                          sin_precio_comparable)
 from reporte.theme import apply_style, fig_ax, color_for_prop, label_for_prop, GRID_COLOR, MUTED, TEXT_COLOR
 
 
@@ -52,7 +53,12 @@ df = df.reset_index(drop=True)
 df["_clave"] = (df["modelo_norm"].astype(str) + " · "
                 + df["propulsion"].map(label_for_prop))
 
-st.caption(f"Modelos mostrados: {len(df)}")
+_n_sin_precio = len(sin_precio_comparable(df_scores))
+_nota_sin_precio = (
+    f" | {_n_sin_precio} modelos sin precio USD (EUR) se muestran aparte en 🏆 Ranking"
+    if _n_sin_precio else ""
+)
+st.caption(f"Modelos mostrados: {len(df)}{_nota_sin_precio}")
 
 # ======= TARJETAS TOP =======
 st.subheader("🏅 Fichas de los contendientes")

@@ -53,7 +53,7 @@ limitaciones = pd.DataFrame({
         "Trabajo de campo: muestra cerrada",
         "vedca.cu caído",
         "Normalización min-max intra-grupo",
-        "Imputación neutra (0.5)",
+        "Re-ponderación por criterios presentes",
         "Precios EUR sin conversión",
         "Legalidad = mención, no verificación",
         "Sensibilidad a los pesos",
@@ -66,13 +66,13 @@ limitaciones = pd.DataFrame({
         f"La muestra de calle es **final**: {_n('observaciones_campo')} observaciones en {_n('municipios_campo')} de los 15 municipios, dos semanas. **No habrá más trabajo de campo** (decisión 2026-10-31), así que no se puede cerrar 'el más común de La Habana': solo describir la muestra. Con n={_n('observaciones_campo')} los intervalos de confianza se solapan (el 1º y el 3º no se distinguen) y no hay denominador (triciclos/hora o /km), así que tampoco hay densidad.",
         "Catálogo oficial VEDCA no disponible desde 2024. Cobertura vía Telegram/islagrande es parcial y con precios EUR históricos.",
         "Un modelo extremo (muy barato/muy caro) mueve la escala de **todo el grupo**. Al añadir Facebook, el ranking eléctrico cambió.",
-        "Ausentes → 0.5 neutro + n_criterios. No castiga, pero oculta que el score se basa en menos evidencia. Ver columna n_criterios.",
-        "Las 9 fichas de islagrande están en EUR y no tienen `precio_usd`: en el criterio de precio (peso 0.40) se imputan 0.5. No se inventa un tipo de cambio, pero ese catálogo queda fuera del ranking de precio.",
+        "Los ausentes no se imputan: el score re-pondera solo los criterios con dato y se publica n_criterios. Un score con 3 criterios no es equivalente a uno con 5; la columna n_criterios permite filtrar. `score_imputado` conserva el método anterior (0.5) solo como referencia.",
+        "7 modelos del catálogo VEDCA (9 fichas de islagrande y 6 anuncios de vedca_telegram) no tienen `precio_usd` y están en EUR. No se convierten ni se imputan: quedan fuera del ranking principal de precio y se muestran aparte con un score sin precio.",
         "`legalidad_bin` = 1 si el anuncio **menciona** papeles ('factura', 'directo a chapa'). No verifica el trámite y no hay casos 'no/sin': mide mención, no legalidad comprobada.",
         sens_texto,
         f"{_n('modelos_con_repuestos')}/{_n('modelos_ranking')} modelos tienen repuestos_proxy=1 (los que se anuncian en más de una fuente). Es un proxy, no disponibilidad real de repuestos: mide presencia en el mercado, no stock de piezas."
     ],
-    "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "BAJO", "MEDIO", "MEDIO", "MEDIO", "BAJO"]
+    "Impacto": ["ALTO", "ALTO", "MEDIO", "ALTO", "MEDIO", "MEDIO", "MEDIO", "MEDIO", "MEDIO", "MEDIO", "BAJO"]
 })
 
 st.dataframe(limitaciones, width="stretch", hide_index=True,
@@ -167,10 +167,10 @@ st.markdown(f"""
 |---------|--------|---------------------|-----------|-------|
 | `anuncios_triciclos.jsonl` | 5 scrapers | {_cortes.get('anuncios_captura', '—')} | {_n('anuncios_scraper')} | vedca.cu caído; 1 excluido por el usuario |
 | `anuncios_facebook.jsonl` | parse_fb.py | {_cortes.get('anuncios_captura', '—')} | {_n('anuncios_facebook')} | 1 excluido (Artemisa) |
-| `empresas_*.jsonl` ({_n('empresas')}) | scrape_empresas.py | {_cortes.get('catalogos', '—')} | {_n('fichas_empresa')} | 5 catálogos previos + 5 nuevos; excluidos genéricos sin marca, cuatriciclo y ofertas duplicadas |
+| `empresas/*.jsonl` ({_n('empresas')}) | scrape_empresas.py | {_cortes.get('catalogos', '—')} | {_n('fichas_empresa')} | Fuente única desde 2026-11-06 (antes había copia idéntica en clean_data); excluidos genéricos sin marca y ofertas duplicadas |
 | `modelos_canonicos.json` | **curado a mano** | {_cortes.get('catalogos', '—')} | {_n('productos_canonicos')} productos | Fuente de verdad de la identidad ({_n('productos_excluidos')} excluidos) |
 | `score_modelos.csv` | analisis.py | {_cortes.get('anuncios_captura', '—')} | {_n('modelos_ranking')} filas ({_n('nombres_modelo')} nombres) | Recalculado tras la limpieza de nombres |
-| `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | {_cortes.get('anuncios_captura', '—')} | {len(df_sens)} + {len(df_sens_res)} | 7 escenarios × {_n('modelos_ranking')} modelos; **no altera el score** |
+| `sensibilidad_pesos.csv` + `sensibilidad_resumen.csv` | sensibilidad.py | {_cortes.get('anuncios_captura', '—')} | {len(df_sens)} + {len(df_sens_res)} | 7 escenarios × {_n('modelos_ranking')} modelos (base re-ponderado, `imputado_05` y 5 omisiones); **no altera el score** |
 | `registro_ubicaciones.csv` | **CAMPO** (`parse_campo.py`) | {_cortes.get('campo', '—')} | {_n('observaciones_campo')} | {_n('municipios_campo')}/15 municipios; sin datos personales |
 
 **Corte declarado de anuncios:** {_cortes.get('anuncios', '—')} · **última captura real:** {_cortes.get('anuncios_captura', '—')}. El corte es una decisión de proyecto; no implica que existan datos hasta esa fecha.
@@ -179,7 +179,8 @@ st.markdown(f"""
 st.markdown("---")
 
 st.caption("""
-**Principio rector:** *No inventar datos.* Rangos → límite inferior. Ausentes → 0.5 neutro + n_criterios.
-Si un dato no se puede verificar, no se usa. La transparencia sobre lo que **no sabemos** 
-es tan importante como lo que mostramos.
+**Principio rector:** *No inventar datos.* Rangos → límite inferior. Ausentes → se re-pondera
+solo con los criterios presentes + n_criterios (sin 0.5 artificial). Si un dato no se puede
+verificar, no se usa. La transparencia sobre lo que **no sabemos** es tan importante como lo
+que mostramos.
 """)
