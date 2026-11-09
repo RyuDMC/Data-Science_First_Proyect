@@ -10,7 +10,7 @@
     - 📥 **[`raw_data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/raw_data)** — Capturas genuinas: transcripción de Facebook y hoja de campo (esta última ignorada por git). El JSONL del scraper vive una sola vez en [`clean_data/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Data/clean_data).
   - 🖥️ **[`reporte/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte)** — Aplicación Streamlit multipágina.
     - ⚙️ **[`.streamlit/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/.streamlit)** — Configuración de tema y servidor.
-    - 📄 **[`pages/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages)** — Las 10 páginas del reporte.
+    - 📄 **[`pages/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/reporte/pages)** — Las 11 páginas del reporte (la `0_La_Historia` es el scrollytelling).
   - 🧪 **[`tests/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/tests)** — Cifras, contratos, identidad, páginas y privacidad.
   - 📓 **[`opencode/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/opencode)** — Handoff, diario de trabajo y auditoría JINPEN.
   - 💬 **[`Prompts/`](https://github.com/RyuDMC/Data-Science_First_Proyect/tree/main/Prompts)** — Prompts e instrucciones del proyecto.
