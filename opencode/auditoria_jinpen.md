@@ -74,10 +74,12 @@ JINPENG." Aplicado en el origen, no por alias automático:
 
 - El híbrido comparte identidad (no specs): las fichas siguen separadas por
   URL con Motor 1000/1100/1500 W y baterías 32/58/89 Ah.
-- Con el agregado, `JINPENG` híbrido (n=3, 5 criterios) pasa a ser el
-  **mejor puntuado global** (score 0.883); el eléctrico sigue liderado por
-  TOPMAQ BRIDERK 2026 GELPB (0.786). Ranking: 40 → 38 filas, 39 → 37 nombres;
-  `repuestos_proxy` 9 → 10 (el híbrido ahora se anuncia en 2 fuentes).
+- Con el agregado, `JINPENG` híbrido (n=3, 5 criterios) pasa a tener el
+  **mayor score del CSV** (0.883), aunque **no es comparable con los
+  eléctricos**: cada propulsión se normaliza por separado. El eléctrico sigue
+  liderado por TOPMAQ BRIDERK 2026 GELPB (0.786). Ranking: 40 → 38 filas,
+  39 → 37 nombres; `repuestos_proxy` 9 → 10 (el híbrido ahora se anuncia en 2
+  fuentes).
 - Guarda: `tests/test_identidad.py::test_grupo_jinpeng_esta_unificado` y el
   escáner de erratas en `test_no_quedan_erratas_en_el_ranking`.
 
@@ -88,3 +90,63 @@ JINPENG." Aplicado en el origen, no por alias automático:
   `JINPEN`/`JIMPEG` no quedan ni en el ranking ni en la tabla canónica.
 - `crear_canonicos.py --check`, `norm_modelo.py --check` y la suite 36/36
   pasan tras la migración.
+
+## 3ª pasada (2026-11-06): el híbrido agregado se divide en 3 filas
+
+**Decisión del usuario** ("Dividir en 3 filas"): la fila `JINPENG` híbrido
+(n=3) mezclaba tres fichas con specs incompatibles. El agregado con mediana
+mostraba un producto que nadie vende: baterías 32/58/89 Ah en una misma fila.
+Se mantiene la unificación de MARCA (erratas bloqueadas por test) y se
+separa el nivel producto.
+
+Materialización (re-ejecutable, sin URLs a mano en CSV):
+
+- `codes/crear_canonicos.py` `OVERRIDES` por URL (la tabla curada "manda
+  siempre" en `canonizar`), nombres que citan la spec real de cada ficha:
+  - `triciclo-jinpen-hibrido` (elyerromenu) → `JINPENG HIBRIDO 1000W`
+    (1000 W / 60 V 32 Ah, $3800, extensor 4500 W);
+  - `triciclo-jimpeng-hibrido-2026` (elyerromenu) → `JINPENG HIBRIDO 1500W`
+    (1500 W / 72 V 58 Ah, 100 km, 850 kg, $4300, extensor 5000 W);
+  - `triciclo-jeinpeing` (cubancargos) → `JINPENG HIBRIDO 1100W`
+    (1100 W / 72 V 89 Ah, $4751, garantía 1 mes de baterías);
+- `norm_modelo.py --migrar --en-sitio` reescribe la copia única
+  (`clean_data/anuncios_triciclos.jsonl`, unificada ese mismo día con la
+  reestructuración raw/clean): diff = solo esas 3 filas;
+- regeneración de `analisis.py`, `analisis_campo.py`, `sensibilidad.py`,
+  `generar_metadata.py` y exámenes `--check` en verde.
+
+**Excepción al contrato de nombres.** El repo prohíbe terminaciones
+`numero+unidad` (`tests/test_identidad.py`, en pantalla y en los JSONL).
+Es la única vía honesta de distinguir las 3 fichas sin inventar: los slugs
+son erratas bloqueadas y los títulos reales no atan cada ficha a su spec.
+Excepción cerrada (`SPEC_EN_NOMBRE_PERMITIDAS`) con las 3 cadenas exactas,
+referenciada desde `OVERRIDES`; cualquier nombre-nuevo-con-spec sigue
+bloqueado.
+
+**Efectos en cifras (2026-11-06):**
+
+| Concepto | Antes | Ahora |
+|---|---|---|
+| Filas del ranking | 38 | 40 |
+| Nombres únicos | 37 | 39 |
+| Anuncios n=1 | 23 | 25 |
+| Precio comparable | 31 (+7 sin precio) | 33 (+7) |
+| `repuestos_proxy` | 10 | 9 |
+| Mejor híbrido por score | `JINPENG` 0.883 (n=3) | `HIBRIDO 1000W` 0.909 (n_criterios=3; `1500W` 0.707 con 5 criterios) |
+
+- El top por score exige ≥3 criterios presentes: `1000W` y `1500W` pasan.
+  `score_imputado` (0.5) sigue como referencia histórica (0.725/0.475 para
+  las filas con 3 criterios).
+- `repuestos_proxy` 10→9: el agregado acreditaba "más de una fuente" a tres
+  productos distintos; ahora cada híbrido es de una sola fuente y el proxy
+  vuelve a medir identidad con ≥2 fuentes.
+- Guardas: `test_grupo_jinpeng_hibrido_son_3_filas` (sustituye a
+  `test_grupo_jinpeng_esta_unificado`), `SPEC_EN_NOMBRE_PERMITIDAS` y los
+  contratos de conteos en `tests/test_contratos.py` (40 filas, 33 con
+  precio, 9 proxy).
+
+## Verificación (2026-11-06)
+
+- Suite 48/48; `crear_canonicos --check`, `generar_metadata --check`,
+  `sensibilidad --check` OK; `compileall` OK; AppTest de las 11 páginas sin
+  excepciones.

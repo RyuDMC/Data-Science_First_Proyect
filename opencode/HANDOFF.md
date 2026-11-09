@@ -15,11 +15,11 @@ Trabajo sobre un clon limpio del remoto (`353a1f2`) en `~/Projects/Data-Science_
 - **Hallazgo real de robustez:** el top-3 eléctrico **cambia en 6/6** escenarios de omisión; el 1º solo cambia al quitar `carga_kg` (→ KIVITOVA). El texto anterior (“el podio, no”) era falso y se sustituyó por el cálculo dinámico en `reporte/data.py` y página 4.
 - **“Mejor global” eliminado:** `top_por_score` ahora exige `propulsion`. Resumen muestra el líder eléctrico + brecha + n=1; páginas 6 y 7 usan top por grupo, nunca un podio mezclado.
 - **Pareto genérico:** `reporte/data.py::frontera_pareto` orienta ambos ejes (precio = menor mejor) y se testea con autonomía/carga → `TOPMAQ` y `ONEBOT`. La página 5 ya no asume X=precio.
-- **PII:** se redactó un **CI mal escrito de 8 dígitos** en `legalizacion` (3 anuncios, en raw y clean; no era un teléfono, como se creyó al principio). Marcador genérico: `[DATO PERSONAL REDACTADO]`. `tests/test_privacidad.py` busca CI, números `[56]\d{7}` (móvil o CI incompleto), `+53` y números tras “WhatsApp”.
+- **PII:** se redactó un **número de 8 dígitos sin identificar** en `legalizacion` (3 anuncios, en raw y clean). El texto original dice `WhatsApp:`, pero no hay evidencia suficiente para afirmar si era un teléfono o un CI incompleto; se redacta por precaución. Marcador genérico: `[DATO PERSONAL REDACTADO]`. `tests/test_privacidad.py` busca CI, números `[56]\d{7}` (móvil o CI incompleto), `+53` y números tras “WhatsApp”.
 - **Pipeline seguro:** `norm_modelo.py --migrar` escribe a `Data/raw_data_migrado/` (ignorado); el modo destructivo exige `--en-sitio`. `crear_canonicos.py --check` ahora compara contra el JSON y sale con 1 si difiere. `generar_metadata.py` separa `cortes.anuncios` (decisión) de `cortes.anuncios_captura` (dato real).
 - **Documentación:** README con metodología, limitaciones, privacidad y licencia pendiente; nuevo `docs/etica_y_legal.md`; CI en `.github/workflows/tests.yml`.
 - **Verificación:** `./.venv/bin/python -m pytest -q tests/` → **45/45**; `analisis.py`, `sensibilidad.py`, `generar_metadata.py --check` y `crear_canonicos.py --check` OK. El score oficial no cambió.
-- **Pendiente crítico:** el CI mal escrito sigue en el **historial de git** (commits `a9fd9ee`/`4b08583`). Borrarlo del HEAD no lo borra del historial; hay que reescribir historia (`git filter-repo`) o mantener el repo privado. Ver `docs/etica_y_legal.md`.
+- **Pendiente crítico:** el número de 8 dígitos sigue en el **historial de git** (commits `a9fd9ee`/`4b08583`). Borrarlo del HEAD no lo borra del historial; hay que reescribir historia (`git filter-repo`) o mantener el repo privado. Ver `docs/etica_y_legal.md`.
 
 ## 2. Estado actual
 - **Campo (cerrado):** 30 obs, 5 municipios (Centro Habana, Plaza, Habana del Este, La Lisa, Playa), 2026-10-13→25. 12 marcas; JINPENG 20% [10–37], KIVITOVA/ONEBOT 16.7% [7–34]. Uso: pasajeros 60%, carga 20%, mixto 20%. 29 eléctricos + 1 híbrido.
@@ -46,26 +46,76 @@ Trabajo sobre un clon limpio del remoto (`353a1f2`) en `~/Projects/Data-Science_
 - **Grupo JINPENG unificado (2026-10-31, 2ª pasada):** decisión del usuario: "JIMPEG es errata de JINPENG y JINPEN híbrido también — ahí debe ir JINPENG". En `OVERRIDES` por URL: `JINPEN HIBRIDO` → `JINPENG` (marca JINPENG), la ficha sin modelo de `triciclo-jimpeng-hibrido-2026` recupera marca `JINPENG`, el anuncio Facebook "JIMPEG PANTER 2026" → `JINPENG PANTER 2026` y la ficha `TY150UK` corrige marca `JIMPENG` → `JINPENG` (el código de modelo sigue intacto). Limpiadores: `MARCA_ALIAS` añade `JIMPEG`/`JEINPEING` → `JINPENG`, `ALIAS_MODELOS` protege `JIMPEG PANTER 2026`/`JINPEN`, y `parse_fb.py` normaliza las erratas al parsear los bloques de FB. Efecto: los 3 híbridos del grupo son una sola identidad `JINPENG` (n=3, score **0.883**, el mejor valorado global); JINPENG GELPB sigue eléctrico separado. Ranking **40 → 38 filas (37 nombres)**; `repuestos_proxy` 9 → 10. Auditoría: `opencode/auditoria_jinpen.md` registra el cambio de postura y el resultado.
 - **Modelos inválidos (2026-10-31):** por decisión del usuario, un nombre que contiene `TRICICLO` y no tiene marca no identifica un modelo válido (p. ej. `TRICICLO ELECTRICO`, `TRICICLO HIBRIDO LITIO`). Se excluyeron en el origen 4 fichas de Bluewave (`triciclo-electrico`, `triciclo-hibrido-solar`, `triciclo-hibrido-litio`, `triciclo-jmd-hibrido`) en `codes/crear_canonicos.py`; `norm_modelo --migrar` las retiró de `Data/empresas/` y `clean_data/`. Catálogos: **68 → 64 fichas**; canónicos: **137 → 133**; excluidos: **3 → 7**. `tests/test_identidad.py` bloquea la reincidencia.
 - **Marca desde el modelo (2026-10-31):** revisados los 12 registros con `marca` vacía. Se corrigieron los 4 que contienen una marca ya presente en el dataset: **TIGER** (Bluewave y dos de Francis Motors) y **HERCULES** (Francis Motors), vía `OVERRIDES` en `codes/crear_canonicos.py`. Los otros 8 (`DG BLUE`, `BLUE`, `FENIX`, `WHITE TREK`, `TRION FM-151`, `PHANTOM`, `BRAVO`, `RICKSHAW`; nombres tras las dos pasadas de limpieza) no declaran marca en la fuente ni contienen una marca conocida: se dejan con `marca=None` para no inventar. `tests/test_identidad.py` añade la guarda.
-- **README (2026-10-31):** el README queda reducido al **árbol de carpetas** con iconos, descripciones y enlaces directos a GitHub, más la guía paso a paso para montar la página (clonar, crear el entorno, instalar dependencias, `streamlit run reporte/app.py` y regeneración opcional de los datos). Los 18 enlaces devuelven HTTP 200. Al no publicar cifras, se retiraron los dos tests de `test_cifras.py` que las exigían en el README; la suite bajó de 35 a **33/33** en ese momento (hoy **36/36**).
+- **README (2026-10-31):** el README queda reducido al **árbol de carpetas** con iconos, descripciones y enlaces directos a GitHub, más la guía paso a paso para montar la página (clonar, crear el entorno, instalar dependencias, `streamlit run reporte/app.py` y regeneración opcional de los datos). Los 18 enlaces devuelven HTTP 200. Al no publicar cifras, se retiraron los dos tests de `test_cifras.py` que las exigían en el README; la suite bajó de 35 a **33/33** en ese momento (hoy **48/48**).
 - **Tests (2026-10-31):** `tests/test_cifras.py` (metadata ↔ datos, determinismo y archivo legado), `tests/test_privacidad.py` (PII), `tests/test_contratos.py` (dataset, helpers, dependencias y pipeline), `tests/test_identidad.py` (OIM, STAR, RALLY, group JINPENG, descriptores, grafías y specs) y `tests/test_paginas.py` (`AppTest` de las 11 pantallas). Tras la sesión 2026-11-04: `./.venv/bin/python -m pytest -q tests/` → **45/45**; `generar_metadata.py --check` y `crear_canonicos.py --check` OK; `AppTest` **11/11**.
 - **PII (2026-10-31):** `codes/parse_campo.py:18` ya no contiene un CI de ejemplo (`CI: <11 dígitos>`); `.gitignore` cubre `Data/raw_data/*personas*` además del nombre exacto. `git grep -nIE "\b[0-9]{11}\b"` → sin coincidencias.
 - **Git:** HEAD `861f66a`. El usuario ha ido commiteando por partes: `52955db` (exclusión TRICICLO + marcas TIGER/HERCULES) y `861f66a` (tabla canónica con los nombres limpios y `OVERRIDES`/`EXCLUIDOS`). Sin commitear: la migración de los datos (`Data/empresas/*.jsonl`, `Data/clean_data/*` y `Data/raw_data/anuncios_triciclos.jsonl`), `codes/norm_modelo.py` (DocString + `MARCA_ALIAS`), `codes/scrape_triciclos.py` (sin " FOTOVOLTAICO"), `reporte/pages/{2_Metodo,9_Empresas}.py`, `tests/`, `Data/metadata.json`, `codes/crear_canonicos.py` (motivo del exclusión "MIGHONG"), este `HANDOFF.md` y el diario. El usuario revisa y commitea.
 
 ## 3. Pendiente
+
+### Estado después de las sesiones 2026-11-06 → 2026-11-08
+
+- **Punto 2 de la revisión externa (78/100) completado:**
+  1. **Honestidad del ranking**: hecho el 2026-11-05 (score re-ponderado sin
+     imputar; `score_imputado`=0.5 queda como referencia histórica;
+     `precio_comparable` separa los 7 modelos VEDCA/EUR del ranking de precio).
+  2. **Historial con PII (el número de 8 dígitos en 6 commits):** decisión del usuario
+     (2026-11-06): **"No tocar"**. Queda declarado en README,
+     `docs/etica_y_legal.md` y `tests/test_privacidad.py`. La sustitución
+     histórica con `git filter-repo` queda cancelada (el propio historial
+     conserva la captura legítima; forzar push reescribiría también las
+     URL/publicaciones legítimas).
+  3. **raw/clean duplicados (Opción A elegida):** una sola copia por fuente.
+     `scrape_triciclos.py` escribe directo a `clean_data/` (la captura nace
+     ya normalizada); `Data/empresas/` es la fuente única de catálogos (se
+     borraron las 10 copias idénticas de `clean_data/` y el JSONL duplicado
+     de raw); `raw_data/` queda para capturas genuinas (transcripción FB +
+     hoja de campo privada). `analisis.py`/`crear_canonicos.py`/
+     `norm_modelo.py`/`reporte/data.py`/README/page-2/page-10 actualizados.
+  4. **Precio** (hecho el 2026-11-05 junto al punto de honestidad).
+  5. **ToS/robots.txt:** revisión completa del 2026-11-06 registrada en la
+     tabla §2a de `docs/etica_y_legal.md` (16 dominios, incluídos los 404 de
+     `t.me` y `mrcubamiami.com` y la prohibición expresa de Facebook —por
+     eso los 29 anuncios de FB son transcripción manual, no scraping).
+     Test nuevo: `test_documentacion_cubre_las_fuentes` obliga a re-verificar
+     al cambiar fuentes.
+  6. **JINPENG híbrido n=3 → 3 filas** (ver Comité auditor:
+     `opencode/auditoria_jinpen.md` §3ª pasada 2026-11-06). Nombres
+     `JINPENG HIBRIDO 1000W/1100W/1500W` desde `OVERRIDES` por URL +
+     `norm_modelo --migrar --en-sitio`; única excepción documentada al
+     contrato "specs fuera del nombre" (`SPEC_EN_NOMBRE_PERMITIDAS`).
+- **Cifras tras el split:** ranking 38 → **40 filas** (39 nombres); anuncios
+  n=1: 23 → **25**; precio comparable 31 → **33** (+7 VEDCA sin precio);
+  `repuestos_proxy` 10 → **9** (el agregado acreditaba ≥2 fuentes a tres
+  productos distintos); mejor híbrido: `JINPENG HIBRIDO 1000W` (0.909,
+  n_criterios=3, precio $3800).
+- **Verificación de la sesión:** pytest **48/48**; `crear_canonicos --check`,
+  `generar_metadata --check`, `sensibilidad --check`, `compileall` OK;
+  AppTest sin servidor **11/11 páginas sin excepciones** (incluidas las que
+  fallaban antes del fix del Pareto en page-5).
+- **Sin commitear:** toda la sesión (código + datos + docs + tests). El
+  usuario revisa las diffs y decide los commits; no commitear ni pushear sin
+  su instrucción.
+- **Licencia:** resuelta el 2026-11-08 — **MIT único** (`LICENSE`, cubre
+  código + datos con la nota de terceros; actualizado README §Licencia y
+  `docs/etica_y_legal.md` §5).
+
+### Heredados (de sesiones anteriores)
+
 1. **Commitear:** la limpieza de modelos inválidos + nombres, `opencode/HANDOFF.md` y `opencode/Journaing_file.md`.
 2. **Decidir si `Data/empresas/` entra al scoring completo** (hoy solo da contexto; si entra, los 3 E-CARGO y 2 FLY RACING se agregarían y habría que publicar el antes/después).
 3. **Campo: nada más que hacer** — no reabrir la captación ni prometer 15 municipios en el reporte.
 4. Heredados: `precio_texto_usd` (3 contradictorios), conflicto VEDCA C400, MAGIKBIKE, Mr Cuba (Wix frágil), `vedca.cu` caído, llevar `Data/fuentes_justificacion.md` a `2_Metodo`, deploy.
 
 ## 4. Recursos
-- **Repo:** clon de trabajo `~/Projects/Data-Science_First_Proyect` (antes, disco externo) · remoto `github.com/RyuDMC/Data-Science_First_Proyect`.
+- **Repo:** clon de trabajo en disco externo `…/Oliver/Study/DS Proyects/Data-Science` (montar con `udisksctl mount -b /dev/sda3` si se desmonta) · remoto `github.com/RyuDMC/Data-Science` (redirige a `Data-Science_First_Proyect`).
 - **Pipeline:** `codes/scrape_triciclos.py` (anuncios) · `codes/parse_fb.py` · `codes/scrape_empresas.py` (10 catálogos) · `codes/parse_campo.py` · `codes/analisis.py` (scoring) · `codes/sensibilidad.py` (robustez del ranking) · `codes/analisis_campo.py` (campo) · `codes/generar_metadata.py` (cifras/cortes) · `codes/norm_modelo.py` + `codes/crear_canonicos.py` (identidad).
-- **Datos:** `Data/raw_data/` (crudo, PII ignorada) · `Data/empresas/*.jsonl` (10) · `Data/clean_data/` (JSONL + `score_modelos.csv` + `campo_resumen.csv` + `campo_uso.csv`) · `Data/modelos_canonicos.json` (137) · `Data/metadata.json` (conteos y cortes).
+- **Datos:** `Data/raw_data/` (capturas genuinas: transcripción FB + hoja de campo privada, ignorada por git) · `Data/empresas/*.jsonl` (10, fuente única de catálogos) · `Data/clean_data/` (anuncios + `score_modelos.csv` + campo + sensibilidad) · `Data/modelos_canonicos.json` (133 productos, 7 excluidos) · `Data/metadata.json` (conteos y cortes).
 - **Reporte:** `reporte/app.py`, `reporte/data.py`, `reporte/theme.py`, `reporte/pages/*` (10 páginas).
 - **Tests:** `tests/test_cifras.py`, `tests/test_privacidad.py`, `tests/test_contratos.py`, `tests/test_identidad.py`, `tests/test_paginas.py` (`./.venv/bin/python -m pytest -q tests/`, `requirements-dev.txt`).
 - **Docs:** `Data/Posibles fuentes de datos.md`, `Data/Links de Referencias.md`, `Data/fuentes_justificacion.md` · Diario `opencode/Journaing_file.md` (37 entradas).
 - **Orden de ejecución:** `scrape_triciclos` → `parse_fb` → `crear_canonicos` (instala `OVERRIDES` nuevos) → `scrape_empresas` → `parse_campo` → `norm_modelo --migrar` → `crear_canonicos` → `norm_modelo --migrar` → `analisis` → `analisis_campo` → `sensibilidad` → `generar_metadata` → `parse_campo --check` → `streamlit run reporte/app.py`.
-- **Pesos (no cambiar sin decisión):** precio 0.40, autonomía 0.25, carga 0.20, legalidad 0.10, repuestos 0.05; min-max intra-propulsión; ausentes 0.5 + `n_criterios`. **No comparar scores entre propulsiones.** La sensibilidad (`codes/sensibilidad.py`) **no** propone otros pesos: mide cuánto aguanta el orden y se reporta junto al score oficial.
+- **Pesos (no cambiar sin decisión):** precio 0.40, autonomía 0.25, carga 0.20, legalidad 0.10, repuestos 0.05; min-max intra-propulsión. **Score oficial (2026-11-05): re-pondera solo con los criterios PRESENTES** (no imputa); `score_imputado`, que sí imputa 0.5 a los ausentes, queda como referencia histórica. **No comparar scores entre propulsiones.** La sensibilidad (`codes/sensibilidad.py`) **no** propone otros pesos: mide cuánto aguanta el orden y se reporta junto al score oficial.
 
 ## 5. Advertencias
 - **Prohibido inventar datos.** Rangos → límite inferior; ausentes → 0.5 + `n_criterios`; si una ficha solo declara voltaje, `bateria_ah` queda `null` (no se estima).
