@@ -60,9 +60,11 @@
     display:grid; grid-template-columns:44% 1fr; gap:1.6rem;
   }
   .figura-marco{position:sticky; top:9vh; height:80vh;
-    display:flex; align-items:center; justify-content:center}
+    display:grid; place-items:center}
+  /* las seis figuras comparten la misma celda: se superponen y solo la
+     .activa es visible (en flex se ponían en fila y se aplastaban) */
   .figura{
-    width:100%; opacity:0; transform:translateY(10px);
+    grid-area:1 / 1; width:100%; opacity:0; transform:translateY(10px);
     transition:opacity .45s ease, transform .45s ease; pointer-events:none;
   }
   .figura.activa{opacity:1; transform:none; pointer-events:auto}
@@ -159,6 +161,7 @@
     font-size:.85rem; line-height:1.55; box-shadow:0 12px 30px rgba(0,0,0,.28);
   }
   .ficha-pop.abierto{display:block}
+  #ficha-pop-texto{display:block; padding-right:1.5rem}
   .ficha-pop b{color:#fff}
   .ficha-pop .fp-x{position:absolute; top:.15rem; right:.55rem; cursor:pointer;
     opacity:.75; font-size:1.05rem}
@@ -284,7 +287,7 @@
           <h3>Se anuncia vs. se ve, por marca</h3>
           <p class="sub">○ cuota dentro de los anuncios · ● cuota dentro de la muestra de calle ·
              Δ en puntos porcentuales</p>
-          <svg id="svg-dumbbell" viewBox="0 0 680 330" role="img"
+          <svg id="svg-dumbbell" viewBox="0 0 780 330" role="img"
                aria-label="Comparación de cuota publicitaria y cuota de calle por marca"></svg>
         </div>
       </section>
@@ -298,7 +301,7 @@
           <h3 style="margin-top:.6rem">¿Y cuánto puede moverse el podio?</h3>
           <p class="sub">puesto eléctrico en 6 escenarios de omisión + 2.000 perturbaciones de ±0.05
              (<code>codes/sensibilidad.py</code>, semilla fija)</p>
-          <svg id="svg-rangos" viewBox="0 0 680 330" role="img"
+          <svg id="svg-rangos" viewBox="0 0 680 350" role="img"
                aria-label="Rangos de posición del podio eléctrico bajo escenarios y perturbaciones"></svg>
         </div>
       </section>
@@ -390,7 +393,7 @@
       <p class="detalle">La sensibilidad <b>no propone otros pesos</b>: mide
       cuánto aguanta el orden y se reporta junto al score oficial. ¿Quieres
       mover los pesos tú? Eso se hace en el reporte técnico (página
-      <b>🏆 Ranking</b>), donde el score se recalcula en vivo con la misma
+      <b>Ranking</b>), donde el score se recalcula en vivo con la misma
       fórmula re-ponderada que corre <code>codes/analisis.py</code>.</p>
     </article>
 
@@ -479,7 +482,7 @@
 
 <!-- ================= APÉNDICE ================= -->
 <section class="apendice" id="apendice">
-  <h3>🧾 Cómo se hizo esta historia</h3>
+  <h3>Cómo se hizo esta historia</h3>
   <table class="tabla-lite">
     <tr><td>Anuncios — captura</td><td><span data-cifra="cortes.anuncios_captura"></span></td></tr>
     <tr><td>Anuncios — corte de análisis</td><td><span data-cifra="cortes.anuncios"></span></td></tr>
@@ -647,8 +650,8 @@
     });
     var tf = document.getElementById('texto-fuentes');
     if (tf) tf.textContent = frases.length
-      ? ': ' + frases.join(', ').replace(/, ([^,]*)$/, ' y $1') + '.'
-      : '.';
+      ? ': ' + frases.join(', ').replace(/, ([^,]*)$/, ' y $1')
+      : '';
   })();
 
   /* ---------- pesos: barras + citas ---------- */
@@ -722,7 +725,10 @@
       t.textContent = Math.round((elec.n / total) * 100) + '%';
       var t2 = el('text', { x: cx, y: cy + 20, 'text-anchor': 'middle',
         'font-size': 13, fill: C.gris }, svg);
-      t2.textContent = 'eléctricos (' + elec.n + ' de ' + total + ')';
+      t2.textContent = 'eléctricos';
+      var t3 = el('text', { x: cx, y: cy + 36, 'text-anchor': 'middle',
+        'font-size': 11, fill: C.gris }, svg);
+      t3.textContent = '(' + elec.n + ' de ' + total + ')';
     }
     var lx = 260, ly = 78;
     con.forEach(function (p) {
@@ -763,7 +769,9 @@
     })));
     var escMax = maxPct * 1.12;
     var paso = 330 / filas.length;
-    var X = function (v) { return 40 + (v / escMax) * (640 - 40); };
+    // etiquetas 0..150 · área de dibujo 150..600 · columna de Δ 612..780
+    var X0 = 150, X1 = 600;
+    var X = function (v) { return X0 + (v / escMax) * (X1 - X0); };
     [].concat([0, 10, 20], maxPct > 20 ? [Math.round(maxPct)] : [])
       .forEach(function (v) {
         var t = el('text', { x: X(v), y: 12, 'text-anchor': 'middle',
@@ -792,8 +800,8 @@
         fill: C.texto }, svg);
       t.textContent = trim(f.marca, 14);
       if (i === desMax || i === desMin) {
-        var dx = X(Math.max(f.pct_online, f.pct_campo));
-        var dl = el('text', { x: dx + 16, y: y + 4, 'font-size': 11,
+        // Δ en su propia columna a la derecha: nunca pisa la línea ni el punto
+        var dl = el('text', { x: 612, y: y + 4, 'font-size': 11,
           fill: hl }, svg);
         dl.textContent = 'Δ ' + (f.delta > 0 ? '+' : '') + f.delta +
                          ' pp · n calle ' + f.n_campo;
@@ -829,16 +837,16 @@
         var h = (f.modelos / maxM) * 100;
         var x = paso * (i + 1) - paso * 0.32;
         el('rect', { x: x, y: 116 - h, width: paso * 0.64, height: h,
-          rx: 4, fill: f.n === 1 ? C.rojo : C.muted }, svg);
+          rx: 4, fill: f.n === 1 ? C.rojo : C.muted }, hist);
         var t = el('text', { x: x + paso * 0.32, y: 110 - h,
-          'text-anchor': 'middle', 'font-size': 12, fill: C.texto }, svg);
+          'text-anchor': 'middle', 'font-size': 12, fill: C.texto }, hist);
         t.textContent = f.modelos;
         var e1 = el('text', { x: x + paso * 0.32, y: 132,
-          'text-anchor': 'middle', 'font-size': 11, fill: C.gris }, svg);
+          'text-anchor': 'middle', 'font-size': 11, fill: C.gris }, hist);
         e1.textContent = f.n;
       });
       var eje = el('text', { x: 636, y: 34, 'text-anchor': 'end',
-        'font-size': 11, fill: C.gris }, svg);
+        'font-size': 11, fill: C.gris }, hist);
       eje.textContent = '↑ modelos · → anuncios';
     }
     var rng = svgv('svg-rangos');
@@ -849,27 +857,27 @@
       var pasoY = 320 / res.length;
       var Xr = function (v) { return 155 + (v - 0.5) / (maxRk + 0.5 - 0.5) * (672 - 155); };
       el('rect', { x: Xr(1), y: 0, width: Xr(3.5) - Xr(1),
-        height: 330, fill: '#efe9df', opacity: 0.55 }, svg);
+        height: 336, fill: '#efe9df', opacity: 0.55 }, rng);
       res.forEach(function (f, i) {
         var y = pasoY * i + pasoY / 2 + 6;
         el('line', { x1: Xr(f.rank_min), y1: y, x2: Xr(f.rank_max), y2: y,
-          stroke: C.grid, 'stroke-width': 7 }, svg);
+          stroke: C.grid, 'stroke-width': 7 }, rng);
         el('line', { x1: Xr(f.rank_p05), y1: y, x2: Xr(f.rank_p95), y2: y,
-          stroke: C.muted, 'stroke-width': 3 }, svg);
+          stroke: C.muted, 'stroke-width': 3 }, rng);
         el('circle', { cx: Xr(f.rank_base), cy: y, r: 5, fill: C.elec,
-          stroke: '#fffdf9', 'stroke-width': 1 }, svg);
+          stroke: '#fffdf9', 'stroke-width': 1 }, rng);
         var t = el('text', { x: 2, y: y + 4, 'font-size': 11,
-          fill: C.texto }, svg);
+          fill: C.texto }, rng);
         t.textContent = trim(f.modelo, 22);
       });
       if (res[0] && res[0].top1_pct != null) {
-        var an = el('text', { x: Xr(res[0].rank_base) + 12, y: 16,
-          'font-size': 12, fill: C.texto }, svg);
+        var an = el('text', { x: Xr(res[0].rank_base) + 12, y: 12,
+          'font-size': 12, fill: C.texto }, rng);
         an.textContent = 'nº1 base aguanta el top-1 en ' +
                          Math.round(res[0].top1_pct) + '% de las perturbaciones';
       }
-      var escalas = el('text', { x: 672, y: 326, 'text-anchor': 'end',
-        'font-size': 11, fill: C.gris }, svg);
+      var escalas = el('text', { x: 672, y: 344, 'text-anchor': 'end',
+        'font-size': 11, fill: C.gris }, rng);
       escalas.textContent = 'escenarios de omisión + 2.000 perturbaciones ±0.05';
     }
     var tsub = document.getElementById('texto-subvuelo');
@@ -987,6 +995,8 @@
   var TEAL = '#0e7490', VIOLETA = '#8b5cf6', VERDE = '#059669';
   var ROJO_LEGAL = '#d62728';
   var USO_COLOR = { pasajeros: TINTA, carga: '#6b6b74', mixto: '#b0b0b0' };
+  var PROP_NOMBRE = { electrico: 'eléctrico', hibrido: 'híbrido',
+                      gasolina: 'gasolina', indeterminado: 'indeterminado' };
 
   function id(x) { return doc.getElementById(x); }
   function el(nombre, attrs, padre) {
@@ -1031,6 +1041,9 @@
       var t = el('text', { x: v.x, y: Y + Math.round(v.r * 0.24),
         'text-anchor': 'middle', 'font-size': Math.max(15, Math.round(v.r * 0.52)),
         'font-weight': 'bold', fill: v.color,
+        /* halo del color del papel: el eje del chasis pasa por el centro
+           de cada rueda y sin esto cruza el número */
+        stroke: '#f7f4ef', 'stroke-width': 7, 'paint-order': 'stroke',
         'font-family': 'Georgia, serif' }, svg);
       t.textContent = v.n;
     });
@@ -1145,10 +1158,10 @@
         'font-size': 12, fill: SUAVE }, svg);
       t.textContent = MESES[mm] + ' ' + String(yy).slice(2);
     }
-    var tg = el('text', { x: X(0) + 2, y: 20, 'font-size': 12, fill: TEAL,
+    var tg = el('text', { x: X(0) + 2, y: 14, 'font-size': 12, fill: TEAL,
       'font-weight': 'bold' }, svg);
     tg.textContent = 'Gaceta · ' + (D.legal.gaceta || '');
-    var tc = el('text', { x: X(100) - 2, y: 20, 'text-anchor': 'end',
+    var tc = el('text', { x: X(100) - 2, y: 14, 'text-anchor': 'end',
       'font-size': 12, 'font-weight': 'bold', fill: ROJO_LEGAL }, svg);
     tc.textContent = 'vence · ' + (D.legal.ventana || '');
     // hoy: de la fecha de ejecución, con resolución de MES (la fuente
@@ -1159,9 +1172,10 @@
     pctHoy = Math.max(0, Math.min(100, pctHoy));
     var vencio = fin != null && idxHoy > fin;
     var anchor = pctHoy > 88 ? 'end' : (pctHoy < 12 ? 'start' : 'middle');
-    el('line', { x1: X(pctHoy), y1: 32, x2: X(pctHoy), y2: 62,
+    el('line', { x1: X(pctHoy), y1: 34, x2: X(pctHoy), y2: 64,
       stroke: TINTA, 'stroke-width': 2.5 }, svg);
-    var th = el('text', { x: X(pctHoy), y: 26, 'text-anchor': anchor,
+    // segunda línea de rótulos: «hoy» no compite con «vence» del extremo
+    var th = el('text', { x: X(pctHoy), y: 30, 'text-anchor': anchor,
       'font-size': 12, 'font-weight': 'bold', fill: TINTA }, svg);
     th.textContent = 'hoy' + (vencio ? ' (ya venció)' : '');
   }
@@ -1189,7 +1203,8 @@
       popTxt.textContent = 'Anuncio ' + (i + 1) + ' de ' +
         D.pila.fichas.length + ': ' +
         (f.modelo ? f.modelo : 'sin identificar') + ' · ' + f.fuente +
-        ' · ' + f.propulsion + ' — ' + specs.join(' · ');
+        ' · ' + (PROP_NOMBRE[f.propulsion] || f.propulsion) +
+        ' — ' + specs.join(' · ');
       pop.className = 'ficha-pop abierto';
     }
     svg.addEventListener('click', function (ev) {
