@@ -2,8 +2,8 @@ name: Deploy subfolder to GitHub Pages
 
 on:
   push:
-    branches: [main] # O la rama que uses
-  workflow_dispatch: # Permite ejecutarlo manualmente
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Job único que construye (sube) y despliega
   deploy:
     environment:
       name: github-pages
@@ -27,11 +28,13 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 🔑 ESTA ES LA CLAVE: Especifica la ruta de tu subcarpeta
+      # 🔑 Paso CRÍTICO: Sube la carpeta 'reporte'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'reporte' # 👈 CAMBIA ESTO por tu ruta real
+          # La ruta DEBE ser relativa a la raíz del repo.
+          # Si 'reporte' está en la raíz, esto es correcto.
+          path: 'reporte'
 
       - name: Deploy to GitHub Pages
         id: deployment
