@@ -31,7 +31,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'Data-Science/reporte' # 👈 CAMBIA ESTO por tu ruta real
+          path: '/reporte' # 👈 CAMBIA ESTO por tu ruta real
 
       - name: Deploy to GitHub Pages
         id: deployment
